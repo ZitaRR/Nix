@@ -1,6 +1,5 @@
-﻿using Nix.Presenters;
+﻿using Nix.Controllers;
 using System;
-using System.Drawing;
 using System.Reflection;
 
 namespace Nix
@@ -11,7 +10,7 @@ namespace Nix
         {
             Console.CursorVisible = false;
             Console.Title = Assembly.GetExecutingAssembly().GetName().Name;
-            new HomePresenter();
+            new HomeController();
         }
     }
 }
