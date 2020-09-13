@@ -12,8 +12,6 @@ namespace Nix.Views
 
         private const int offset = 8;
 
-        public NavigationView(Controller controller) : base(controller) { }
-
         private void ListOptions()
         {
             for (int i = 0; i < Options.Count; i++)
@@ -33,14 +31,21 @@ namespace Nix.Views
 
             if (!value)
             {
-                Console.WriteLine(option.Name + "  ");
+                string whitespace = "";
+                for (int i = 0; i < Config.Data.SelectionMarker.Length; i++)
+                {
+                    whitespace += " ";
+                }
+                Console.WriteLine(option.Name + whitespace);
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine(option.Name + " <");
+                Console.ForegroundColor = (ConsoleColor)Config.Data.FontColour;
+                Console.BackgroundColor = (ConsoleColor)Config.Data.BackgroundColour;
+                Console.WriteLine(option.Name + Config.Data.SelectionMarker);
             }
 
+            Console.BackgroundColor = default;
             Console.ForegroundColor = ConsoleColor.Gray;
         }
 
@@ -71,11 +76,10 @@ namespace Nix.Views
             } while (true);
         }
 
-        public override IView Display()
+        public override void Display()
         {
             base.Display();
             Input();
-            return this;
         }
     }
 }

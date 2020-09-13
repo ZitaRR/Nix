@@ -9,23 +9,10 @@ namespace Nix.Views
         public delegate void ChangeView(IView view);
         public static event ChangeView OnViewChange;
 
-        public Controller Controller { get; }
         public string Name { get; internal set; }
         public IView Parent { get; internal set; }
 
-        private readonly string asciiTitle;
-
-        public View(Controller controller)
-        {
-            Controller = controller;
-            asciiTitle = FiggleFonts.Standard.Render(Controller.Title);
-        }
-
-        public virtual IView Display()
-        {
-            OnViewChange?.Invoke(this);
-            Console.WriteLine(asciiTitle + "                   Made by Zita");
-            return this;
-        }
+        public virtual void Display()
+            => OnViewChange?.Invoke(this);
     }
 }

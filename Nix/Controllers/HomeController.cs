@@ -7,40 +7,29 @@ namespace Nix.Controllers
 {
     internal sealed class HomeController : Controller
     {
-        private NavigationView menu;
-        private NavigationView settings;
+        private Controller settings;
 
         public HomeController()
         {
-            menu = new NavigationView(this)
+            Menu = new NavigationView
             {
                 Name = "Main Menu",
                 Parent = null,
                 Options = new List<Option>
                 {
-                    new Option { Name = "Settings", View = Settings },
+                    new Option { Name = "Settings", View = SettingsController },
                     new Option { Name = "Exit", View = Exit }
                 },
             };
-            menu.Display();
+
+            Display();
         }
 
-        public IView Settings()
+        public IView SettingsController()
         {
             if (settings is null)
-            {
-                settings = new NavigationView(this)
-                {
-                    Name = "Settings",
-                    Parent = menu,
-                    Options = new List<Option>
-                    {
-                        new Option { Name = "Settings, Menu 1", View = menu.Display },
-                        new Option { Name = "Settings, Menu 2", View = menu.Display }
-                    }
-                };
-            }
-            return settings;
+                settings = new SettingsController();
+            return settings.Menu;
         }
 
         public IView Exit()
