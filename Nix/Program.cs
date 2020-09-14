@@ -1,4 +1,5 @@
-﻿using Nix.Controllers;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Nix.Controllers;
 using Nix.Resources;
 using System;
 using System.Reflection;
@@ -11,7 +12,18 @@ namespace Nix
         {
             Console.CursorVisible = false;
             Console.Title = Assembly.GetExecutingAssembly().GetName().Name;
-            new HomeController();
+            Extensions.AddServices(new ServiceCollection()).BuildServiceProvider().GetService<HomeController>();
+            //new HomeController(Extensions.AddServices(new ServiceCollection()).BuildServiceProvider());
         }
+    }
+
+    static class Extensions
+    {
+        public static IServiceCollection AddServices(this IServiceCollection collection)
+            => collection.AddSingleton<IDiscord, NixClient>()
+                .AddSingleton<ILogger, Logger>()
+                .AddSingleton(x => new HomeController(x))
+                .AddSingleton<SettingsController>()
+                .AddSingleton<DiscordController>();
     }
 }
