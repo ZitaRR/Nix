@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Nix.Resources
 {
@@ -13,7 +11,7 @@ namespace Nix.Resources
 
         public LogMessage(string source, string message, ConsoleColor colour)
         {
-            Date = DateTime.UtcNow;
+            Date = DateTime.Now;
             Source = source;
             Message = message;
             Colour = colour;
