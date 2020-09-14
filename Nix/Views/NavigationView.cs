@@ -73,6 +73,7 @@ namespace Nix.Views
                         return;
                     case ConsoleKey.Enter:
                         Options[Index].View().Display();
+                        Options[Index].View().Parent.Display();
                         return;
                 }
             } while (true);
