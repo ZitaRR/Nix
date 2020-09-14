@@ -12,6 +12,8 @@ namespace Nix.Views
 
         private const int offset = 8;
 
+        public NavigationView(Controller controller) : base(controller) { }
+
         private void ListOptions()
         {
             for (int i = 0; i < Options.Count; i++)

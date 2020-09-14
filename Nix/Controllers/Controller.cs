@@ -13,19 +13,10 @@ namespace Nix.Controllers
         public Controller()
         {
             Title = GetType().Name.Replace(nameof(Controller), "");
-            View.OnViewChange += View_OnViewChange;
             Config.Initialize();
         }
 
         internal void Display()
             => Menu.Display();
-
-        private void View_OnViewChange(IView view)
-        {
-            CurrentView = view;
-            Console.Clear();
-            var ascii = Figgle.FiggleFonts.Standard.Render(Title);
-            Console.WriteLine(ascii + "     " + CurrentView.Name);
-        }
     }
 }

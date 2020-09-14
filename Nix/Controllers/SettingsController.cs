@@ -9,13 +9,13 @@ namespace Nix.Controllers
     {
         private NavigationView fontColours;
         private NavigationView backgroundColours;
-        private Array colours;
+        private readonly Array colours;
 
         public SettingsController()
         {
             colours = Enum.GetValues(typeof(ConsoleColor));
 
-            Menu = new NavigationView
+            Menu = new NavigationView(this)
             {
                 Name = "Settings",
                 Parent = CurrentView,
@@ -51,7 +51,7 @@ namespace Nix.Controllers
                     });
                 }
 
-                fontColours = new NavigationView
+                fontColours = new NavigationView(this)
                 {
                     Name = "Change Font Colour",
                     Parent = Menu,
@@ -80,7 +80,7 @@ namespace Nix.Controllers
                     });
                 }
 
-                backgroundColours = new NavigationView
+                backgroundColours = new NavigationView(this)
                 {
                     Name = "Change Background Colour",
                     Parent = CurrentView,

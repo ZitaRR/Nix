@@ -1,4 +1,5 @@
-﻿using Nix.Resources;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Nix.Resources;
 using Nix.Views;
 using System;
 using System.Collections.Generic;
@@ -7,11 +8,17 @@ namespace Nix.Controllers
 {
     internal sealed class HomeController : Controller
     {
-        private Controller settings;
+        private readonly Controller settings;
+        private readonly Controller discord;
+        private readonly IServiceProvider services;
 
-        public HomeController()
+        public HomeController(IServiceProvider services)
         {
-            Menu = new NavigationView
+            this.services = services;
+            settings = this.services.GetService<SettingsController>();
+            discord = this.services.GetService<DiscordController>();
+
+            Menu = new NavigationView(this)
             {
                 Name = "Main Menu",
                 Parent = null,
@@ -26,11 +33,10 @@ namespace Nix.Controllers
         }
 
         public IView SettingsController()
-        {
-            if (settings is null)
-                settings = new SettingsController();
-            return settings.Menu;
-        }
+            => settings.Menu;
+
+        public IView DiscordController()
+            => discord.Menu;
 
         public IView Exit()
         {

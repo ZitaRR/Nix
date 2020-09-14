@@ -8,7 +8,7 @@ namespace Nix.Resources
     {
         internal static ConfigData Data { get; set; } = new ConfigData();
 
-        private static readonly string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\config.cfg";
+        private static readonly string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\config.json";
         private static bool initialized = false;
 
         public static void Initialize()
@@ -51,9 +51,11 @@ namespace Nix.Resources
 
         internal class ConfigData
         {
+            public string Token { get; set; }
+            public string Prefix { get; set; } = ".";
             public string SelectionMarker { get; set; } = " <";
-            public int FontColour { get; set; } = 1;
-            public int BackgroundColour { get; set; } = 1;
+            public int FontColour { get; set; } = 0;
+            public int BackgroundColour { get; set; } = 15;
         }
     }
 }
