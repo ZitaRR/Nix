@@ -13,13 +13,17 @@ namespace Nix.Resources
         public DiscordSocketClient Client { get; private set; }
 
         private CommandService commands;
-        private IServiceProvider services;
-        private ILogger logger;
+        private readonly IServiceProvider services;
+        private readonly ILogger logger;
+        private readonly IPersistentStorage storage;
 
-        public NixClient(IServiceProvider services, ILogger logger)
+        private const string SOURCE = "DISCORD";
+
+        public NixClient(IServiceProvider services, ILogger logger, IPersistentStorage storage)
         {
             this.services = services;
             this.logger = logger;
+            this.storage = storage;
         }
 
         public async Task StartAsync()
@@ -48,6 +52,7 @@ namespace Nix.Resources
             if (msg is null || msg.Author.IsBot)
                 return;
 
+            HandleUser(msg.Author as SocketGuildUser);
             logger.AppendLog(LogSeverity.Info, $"{msg.Author.Username} said ‘{msg.Content}‚");
 
             int argPos = 0;
@@ -56,6 +61,9 @@ namespace Nix.Resources
             {
                 var context = new SocketCommandContext(Client, msg);
                 IResult result = await commands.ExecuteAsync(context, argPos, services);
+
+                if (!result.IsSuccess)
+                    logger.AppendLog(LogSeverity.Debug, result.ErrorReason);
             }
         }
 
@@ -64,6 +72,24 @@ namespace Nix.Resources
 #if DEBUG
             await Client.SetGameAsync("myself being created", type: ActivityType.Watching);
 #endif
+            logger.AppendLog(SOURCE, "Discord initialized");
+        }
+
+        private void HandleUser(SocketGuildUser user)
+        {
+            if (user is null)
+                return;
+
+            var nixUser = new NixUser
+            {
+                Name = user.Username, 
+                ID = user.Id,
+                CreatedAt = user.CreatedAt.DateTime,
+                AvatarURL = user.GetAvatarUrl(),
+                Roles = user.Roles
+            };
+
+            storage.Store(nixUser);
         }
     }
 }
