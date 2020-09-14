@@ -2,6 +2,7 @@
 using Nix.Controllers;
 using Nix.Resources;
 using System;
+using System.Collections;
 using System.Reflection;
 
 namespace Nix
@@ -15,6 +16,9 @@ namespace Nix
             Extensions.AddServices(new ServiceCollection()).BuildServiceProvider().GetService<HomeController>();
             //new HomeController(Extensions.AddServices(new ServiceCollection()).BuildServiceProvider());
         }
+
+        static IEnumerable T()
+            => null;
     }
 
     static class Extensions
@@ -22,6 +26,7 @@ namespace Nix
         public static IServiceCollection AddServices(this IServiceCollection collection)
             => collection.AddSingleton<IDiscord, NixClient>()
                 .AddSingleton<ILogger, Logger>()
+                .AddSingleton<IPersistentStorage, PersistentStorage>()
                 .AddSingleton(x => new HomeController(x))
                 .AddSingleton<SettingsController>()
                 .AddSingleton<DiscordController>();
