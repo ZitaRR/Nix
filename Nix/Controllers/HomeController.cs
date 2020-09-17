@@ -8,15 +8,11 @@ namespace Nix.Controllers
 {
     internal sealed class HomeController : Controller
     {
-        private readonly Controller settings;
-        private readonly Controller discord;
         private readonly IServiceProvider services;
 
         public HomeController(IServiceProvider services)
         {
             this.services = services;
-            settings = this.services.GetService<SettingsController>();
-            discord = this.services.GetService<DiscordController>();
 
             Menu = new NavigationView(this)
             {
@@ -25,6 +21,7 @@ namespace Nix.Controllers
                 Options = new List<Option>
                 {
                     new Option { Name = "Settings", View = SettingsController },
+                    new Option { Name = "Discord", View = DiscordController },
                     new Option { Name = "Exit", View = Exit }
                 },
             };
@@ -33,10 +30,10 @@ namespace Nix.Controllers
         }
 
         public IView SettingsController()
-            => settings.Menu;
+            => services.GetService<SettingsController>().Menu;
 
         public IView DiscordController()
-            => discord.Menu;
+            => services.GetService<DiscordController>().Menu;
 
         public IView Exit()
         {
