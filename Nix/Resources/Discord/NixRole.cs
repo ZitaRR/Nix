@@ -7,6 +7,6 @@ namespace Nix.Resources
         public int ID { get; set; }
         public ulong RoleID { get; set; }
         public string Name { get; set; }
-        public DateTime CreatedAt { get; } = DateTime.Now;
+        public DateTime StoredAt { get; } = DateTime.Now;
     }
 }

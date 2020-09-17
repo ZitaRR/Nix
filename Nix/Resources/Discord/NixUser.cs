@@ -9,8 +9,9 @@ namespace Nix.Resources
         public int ID { get; set; }
         public ulong UserID { get; set; }
         public ulong GuildID { get; set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime JoinedAt { get; set; }
-        public DateTime CreatedAt { get; } = DateTime.Now;
+        public DateTime StoredAt { get; } = DateTime.Now;
         public IEnumerable<NixRole> Roles { get; set; }
         public string AvatarURL { get; set; }
         public int TotalMessages { get; set; }
@@ -21,6 +22,9 @@ namespace Nix.Resources
             $"User ID: {UserID}\n" +
             $"Guild ID: {GuildID}\n" +
             $"Created At: {CreatedAt}\n" +
+            $"Joined At: {JoinedAt}\n" +
+            $"Stored At: {StoredAt}\n" +
+            $"Avatar URL: {AvatarURL}\n" +
             $"Messages Sent: {TotalMessages}";
     }
 }

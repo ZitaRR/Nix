@@ -42,19 +42,19 @@ namespace Nix.Resources
 
         private Task Client_LeftGuild(SocketGuild guild)
         {
-            UnregisterGuildAndItsUsers(guild.GetNixGuild());
+            UnregisterGuild(guild.GetNixGuild());
             return Task.CompletedTask;
         }
 
         private Task Client_JoinedGuild(SocketGuild guild)
         {
-            RegisterGuildAndItsUsers(guild.GetNixGuild());
+            RegisterGuild(guild.GetNixGuild());
             return Task.CompletedTask;
         }
 
         private Task Client_GuildAvailable(SocketGuild guild)
         {
-            RegisterGuildAndItsUsers(guild.GetNixGuild());
+            RegisterGuild(guild.GetNixGuild());
             return Task.CompletedTask;
         }
 
@@ -108,7 +108,7 @@ namespace Nix.Resources
             storage.Update(nixUser);
         }
 
-        private void RegisterGuildAndItsUsers(NixGuild guild)
+        private void RegisterGuild(NixGuild guild)
         {
             if (storage.Exists<NixGuild>(x => x.GuildID == guild.GuildID))
                 return;
@@ -125,25 +125,38 @@ namespace Nix.Resources
                 storage.Store(user);
             }
 
-            logger.AppendLog($"{guild.Name} registered along with {registeredUsers} users");
+            int registeredChannels = 0;
+            foreach (var channel in guild.Channels)
+            {
+                if (storage.Exists<NixChannel>(x => x.ChannelID == channel.ChannelID))
+                    continue;
+
+                registeredChannels++;
+                storage.Store(channel);
+            }
+
+            logger.AppendLog($"{guild.Name} registered along with {registeredChannels} channels and {registeredUsers} users");
         }
 
-        private void UnregisterGuildAndItsUsers(NixGuild guild)
+        private void UnregisterGuild(NixGuild guild)
         {
             storage.Delete<NixGuild>(x => x.GuildID == guild.GuildID);
 
             int unregisteredUsers = 0;
             foreach (var user in guild.Users)
             {
-                try
-                {
-                    storage.Delete<NixUser>(x => x.UserID == user.UserID && x.GuildID == guild.GuildID);
-                }
-                catch { continue; }
+                storage.Delete<NixUser>(x => x.UserID == user.UserID && x.GuildID == guild.GuildID);
                 unregisteredUsers++;
             }
 
-            logger.AppendLog($"{guild.Name} unregistered along with {unregisteredUsers} users");
+            int unregisteredChannels = 0;
+            foreach (var channel in guild.Channels)
+            {
+                storage.Delete<NixChannel>(x => x.ChannelID == channel.ChannelID);
+                unregisteredChannels++;
+            }
+
+            logger.AppendLog($"{guild.Name} unregistered along with {unregisteredChannels} channels and {unregisteredUsers} users");
         }
     }
 }

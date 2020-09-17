@@ -9,9 +9,7 @@ namespace Nix.Resources
         public int ID { get; set; }
         public ulong GuildID { get; set; }
         public List<NixUser> Users { get; set; }
-        public int TextChannels { get; set; }
-        public int VoiceChannels { get; set; }
-        public int Channel { get => TextChannels + VoiceChannels; }
-        public DateTime CreatedAt { get; } = DateTime.Now;
+        public List<NixChannel> Channels { get; set; }
+        public DateTime StoredAt { get; } = DateTime.Now;
     }
 }
