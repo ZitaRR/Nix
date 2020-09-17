@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Nix.Controllers;
 using Nix.Resources;
 using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Nix
@@ -14,11 +15,7 @@ namespace Nix
             Console.CursorVisible = false;
             Console.Title = Assembly.GetExecutingAssembly().GetName().Name;
             Extensions.AddServices(new ServiceCollection()).BuildServiceProvider().GetService<HomeController>();
-            //new HomeController(Extensions.AddServices(new ServiceCollection()).BuildServiceProvider());
         }
-
-        static IEnumerable T()
-            => null;
     }
 
     static class Extensions
@@ -30,5 +27,62 @@ namespace Nix
                 .AddSingleton(x => new HomeController(x))
                 .AddSingleton<SettingsController>()
                 .AddSingleton<DiscordController>();
+
+        public static IEnumerable<NixRole> GetNixRoles(this IReadOnlyCollection<SocketRole> roles)
+        {
+            if (roles is null)
+                throw new ArgumentNullException(nameof(roles));
+            else if (roles.Count <= 0)
+                throw new ArgumentOutOfRangeException(nameof(roles));
+
+            var list = new List<NixRole>();
+            foreach (var role in roles)
+            {
+                list.Add(new NixRole 
+                { 
+                    RoleID = role.Id,
+                    Name = role.Name 
+                });
+            }
+            return list;
+        }
+
+        public static NixUser GetNixUser(this SocketGuildUser user)
+        {
+            if (user is null)
+                throw new ArgumentNullException(nameof(user));
+
+            return new NixUser
+            {
+                Name = user.Username,
+                UserID = user.Id,
+                GuildID = user.Guild.Id,
+                AvatarURL = user.GetAvatarUrl(),
+                JoinedAt = user.CreatedAt.DateTime,
+                Roles = user.Roles.GetNixRoles(),
+                TotalMessages = 1
+            };
+        }
+
+        public static NixGuild GetNixGuild(this SocketGuild guild)
+        {
+            if (guild is null)
+                throw new ArgumentNullException(nameof(guild));
+
+            var users = new List<NixUser>();
+            foreach (var user in guild.Users)
+            {
+                users.Add(user.GetNixUser());
+            }
+
+            return new NixGuild
+            {
+                Name = guild.Name,
+                GuildID = guild.Id,
+                Users = users,
+                TextChannels = guild.TextChannels.Count,
+                VoiceChannels = guild.VoiceChannels.Count
+            };
+        }
     }
 }
