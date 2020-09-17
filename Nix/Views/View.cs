@@ -6,6 +6,8 @@ namespace Nix.Views
 {
     internal abstract class View : IView
     {
+        public const int OFFSET = 8;
+
         public Controller Controller { get; private set; }
         public string Name { get; internal set; }
         public IView Parent { get; internal set; }

@@ -10,8 +10,6 @@ namespace Nix.Views
         public List<Option> Options { get; internal set; }
         public int Index { get; private set; } = 0;
 
-        private const int offset = 8;
-
         public NavigationView(Controller controller) : base(controller) { }
 
         private void ListOptions()
@@ -28,7 +26,7 @@ namespace Nix.Views
 
         private void SetFocus(int index, bool value)
         {
-            Console.SetCursorPosition(0, index + offset);
+            Console.SetCursorPosition(0, index + OFFSET);
             var option = Options[index];
 
             if (!value)
