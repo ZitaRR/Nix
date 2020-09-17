@@ -58,7 +58,8 @@ namespace Nix
                 UserID = user.Id,
                 GuildID = user.Guild.Id,
                 AvatarURL = user.GetAvatarUrl(),
-                JoinedAt = user.CreatedAt.DateTime,
+                CreatedAt = user.CreatedAt.DateTime,
+                JoinedAt = user.JoinedAt.GetValueOrDefault().DateTime,
                 Roles = user.Roles.GetNixRoles(),
                 TotalMessages = 1
             };
@@ -75,13 +76,32 @@ namespace Nix
                 users.Add(user.GetNixUser());
             }
 
+            var channels = new List<NixChannel>();
+            foreach (var channel in guild.Channels)
+            {
+                if (channel is ISocketMessageChannel)
+                    channels.Add(channel.GetNixChannel());
+            }
+
             return new NixGuild
             {
                 Name = guild.Name,
                 GuildID = guild.Id,
                 Users = users,
-                TextChannels = guild.TextChannels.Count,
-                VoiceChannels = guild.VoiceChannels.Count
+                Channels = channels
+            };
+        }
+
+        public static NixChannel GetNixChannel(this SocketGuildChannel channel)
+        {
+            if (channel is null)
+                throw new ArgumentNullException(nameof(channel));
+
+            return new NixChannel
+            {
+                Name = channel.Name,
+                ChannelID = channel.Id,
+                GuildID = channel.Guild.Id
             };
         }
     }

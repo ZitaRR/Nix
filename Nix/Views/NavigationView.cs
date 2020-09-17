@@ -54,7 +54,7 @@ namespace Nix.Views
             do
             {
                 ListOptions();
-                var key = Console.ReadKey(false).Key;
+                var key = Console.ReadKey(true).Key;
                 switch (key)
                 {
                     case ConsoleKey.UpArrow:
