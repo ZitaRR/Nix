@@ -16,12 +16,14 @@ namespace Nix.Resources
         private readonly IServiceProvider services;
         private readonly ILogger logger;
         private readonly IPersistentStorage storage;
+        private readonly IRegister register;
 
-        public NixClient(IServiceProvider services, ILogger logger, IPersistentStorage storage)
+        public NixClient(IServiceProvider services, ILogger logger, IPersistentStorage storage, IRegister register)
         {
             this.services = services;
             this.logger = logger;
             this.storage = storage;
+            this.register = register;
         }
 
         public async Task StartAsync()
@@ -42,19 +44,19 @@ namespace Nix.Resources
 
         private Task Client_LeftGuild(SocketGuild guild)
         {
-            UnregisterGuild(guild.GetNixGuild());
+            register.UnRegisterGuild(guild.GetNixGuild());
             return Task.CompletedTask;
         }
 
         private Task Client_JoinedGuild(SocketGuild guild)
         {
-            RegisterGuild(guild.GetNixGuild());
+            register.RegisterGuild(guild.GetNixGuild());
             return Task.CompletedTask;
         }
 
         private Task Client_GuildAvailable(SocketGuild guild)
         {
-            RegisterGuild(guild.GetNixGuild());
+            register.RegisterGuild(guild.GetNixGuild());
             return Task.CompletedTask;
         }
 
@@ -106,57 +108,6 @@ namespace Nix.Resources
 
             nixUser.TotalMessages++;
             storage.Update(nixUser);
-        }
-
-        private void RegisterGuild(NixGuild guild)
-        {
-            if (storage.Exists<NixGuild>(x => x.GuildID == guild.GuildID))
-                return;
-
-            storage.Store(guild);
-
-            int registeredUsers = 0;
-            foreach (var user in guild.Users)
-            {
-                if (storage.Exists<NixUser>(x => x.UserID == user.UserID && x.GuildID == user.GuildID))
-                    continue;
-
-                registeredUsers++;
-                storage.Store(user);
-            }
-
-            int registeredChannels = 0;
-            foreach (var channel in guild.Channels)
-            {
-                if (storage.Exists<NixChannel>(x => x.ChannelID == channel.ChannelID))
-                    continue;
-
-                registeredChannels++;
-                storage.Store(channel);
-            }
-
-            logger.AppendLog($"{guild.Name} registered along with {registeredChannels} channels and {registeredUsers} users");
-        }
-
-        private void UnregisterGuild(NixGuild guild)
-        {
-            storage.Delete<NixGuild>(x => x.GuildID == guild.GuildID);
-
-            int unregisteredUsers = 0;
-            foreach (var user in guild.Users)
-            {
-                storage.Delete<NixUser>(x => x.UserID == user.UserID && x.GuildID == guild.GuildID);
-                unregisteredUsers++;
-            }
-
-            int unregisteredChannels = 0;
-            foreach (var channel in guild.Channels)
-            {
-                storage.Delete<NixChannel>(x => x.ChannelID == channel.ChannelID);
-                unregisteredChannels++;
-            }
-
-            logger.AppendLog($"{guild.Name} unregistered along with {unregisteredChannels} channels and {unregisteredUsers} users");
         }
     }
 }

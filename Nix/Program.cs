@@ -24,6 +24,7 @@ namespace Nix
             => collection.AddSingleton<IDiscord, NixClient>()
                 .AddSingleton<ILogger, Logger>()
                 .AddSingleton<IPersistentStorage, PersistentStorage>()
+                .AddSingleton<IRegister, Register>()
                 .AddSingleton(x => new HomeController(x))
                 .AddSingleton<SettingsController>()
                 .AddSingleton<DiscordController>();
