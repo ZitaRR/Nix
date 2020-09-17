@@ -11,7 +11,7 @@ namespace Nix.Resources
         public ulong GuildID { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime JoinedAt { get; set; }
-        public DateTime StoredAt { get; } = DateTime.Now;
+        public DateTime StoredAt { get; set; }
         public IEnumerable<NixRole> Roles { get; set; }
         public string AvatarURL { get; set; }
         public int TotalMessages { get; set; }

@@ -8,7 +8,7 @@ namespace Nix.Resources
         public int ID { get; set; }
         public ulong ChannelID { get; set; }
         public ulong GuildID { get; set; }
-        public DateTime StoredAt { get => DateTime.Now; }
+        public DateTime StoredAt { get; set; }
 
         public override string ToString()
             => $"Name: {Name}\n" +

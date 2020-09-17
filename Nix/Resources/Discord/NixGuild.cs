@@ -10,6 +10,6 @@ namespace Nix.Resources
         public ulong GuildID { get; set; }
         public List<NixUser> Users { get; set; }
         public List<NixChannel> Channels { get; set; }
-        public DateTime StoredAt { get; } = DateTime.Now;
+        public DateTime StoredAt { get; set; }
     }
 }
