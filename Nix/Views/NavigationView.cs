@@ -10,7 +10,8 @@ namespace Nix.Views
         public List<Option> Options { get; internal set; }
         public int Index { get; private set; } = 0;
 
-        public NavigationView(Controller controller) : base(controller) { }
+        public NavigationView(Controller controller, int index = 0) : base(controller)
+            => Index = index;
 
         private void ListOptions()
         {

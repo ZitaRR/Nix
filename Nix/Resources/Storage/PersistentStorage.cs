@@ -29,6 +29,7 @@ namespace Nix.Resources
                 return;
             }
 
+            entity.StoredAt = DateTime.Now;
             var collection = context.GetCollection<T>();
             collection.Insert(entity);
             logger.AppendLog("DATABASE", $"Entity of type {entity.GetType().Name} has been stored");

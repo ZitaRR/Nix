@@ -2,7 +2,7 @@
 
 namespace Nix.Resources
 {
-    internal sealed class NixLogMessage
+    public sealed class NixLogMessage
     {
         public DateTime Date { get; private set; }
         public string Source { get; private set; }

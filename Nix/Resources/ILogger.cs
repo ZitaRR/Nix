@@ -5,7 +5,7 @@ using LiteDB;
 
 namespace Nix.Resources
 {
-    interface ILogger
+    public interface ILogger
     {
         IList<NixLogMessage> Logs { get; }
         void AppendLog(string source, string message, ConsoleColor colour = ConsoleColor.Yellow);

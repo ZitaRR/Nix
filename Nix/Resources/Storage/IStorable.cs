@@ -7,6 +7,6 @@ namespace Nix.Resources
     {
         [BsonId]
         public int ID { get; }
-        public DateTime StoredAt { get; }
+        public DateTime StoredAt { get; set; }
     }
 }

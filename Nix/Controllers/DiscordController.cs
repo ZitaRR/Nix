@@ -100,7 +100,9 @@ namespace Nix.Controllers
                 });
             }
 
-            return new NavigationView(this)
+            int index = channels?.Index ?? 0;
+
+            return channels = new NavigationView(this, index)
             {
                 Name = "Channels",
                 Parent = Guilds(),
