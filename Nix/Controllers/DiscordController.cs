@@ -2,13 +2,14 @@
 using Nix.Views;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Nix.Controllers
 {
     internal sealed class DiscordController : Controller
     {
         private LogView log;
+        private NavigationView guilds;
+        private NavigationView channels;
         private readonly IDiscord discord;
         private readonly ILogger logger;
         private readonly IPersistentStorage storage;
@@ -26,6 +27,7 @@ namespace Nix.Controllers
                 Options = new List<Option>
                 {
                     new Option { Name = "Logs", View = Logs },
+                    new Option { Name = "Guilds", View = Guilds }
                 }
             };
 
@@ -48,6 +50,62 @@ namespace Nix.Controllers
                 };
             }
             return log;
+        }
+
+        private IView Guilds()
+        {
+            if (guilds is null)
+            {
+                var _guilds = storage.FindAll<NixGuild>();
+                var options = new List<Option>();
+                foreach (var guild in _guilds)
+                {
+                    options.Add(new Option
+                    {
+                        Name = guild.Name,
+                        View = () =>
+                        {
+                            return Channels(guild.GuildID);
+                        }
+                    });
+                }
+
+                guilds = new NavigationView(this)
+                {
+                    Name = "Guilds",
+                    Parent = CurrentView,
+                    Options = options
+                };
+            }
+            return guilds;
+        }
+
+        private IView Channels(ulong guildID)
+        {
+            var _channels = storage.Find<NixChannel>(x => x.GuildID == guildID);
+            var options = new List<Option>();
+            foreach (var channel in _channels)
+            {
+                options.Add(new Option
+                {
+                    Name = channel.Name,
+                    View = () =>
+                    {
+                        return new NotificationView(this, channel.ToString())
+                        {
+                            Name = channel.Name,
+                            Parent = Channels(guildID)
+                        };
+                    }
+                });
+            }
+
+            return new NavigationView(this)
+            {
+                Name = "Channels",
+                Parent = Guilds(),
+                Options = options
+            };
         }
     }
 }
