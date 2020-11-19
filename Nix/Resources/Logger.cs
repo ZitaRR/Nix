@@ -22,14 +22,14 @@ namespace Nix.Resources
 
         public void AppendLog(string message, LogSeverity severity)
         {
-            ConsoleColor colour = ConsoleColor.Yellow;
+            ConsoleColor colour = ConsoleColor.Magenta;
             switch (severity)
             {
                 case LogSeverity.Debug:
                     colour = ConsoleColor.Green;
                     break;
                 case LogSeverity.Warning:
-                    colour = ConsoleColor.Red;
+                    colour = ConsoleColor.DarkYellow;
                     break;
                 case LogSeverity.Error:
                     colour = ConsoleColor.DarkRed;
