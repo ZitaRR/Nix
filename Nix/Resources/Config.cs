@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using Newtonsoft.Json;
+using Nix.Controllers;
+using Nix.Views;
 
 namespace Nix.Resources
 {
@@ -19,14 +21,18 @@ namespace Nix.Resources
             if (!File.Exists(path))
             {
                 Save();
-                Console.WriteLine($"Config was created at [{path}]");
-                Console.ReadLine();
+                new NotificationView($"Config was created at [{path}]")
+                {
+                    Name = "Config"
+                }.Display();
             }
             else
             {
                 Load();
-                Console.WriteLine("Config was intialized.");
-                Console.ReadLine();
+                new NotificationView("Config was intialized.")
+                {
+                    Name = "Config"
+                }.Display();
             }
 
             initialized = true;

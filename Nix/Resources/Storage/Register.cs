@@ -41,7 +41,9 @@
                 registeredChannels++;
             }
 
-            logger.AppendLog($"{guild.Name} registered along with {registeredChannels} channels and {registeredUsers} users");
+            logger.AppendLog($"{guild.Name} registered along with " +
+                $"{registeredChannels} channel(s) and " +
+                $"{registeredUsers} user(s)");
         }
 
         public void RegisterUser(NixUser user)
@@ -57,17 +59,25 @@
 
         public void UnRegisterGuild(NixGuild guild)
         {
+            int unregisteredUsers = 0;
+            int unregisteredChannels = 0;
+
             foreach (var user in guild.Users)
             {
                 UnregisterUser(user);
+                unregisteredUsers++;
             }
 
             foreach (var channel in guild.Channels)
             {
                 UnregisterChannel(channel);
+                unregisteredChannels++;
             }
 
             storage.Delete<NixGuild>(x => x.GuildID == guild.GuildID);
+            logger.AppendLog($"{guild.Name} unregistered along with " +
+                $"{unregisteredChannels} channel(s) and " +
+                $"{unregisteredUsers} user(s)");
         }
 
         public void UnregisterUser(NixUser user)
