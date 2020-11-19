@@ -9,6 +9,7 @@ namespace Nix.Controllers
     {
         private NavigationView fontColours;
         private NavigationView backgroundColours;
+        private InputView markerInput;
         private readonly Array colours;
 
         public SettingsController()
@@ -22,14 +23,28 @@ namespace Nix.Controllers
                 Options = new List<Option>
                 {
                     new Option { Name = "Change Font Colour", View = ChangeFontColour },
-                    new Option { Name = "Change Background Colour", View = ChangeBackgroundColour }
+                    new Option { Name = "Change Background Colour", View = ChangeBackgroundColour },
+                    new Option { Name = "Change Selection Marker", View = ChangeSelectionMarker }
                 }
             };
         }
 
         public IView ChangeSelectionMarker()
         {
-            throw new NotImplementedException();
+            if (markerInput is null)
+            {
+                markerInput = new InputView(this, "Enter Selection Marker", Config.Data.SelectionMarker)
+                {
+                    Name = "Selection Marker",
+                    Parent = CurrentView,
+                    Callback = (input) =>
+                    {
+                        Config.Data.SelectionMarker = input.UserInput;
+                        Config.Save();
+                    }
+                };
+            }
+            return markerInput;
         }
 
         public IView ChangeFontColour()
