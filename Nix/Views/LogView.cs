@@ -16,7 +16,8 @@ namespace Nix.Views
 
         private void Logger_OnLog(NixLogMessage log)
         {
-            logger.WriteLog(log);
+            if (Controller.CurrentView is LogView)
+                logger.WriteLog(log);
         }
 
         public override void Display()

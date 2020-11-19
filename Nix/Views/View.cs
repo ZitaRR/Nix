@@ -14,6 +14,8 @@ namespace Nix.Views
 
         private string asciiTitle;
 
+        public View() { }
+
         public View(Controller controller)
         {
             Controller = controller;

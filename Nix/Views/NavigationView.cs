@@ -66,6 +66,7 @@ namespace Nix.Views
                         if (Index < Options.Count - 1)
                             Index++;
                         break;
+                    case ConsoleKey.Escape:
                     case ConsoleKey.Backspace:
                         try { Parent.Display(); }
                         catch { break; }

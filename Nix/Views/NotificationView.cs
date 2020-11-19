@@ -7,6 +7,11 @@ namespace Nix.Views
     {
         public string Message { get; private set; }
 
+        public NotificationView(string message)
+        {
+            Message = message;
+        }
+
         public NotificationView(Controller controller, string message) : base(controller) 
         {
             Message = message;
