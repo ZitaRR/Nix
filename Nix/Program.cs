@@ -25,7 +25,7 @@ namespace Nix
                 .AddSingleton<ILogger, Logger>()
                 .AddSingleton<IPersistentStorage, PersistentStorage>()
                 .AddSingleton<IRegister, Register>()
-                .AddSingleton(x => new HomeController(x))
+                .AddSingleton<HomeController>()
                 .AddSingleton<SettingsController>()
                 .AddSingleton<DiscordController>();
 

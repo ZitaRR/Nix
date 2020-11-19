@@ -8,13 +8,12 @@ namespace Nix.Controllers
 {
     internal sealed class HomeController : Controller
     {
-        private readonly IServiceProvider services;
+        private readonly DiscordController discord;
+        private readonly SettingsController settings;
 
         public HomeController(IServiceProvider services)
         {
-            this.services = services;
-
-            Menu = new NavigationView(this)
+            CurrentView = Menu = new NavigationView(this)
             {
                 Name = "Main Menu",
                 Parent = null,
@@ -26,14 +25,17 @@ namespace Nix.Controllers
                 },
             };
 
+            discord = services.GetRequiredService<DiscordController>();
+            settings = services.GetRequiredService<SettingsController>();
+
             Display();
         }
 
         public IView SettingsController()
-            => services.GetService<SettingsController>().Menu;
+            => settings.Menu;
 
         public IView DiscordController()
-            => services.GetService<DiscordController>().Menu;
+            => discord.Menu;
 
         public IView Exit()
         {
