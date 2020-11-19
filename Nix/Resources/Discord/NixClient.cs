@@ -1,6 +1,8 @@
 ﻿using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -18,19 +20,24 @@ namespace Nix.Resources
         private readonly IPersistentStorage storage;
         private readonly IRegister register;
 
-        public NixClient(IServiceProvider services, ILogger logger, IPersistentStorage storage, IRegister register)
+        public NixClient(ILogger logger, IPersistentStorage storage, IRegister register)
         {
-            this.services = services;
             this.logger = logger;
             this.storage = storage;
             this.register = register;
+
+            Client = new DiscordSocketClient();
+            commands = new CommandService();
+
+            services = new ServiceCollection()
+                .AddSingleton(Client)
+                .AddSingleton(commands)
+                .AddSingleton<InteractiveService>()
+                .BuildServiceProvider();
         }
 
         public async Task StartAsync()
         {
-            Client = new DiscordSocketClient();
-            commands = new CommandService();
-
             Client.MessageReceived += ProcessMessage;
             Client.GuildAvailable += Client_GuildAvailable;
             Client.JoinedGuild += Client_JoinedGuild;
