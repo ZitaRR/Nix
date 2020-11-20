@@ -62,7 +62,7 @@ namespace Nix
                 CreatedAt = user.CreatedAt.DateTime,
                 JoinedAt = user.JoinedAt.GetValueOrDefault().DateTime,
                 Roles = user.Roles.GetNixRoles(),
-                TotalMessages = 1
+                TotalMessages = 0
             };
         }
 
@@ -89,7 +89,8 @@ namespace Nix
                 Name = guild.Name,
                 GuildID = guild.Id,
                 Users = users,
-                Channels = channels
+                Channels = channels,
+                Client = guild.CurrentUser.GetNixUser()
             };
         }
 

@@ -81,7 +81,7 @@ namespace Nix.Resources
                 return;
 
             HandleUser(msg.Author as SocketGuildUser);
-            logger.AppendLog($"{msg.Author.Username} said ‘{msg.Content}‚");
+            logger.AppendLog($"{msg.Author.Username} >> {msg.Content}");
 
             int argPos = 0;
             if (msg.HasStringPrefix(Config.Data.Prefix, ref argPos) || 
@@ -101,8 +101,8 @@ namespace Nix.Resources
             await Client.SetGameAsync("myself being created", type: ActivityType.Watching);
 #endif
             var guilds = storage.FindAll<NixGuild>();
-            var users = guilds.Select(x => x.Users).Sum(x => x.Count);
-            logger.AppendLog($"{guilds.Count()} guilds are registered with {users} users");
+            var users = storage.FindAll<NixUser>();
+            logger.AppendLog($"{guilds.Count()} guild(s) are registered with {users.Count()} user(s)");
 
             logger.AppendLog("Discord initialized");
         }
@@ -111,7 +111,7 @@ namespace Nix.Resources
         {
             var nixUser = storage.FindOne<NixUser>(x => x.UserID == user.Id && x.GuildID == user.Guild.Id);
             if (nixUser is null)
-                storage.Store(nixUser = user.GetNixUser());
+                register.RegisterUser(nixUser = user.GetNixUser());
 
             nixUser.TotalMessages++;
             storage.Update(nixUser);

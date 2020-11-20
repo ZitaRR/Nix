@@ -11,5 +11,6 @@ namespace Nix.Resources
         public List<NixUser> Users { get; set; }
         public List<NixChannel> Channels { get; set; }
         public DateTime StoredAt { get; set; }
+        public NixUser Client { get; set; }
     }
 }

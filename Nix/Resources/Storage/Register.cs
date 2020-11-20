@@ -21,29 +21,16 @@
 
         public void RegisterGuild(NixGuild guild)
         {
-            if (storage.Exists<NixGuild>(x => x.GuildID == guild.GuildID))
-                return;
-
-            storage.Store(guild);
-
-            int registeredUsers = 0;
-            int registeredChannels = 0;
-
-            foreach (var user in guild.Users)
-            {
-                RegisterUser(user);
-                registeredUsers++;
-            }
-
             foreach (var channel in guild.Channels)
             {
                 RegisterChannel(channel);
-                registeredChannels++;
             }
 
-            logger.AppendLog($"{guild.Name} registered along with " +
-                $"{registeredChannels} channel(s) and " +
-                $"{registeredUsers} user(s)");
+            if (storage.Exists<NixGuild>(x => x.GuildID == guild.GuildID))
+                return;
+
+            RegisterUser(guild.Client);
+            storage.Store(guild);
         }
 
         public void RegisterUser(NixUser user)
@@ -59,7 +46,8 @@
 
         public void UnRegisterGuild(NixGuild guild)
         {
-            int unregisteredUsers = 0;
+            UnregisterUser(guild.Client);
+            int unregisteredUsers = 1;
             int unregisteredChannels = 0;
 
             foreach (var user in guild.Users)
