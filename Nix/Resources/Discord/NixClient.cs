@@ -32,6 +32,8 @@ namespace Nix.Resources
             services = new ServiceCollection()
                 .AddSingleton(Client)
                 .AddSingleton(commands)
+                .AddSingleton(storage)
+                .AddSingleton(logger)
                 .AddSingleton<InteractiveService>()
                 .BuildServiceProvider();
         }
@@ -87,7 +89,7 @@ namespace Nix.Resources
             if (msg.HasStringPrefix(Config.Data.Prefix, ref argPos) || 
                 msg.HasMentionPrefix(Client.CurrentUser, ref argPos))
             {
-                var context = new SocketCommandContext(Client, msg);
+                var context = new NixCommandContext(Client, msg, storage, logger);
                 IResult result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)
