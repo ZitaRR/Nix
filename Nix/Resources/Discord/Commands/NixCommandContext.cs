@@ -1,7 +1,7 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
 
-namespace Nix.Resources
+namespace Nix.Resources.Discord
 {
     public class NixCommandContext : SocketCommandContext
     {
@@ -11,14 +11,11 @@ namespace Nix.Resources
             => storage.FindOne<NixChannel>(x => x.ChannelID == Channel.Id);
 
         private readonly IPersistentStorage storage;
-        private readonly ILogger logger;
 
         public NixCommandContext(DiscordSocketClient client, SocketUserMessage message,
-            IPersistentStorage storage, ILogger logger) : base(client, message)
+            IPersistentStorage storage) : base(client, message)
         {
             this.storage = storage;
-            this.logger = logger;
-            this.logger.AppendLog("NixCommandContext initialized");
         }
     }
 }

@@ -2,7 +2,7 @@
 using Discord.Commands;
 using System.Threading.Tasks;
 
-namespace Nix.Resources
+namespace Nix.Resources.Discord
 {
     public class MiscCommands : ModuleBase<NixCommandContext>
     {
