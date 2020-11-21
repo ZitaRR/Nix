@@ -3,10 +3,12 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Nix.Resources.Discord;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Victoria;
 
 namespace Nix.Resources
 {
@@ -35,6 +37,9 @@ namespace Nix.Resources
                 .AddSingleton(storage)
                 .AddSingleton(logger)
                 .AddSingleton<InteractiveService>()
+                .AddSingleton<AudioService>()
+                .AddSingleton<ReplyService>()
+                .AddLavaNode(x => x.SelfDeaf = true)
                 .BuildServiceProvider();
         }
 
@@ -89,7 +94,7 @@ namespace Nix.Resources
             if (msg.HasStringPrefix(Config.Data.Prefix, ref argPos) || 
                 msg.HasMentionPrefix(Client.CurrentUser, ref argPos))
             {
-                var context = new NixCommandContext(Client, msg, storage, logger);
+                var context = new NixCommandContext(Client, msg, storage);
                 IResult result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)
@@ -105,6 +110,10 @@ namespace Nix.Resources
             var guilds = storage.FindAll<NixGuild>();
             var users = storage.FindAll<NixUser>();
             logger.AppendLog($"{guilds.Count()} guild(s) are registered with {users.Count()} user(s)");
+
+            var lavaNode = services.GetRequiredService<LavaNode>();
+            if (!lavaNode.IsConnected)
+                await lavaNode.ConnectAsync();
 
             logger.AppendLog("Discord initialized");
         }
