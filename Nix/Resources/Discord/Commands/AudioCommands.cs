@@ -1,18 +1,14 @@
 ﻿using Discord;
 using Discord.Commands;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Victoria;
 
 namespace Nix.Resources.Discord
 {
-    public class Audio : ModuleBase<NixCommandContext>
+    public class AudioCommands : ModuleBase<NixCommandContext>
     {
         private readonly AudioService audio;
 
-        public Audio(AudioService audio)
+        public AudioCommands(AudioService audio)
         {
             this.audio = audio;
         }
@@ -29,6 +25,10 @@ namespace Nix.Resources.Discord
         public async Task PlayAsync([Remainder] string search)
             => await audio.PlayAsync(Context.User as IVoiceState, Context.Channel as ITextChannel, search);
 
+        [Command("ytplay")]
+        public async Task PlayYoutubeAsync([Remainder] string search)
+            => await audio.PlayYoutubeAsync(Context.User as IVoiceState, Context.Channel as ITextChannel, search);
+
         [Command("duration")]
         public async Task DurationAsync()
             => await audio.DurationAsync(Context.Channel as ITextChannel);
@@ -44,5 +44,13 @@ namespace Nix.Resources.Discord
         [Command("artwork")]
         public async Task ArtworkAsync()
             => await audio.ArtworkAsync();
+
+        [Command("queue")]
+        public async Task ListQueueAsync()
+            => await audio.ListQueueAsync(Context);
+
+        [Command("repeat")]
+        public async Task RepeatAsync()
+            => await audio.RepeatAsync();
     }
 }
