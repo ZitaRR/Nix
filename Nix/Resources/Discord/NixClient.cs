@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Nix.Resources.Discord;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace Nix.Resources
     internal class NixClient : IDiscord
     {
         public DiscordSocketClient Client { get; private set; }
+        public Stopwatch Watch { get; private set; }
 
         private CommandService commands;
         private readonly IServiceProvider services;
@@ -54,6 +56,7 @@ namespace Nix.Resources
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
             await Client.LoginAsync(TokenType.Bot, Config.Data.Token);
             await Client.StartAsync();
+            Watch.Start();
         }
 
         private Task Client_LeftGuild(SocketGuild guild)
