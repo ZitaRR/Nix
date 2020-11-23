@@ -13,10 +13,11 @@ using Victoria;
 
 namespace Nix.Resources
 {
-    internal class NixClient : IDiscord
+    public class NixClient : IDiscord
     {
         public DiscordSocketClient Client { get; private set; }
-        public Stopwatch Watch { get; private set; }
+        public Stopwatch Watch { get; private set; } = new Stopwatch();
+        public OperatingSystem OS { get; } = Environment.OSVersion;
 
         private CommandService commands;
         private readonly IServiceProvider services;
@@ -97,11 +98,12 @@ namespace Nix.Resources
             if (msg.HasStringPrefix(Config.Data.Prefix, ref argPos) || 
                 msg.HasMentionPrefix(Client.CurrentUser, ref argPos))
             {
-                var context = new NixCommandContext(Client, msg, storage);
+                var context = new NixCommandContext(Client, msg, storage,
+                    this, services.GetRequiredService<ReplyService>());
                 IResult result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)
-                    logger.AppendLog(result.ErrorReason, LogSeverity.Debug);
+                    logger.AppendLog(result.ErrorReason, LogSeverity.Warning);
             }
         }
 
