@@ -34,8 +34,8 @@ namespace Nix.Resources.Discord
             => await audio.DurationAsync(Context.Channel as ITextChannel);
 
         [Command("skip")]
-        public async Task SkipAsync()
-            => await audio.SkipAsync(Context.User as IVoiceState, Context.Channel as ITextChannel);
+        public async Task SkipAsync(int amount = 1)
+            => await audio.SkipAsync(Context.User as IVoiceState, Context.Channel as ITextChannel, amount);
 
         [Command("current")]
         public async Task CurrentAsync()
@@ -52,5 +52,9 @@ namespace Nix.Resources.Discord
         [Command("repeat")]
         public async Task RepeatAsync()
             => await audio.RepeatAsync();
+
+        [Command("volume")]
+        public async Task VolumeAsync(ushort volume)
+            => await audio.VolumeAsync(Context.User as IVoiceState, volume);
     }
 }
