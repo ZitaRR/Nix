@@ -1,6 +1,6 @@
 ﻿namespace Nix.Resources
 {
-    interface IRegister
+    public interface IRegister
     {
         void RegisterGuild(NixGuild guild);
         void UnRegisterGuild(NixGuild guild);
