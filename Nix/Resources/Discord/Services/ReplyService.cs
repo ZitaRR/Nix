@@ -11,8 +11,9 @@ namespace Nix.Resources.Discord
 {
     public sealed class ReplyService
     {
-        private readonly Color color;
-        private readonly int offset;
+        private readonly Color NormalColor;
+        private readonly Color errorColor;
+        private readonly int length;
         private EmbedBuilder embed;
         private DiscordSocketClient client;
         private InteractiveService interactive;
@@ -20,7 +21,7 @@ namespace Nix.Resources.Discord
         public EmbedFooterBuilder Footer
             => new EmbedFooterBuilder
             {
-                Text = $"{DateTime.UtcNow:yyyy\\-mm\\-dd} - {DateTime.UtcNow:HH\\:mm} UTC ◈ Latency: {client.Latency}ms",
+                Text = $"{DateTime.UtcNow:yyyy\\-MM\\-dd} - {DateTime.UtcNow:HH\\:mm} UTC ◈ Latency: {client.Latency}ms",
                 IconUrl = client.CurrentUser.GetAvatarUrl()
             };
 
@@ -28,12 +29,13 @@ namespace Nix.Resources.Discord
         {
             this.client = client;
             this.interactive = interactive;
-            color = new Color(254, 254, 254);
-            offset = 25;
+            NormalColor = new Color(254, 254, 254);
+            errorColor = new Color(254, 50, 50);
+            length = 25;
         }
 
         private string FormatTrackTitle(string title)
-            => title.Length > offset ? title.Substring(0, offset) + "..." : title;
+            => title.Length > length ? title.Substring(0, length) + "..." : title;
 
         public async Task AudioPlayAsync(ITextChannel channel, LavaTrack track)
         {
@@ -42,7 +44,7 @@ namespace Nix.Resources.Discord
             {
                 Description =   $"**Playing** 🎶 ``{title}`` 🎶\n" +
                                 $"**Length** ⌚ ``{track.Duration:m\\:ss}``",
-                Color = color,
+                Color = NormalColor,
                 Footer = Footer
             };
             await channel.SendMessageAsync(embed: embed.Build());
@@ -55,7 +57,7 @@ namespace Nix.Resources.Discord
             {
                 Description =   $"**Enqueued** 🎶 ``{title}`` 🎶\n" +
                                 $"**Length** ⌚ ``{track.Duration:mm\\:ss}``",
-                Color = color,
+                Color = NormalColor,
                 Footer = Footer
             };
             await channel.SendMessageAsync(embed: embed.Build());
@@ -67,20 +69,25 @@ namespace Nix.Resources.Discord
             {
                 Description =   $"**Enqueued** ``{tracks.Count} tracks``\n" +
                                 $"**Length** ``{tracks.Sum(x => x.Duration.TotalSeconds)}s``",
-                Color = color,
+                Color = NormalColor,
                 Footer = Footer
             };
             await channel.SendMessageAsync(embed: embed.Build());
         }
 
-        public async Task AudioCurrentlyPlayingAsync(ITextChannel channel, SocketGuildUser user, LavaTrack track)
+        public async Task AudioCurrentlyPlayingAsync(ITextChannel channel, SocketGuildUser user,
+            LavaTrack track, int volume, bool repeat)
         {
             var title = FormatTrackTitle(track.Title);
+            var onRepeat = repeat is true ? "On" : "Off";
             embed = new EmbedBuilder
             {
                 Description =   $"**Playing** 🎶 ``{title}`` 🎶\n" +
-                                $"**Length** ⌚ ``{track.Position:m\\:ss} / {track.Duration:m\\:ss}``",
-                Color = color,
+                                $"**Length** ⌚ ``{track.Position:m\\:ss} / {track.Duration:m\\:ss}``\n" +
+                                $"**Requested By** ``{user.Username}``\n" +
+                                $"**Volume** ``{volume}``\n" +
+                                $"**Repeat** ``{onRepeat}``",
+                Color = NormalColor,
                 Footer = Footer
             };
             await channel.SendMessageAsync(embed: embed.Build());
@@ -93,9 +100,23 @@ namespace Nix.Resources.Discord
             {
                 Description =   $"**Skipped** :x: ``{title}`` :x:\n" +
                                 $"**Tracks in Queue** ``{amount}``",
-                Color = color,
+                Color = NormalColor,
                 Footer = Footer
             };
+
+            await channel.SendMessageAsync(embed: embed.Build());
+        }
+
+        public async Task AudioSkipAsync(ITextChannel channel, int skipped, int amount)
+        {
+            embed = new EmbedBuilder
+            {
+                Description =   $"**Skipped** :x: ``{skipped} tracks`` :x:\n" +
+                                $"**Tracks in Queue** ``{amount}``",
+                Color = NormalColor,
+                Footer = Footer
+            };
+
             await channel.SendMessageAsync(embed: embed.Build());
         }
 
@@ -122,11 +143,47 @@ namespace Nix.Resources.Discord
             {
                 Title = $"**Playing** 🎶 ``{title}`` 🎶",
                 Pages = pages,
-                Color = color,
+                Color = NormalColor,
                 AlternateDescription = null
             };
 
             await interactive.SendPaginatedMessageAsync(context, pager);
+        }
+
+        public async Task ErrorAsync(ITextChannel channel, string message)
+        {
+            embed = new EmbedBuilder
+            {
+                Description = message,
+                Color = errorColor,
+                Footer = Footer
+            };
+
+            await channel.SendMessageAsync(embed: embed.Build());
+        }
+
+        public async Task ExceptionAsync(ITextChannel channel, Exception e)
+        {
+            embed = new EmbedBuilder
+            {
+                Description = $"**ERROR** ``{e.HResult}``\n{e.StackTrace}",
+                Color = errorColor,
+                Footer = Footer
+            };
+
+            await channel.SendMessageAsync(embed: embed.Build());
+        }
+
+        public async Task MessageAsync(ITextChannel channel, string message)
+        {
+            embed = new EmbedBuilder
+            {
+                Description = message,
+                Color = NormalColor,
+                Footer = Footer
+            };
+
+            await channel.SendMessageAsync(embed: embed.Build());
         }
     }
 }
