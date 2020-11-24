@@ -10,13 +10,13 @@ namespace Nix.Resources.Discord
         public NixChannel GetNixChannel
             => storage.FindOne<NixChannel>(x => x.ChannelID == Channel.Id);
         public NixClient NixClient { get; }
-        public ReplyService Reply { get; }
+        public EmbedService Reply { get; }
 
         private readonly IPersistentStorage storage;
 
         public NixCommandContext(DiscordSocketClient client, SocketUserMessage message,
             IPersistentStorage storage, NixClient nixClient,
-            ReplyService reply) : base(client, message)
+            EmbedService reply) : base(client, message)
         {
             this.storage = storage;
             NixClient = nixClient;

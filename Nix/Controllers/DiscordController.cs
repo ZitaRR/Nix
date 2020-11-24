@@ -87,7 +87,8 @@ namespace Nix.Controllers
                 Options = new List<Option>
                     {
                         new Option { Name = "Users", View = () => Users(guildId) },
-                        new Option { Name = "Channels", View = () => Channels(guildId) }
+                        new Option { Name = "Channels", View = () => Channels(guildId) },
+                        new Option { Name = "Events", View = () => Events(guildId) }
                     }
             };
             return guild;
@@ -150,6 +151,34 @@ namespace Nix.Controllers
                 Name = "Users",
                 Parent = Guild(guildId),
                 Options = options
+            };
+        }
+
+        private IView Events(ulong guildId)
+        {
+            var events = storage.Find<NixEvent>(x => x.GuildID == guildId);
+            var options = new List<Option>();
+            foreach (var nixEvent in events)
+            {
+                options.Add(new Option
+                {
+                    Name = nixEvent.Name,
+                    View = () =>
+                    {
+                        return new NotificationView(this, nixEvent.ToString())
+                        {
+                            Name = nixEvent.Name,
+                            Parent = Events(guildId)
+                        };
+                    }
+                });
+            }
+
+            return new NavigationView(this, 0)
+            {
+                Name = "Events",
+                Options = options,
+                Parent = Guild(guildId)
             };
         }
     }

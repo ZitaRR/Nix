@@ -9,7 +9,7 @@ using Victoria;
 
 namespace Nix.Resources.Discord
 {
-    public sealed class ReplyService
+    public sealed class EmbedService
     {
         private readonly Color NormalColor;
         private readonly Color errorColor;
@@ -25,7 +25,7 @@ namespace Nix.Resources.Discord
                 IconUrl = client.CurrentUser.GetAvatarUrl()
             };
 
-        public ReplyService(DiscordSocketClient client, InteractiveService interactive)
+        public EmbedService(DiscordSocketClient client, InteractiveService interactive)
         {
             this.client = client;
             this.interactive = interactive;
@@ -184,6 +184,84 @@ namespace Nix.Resources.Discord
             };
 
             await channel.SendMessageAsync(embed: embed.Build());
+        }
+
+        public async Task<ulong> EventAsync(ITextChannel channel, SocketUser creator,
+            string name, string description, int id, DateTime start)
+        {
+            embed = new EmbedBuilder
+            {
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = creator.Username,
+                    IconUrl = creator.GetAvatarUrl()
+                },
+                Title = name,
+                Description =   $"**ID** ``{id}``\n" +
+                                $"**Time** ``{start:yyyy-MM-dd, HH:mm UTCz}``\n\n" +
+                                $"{description}",
+                Fields = new List<EmbedFieldBuilder>
+                {
+                    new EmbedFieldBuilder
+                    {
+                        IsInline = true,
+                        Name = "Participants",
+                        Value = "N/A"
+                    }
+                },
+                Color = NormalColor,
+                Footer = Footer
+            };
+
+            var message = await channel.SendMessageAsync(embed: embed.Build());
+            await message.AddReactionAsync(new Emoji("✔️"));
+            await message.AddReactionAsync(new Emoji("❌"));
+            await message.AddReactionAsync(new Emoji("❔"));
+
+            return message.Id;
+        }
+
+        public async Task EventUpdateAsync(ITextChannel channel, NixEvent nixEvent)
+        {
+            var message = await channel.GetMessageAsync(nixEvent.MessageID) as IUserMessage;
+            if (message is null)
+                return;
+
+            var result = nixEvent.Participants.FirstOrDefault().Name;
+            for (int i = 1; i < nixEvent.Participants.Count; i++)
+            {
+                result += $", {nixEvent.Participants[i].Name}";
+            }
+
+            embed = new EmbedBuilder
+            {
+                Author = new EmbedAuthorBuilder
+                {
+                    Name = nixEvent.Creator.Name,
+                    IconUrl = nixEvent.Creator.AvatarURL
+                },
+                Title = nixEvent.Name,
+                Description =   $"**ID** ``{nixEvent.ID}``\n" +
+                                $"**Time** ``{nixEvent.Start:yyyy-MM-dd, HH:mm UTCz}``\n\n" +
+                                $"{nixEvent.Description}",
+                Fields = new List<EmbedFieldBuilder> 
+                { 
+                    new EmbedFieldBuilder
+                    {
+                        IsInline = true,
+                        Name = "Participants",
+                        Value = result
+                    }
+                },
+                Color = NormalColor,
+                Footer = Footer
+            };
+
+            await message.ModifyAsync(x => x.Embed = embed.Build()).ConfigureAwait(false);
+            await message.RemoveAllReactionsAsync();
+            await message.AddReactionAsync(new Emoji("✔️"));
+            await message.AddReactionAsync(new Emoji("❌"));
+            await message.AddReactionAsync(new Emoji("❔"));
         }
     }
 }

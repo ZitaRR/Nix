@@ -24,6 +24,7 @@ namespace Nix.Resources
         private readonly ILogger logger;
         private readonly IPersistentStorage storage;
         private readonly IRegister register;
+        private EventService eventService;
 
         public NixClient(ILogger logger, IPersistentStorage storage, IRegister register)
         {
@@ -41,7 +42,8 @@ namespace Nix.Resources
                 .AddSingleton(logger)
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<AudioService>()
-                .AddSingleton<ReplyService>()
+                .AddSingleton<EmbedService>()
+                .AddSingleton<EventService>()
                 .AddLavaNode(x => x.SelfDeaf = true)
                 .BuildServiceProvider();
         }
@@ -49,6 +51,7 @@ namespace Nix.Resources
         public async Task StartAsync()
         {
             Client.MessageReceived += ProcessMessage;
+            Client.ReactionAdded += Client_ReactionAdded;
             Client.GuildAvailable += Client_GuildAvailable;
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;
@@ -58,6 +61,20 @@ namespace Nix.Resources
             await Client.LoginAsync(TokenType.Bot, Config.Data.Token);
             await Client.StartAsync();
             Watch.Start();
+        }
+
+        private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> cache,
+            ISocketMessageChannel channel, SocketReaction reaction)
+        {
+            try
+            {
+                logger.AppendLog($"ID: {reaction.MessageId} | {reaction.UserId}");
+                await eventService.UpdateEvent(channel as ITextChannel, reaction.MessageId, reaction.UserId);
+            }
+            catch(Exception e)
+            {
+                logger.AppendLog(e);
+            }
         }
 
         private Task Client_LeftGuild(SocketGuild guild)
@@ -99,7 +116,7 @@ namespace Nix.Resources
                 msg.HasMentionPrefix(Client.CurrentUser, ref argPos))
             {
                 var context = new NixCommandContext(Client, msg, storage,
-                    this, services.GetRequiredService<ReplyService>());
+                    this, services.GetRequiredService<EmbedService>());
                 IResult result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)
@@ -116,6 +133,7 @@ namespace Nix.Resources
             var users = storage.FindAll<NixUser>();
             logger.AppendLog($"{guilds.Count()} guild(s) are registered with {users.Count()} user(s)");
 
+            eventService = services.GetRequiredService<EventService>();
             var lavaNode = services.GetRequiredService<LavaNode>();
             if (!lavaNode.IsConnected)
                 await lavaNode.ConnectAsync();

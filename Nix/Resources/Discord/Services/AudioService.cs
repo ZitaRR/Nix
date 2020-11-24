@@ -13,13 +13,13 @@ namespace Nix.Resources.Discord
     public sealed class AudioService
     {
         private readonly LavaNode lavaNode;
-        private readonly ReplyService reply;
+        private readonly EmbedService reply;
         private readonly ushort defaultVolume = 50;
         private ITextChannel channel;
         private Queue<SocketGuildUser> users;
         private bool repeat = false;
 
-        public AudioService(LavaNode lavaNode, ReplyService reply)
+        public AudioService(LavaNode lavaNode, EmbedService reply)
         {
             this.lavaNode = lavaNode;
             this.reply = reply;
