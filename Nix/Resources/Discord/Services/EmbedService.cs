@@ -186,7 +186,7 @@ namespace Nix.Resources.Discord
             await channel.SendMessageAsync(embed: embed.Build());
         }
 
-        public async Task<ulong> EventAsync(ITextChannel channel, SocketUser creator,
+        public async Task EventAsync(ITextChannel channel, SocketUser creator,
             string name, string description, int id, DateTime start)
         {
             embed = new EmbedBuilder
@@ -223,8 +223,6 @@ namespace Nix.Resources.Discord
             await message.AddReactionAsync(new Emoji("✔️"));
             await message.AddReactionAsync(new Emoji("❌"));
             await message.AddReactionAsync(new Emoji("❔"));
-
-            return message.Id;
         }
 
         public async Task EventUpdateAsync(ITextChannel channel, SocketReaction react, NixEvent nixEvent)

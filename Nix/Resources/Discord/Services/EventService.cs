@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using LiteDB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,20 +33,20 @@ namespace Nix.Resources.Discord
             timer.Start();
         }
 
-        public async Task CreateEvent(ITextChannel channel, SocketUser creator, string name, string description, DateTime start)
+        public async Task CreateEvent(ITextChannel channel, IMessage message, string name, string description, DateTime start)
         {
-            int eventId = storage.FindAll<NixEvent>().Count() + 1;
-            ulong id = await embed.EventAsync(channel, creator, name, description, eventId, start);
-            var user = storage.FindOne<NixUser>(x => creator.Id == x.UserID && x.GuildID == channel.GuildId);
+            var user = storage.FindOne<NixUser>(x => message.Author.Id == x.UserID && x.GuildID == channel.GuildId);
             storage.Store(new NixEvent
             {
                 Name = name,
                 Creator = user,
                 GuildID = channel.GuildId,
                 Start = start,
-                MessageID = id,
+                MessageID = message.Id,
                 Description = description
             });
+            var nixEvent = storage.FindOne<NixEvent>(x => x.GuildID == channel.GuildId && x.MessageID == message.Id);
+            await embed.EventAsync(channel, message.Author as SocketUser, name, description, nixEvent.ID, start);
         }
 
         public async Task UpdateEvent(ITextChannel channel, SocketReaction react)
