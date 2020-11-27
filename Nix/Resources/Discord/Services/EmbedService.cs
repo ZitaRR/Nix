@@ -207,6 +207,12 @@ namespace Nix.Resources.Discord
                         IsInline = true,
                         Name = "Participants",
                         Value = "N/A"
+                    },
+                    new EmbedFieldBuilder
+                    {
+                        IsInline = true,
+                        Name = "Interested",
+                        Value = "N/A"
                     }
                 },
                 Color = NormalColor,
@@ -221,16 +227,22 @@ namespace Nix.Resources.Discord
             return message.Id;
         }
 
-        public async Task EventUpdateAsync(ITextChannel channel, NixEvent nixEvent)
+        public async Task EventUpdateAsync(ITextChannel channel, SocketReaction react, NixEvent nixEvent)
         {
             var message = await channel.GetMessageAsync(nixEvent.MessageID) as IUserMessage;
             if (message is null)
                 return;
 
-            var result = nixEvent.Participants.FirstOrDefault().Name;
+            var participants = nixEvent.Participants.FirstOrDefault()?.Name ?? "N/A";
             for (int i = 1; i < nixEvent.Participants.Count; i++)
             {
-                result += $", {nixEvent.Participants[i].Name}";
+                participants += $", {nixEvent.Participants[i].Name}";
+            }
+
+            var interested = nixEvent.PossibleParticipants.FirstOrDefault()?.Name ?? "N/A";
+            for (int i = 1; i < nixEvent.PossibleParticipants.Count; i++)
+            {
+                participants += $", {nixEvent.PossibleParticipants[i].Name}";
             }
 
             embed = new EmbedBuilder
@@ -250,7 +262,13 @@ namespace Nix.Resources.Discord
                     {
                         IsInline = true,
                         Name = "Participants",
-                        Value = result
+                        Value = participants
+                    },
+                    new EmbedFieldBuilder
+                    {
+                        IsInline = true,
+                        Name = "Interested",
+                        Value = interested
                     }
                 },
                 Color = NormalColor,
@@ -258,10 +276,7 @@ namespace Nix.Resources.Discord
             };
 
             await message.ModifyAsync(x => x.Embed = embed.Build()).ConfigureAwait(false);
-            await message.RemoveAllReactionsAsync();
-            await message.AddReactionAsync(new Emoji("✔️"));
-            await message.AddReactionAsync(new Emoji("❌"));
-            await message.AddReactionAsync(new Emoji("❔"));
+            await message.RemoveReactionAsync(react.Emote, react.User.Value);
         }
     }
 }

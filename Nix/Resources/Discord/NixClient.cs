@@ -68,8 +68,7 @@ namespace Nix.Resources
         {
             try
             {
-                logger.AppendLog($"ID: {reaction.MessageId} | {reaction.UserId}");
-                await eventService.UpdateEvent(channel as ITextChannel, reaction.MessageId, reaction.UserId);
+                await eventService.UpdateEvent(channel as ITextChannel, reaction);
             }
             catch(Exception e)
             {

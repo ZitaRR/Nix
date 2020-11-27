@@ -48,23 +48,44 @@ namespace Nix.Resources.Discord
             });
         }
 
-        public async Task UpdateEvent(ITextChannel channel, ulong messageId, ulong userId)
+        public async Task UpdateEvent(ITextChannel channel, SocketReaction react)
         {
-            if (userId == client.CurrentUser.Id)
+            if (react.UserId == client.CurrentUser.Id)
                 return;
             
-            var nixEvent = storage.FindOne<NixEvent>(x => messageId == x.MessageID && channel.GuildId == x.GuildID);
-            var nixUser = storage.FindOne<NixUser>(x => userId == x.UserID && channel.GuildId == x.GuildID);
-            
+            var nixEvent = storage.FindOne<NixEvent>(x => react.MessageId == x.MessageID && channel.GuildId == x.GuildID);
+            var nixUser = storage.FindOne<NixUser>(x => react.UserId == x.UserID && channel.GuildId == x.GuildID);
+
             if (nixEvent is null)
                 return;
-            if (nixEvent.Participants.Where(x => x.UserID == userId).Count() > 0)
-                return;
-            
-            nixEvent.Participants.Add(nixUser);
+
+            switch (react.Emote.Name)
+            {
+                case "✔️":
+                    if (nixEvent.Participants.Where(x => x.UserID == react.UserId).Count() > 0)
+                        break;
+                    if (nixEvent.PossibleParticipants.Where(x => x.UserID == react.UserId).Count() > 0)
+                        break;
+                    nixEvent.Participants.Add(nixUser);
+                    break;
+                case "❌":
+                    nixEvent.Participants.RemoveAll(x => x.UserID == nixUser.UserID);
+                    nixEvent.PossibleParticipants.RemoveAll(x => x.UserID == nixUser.UserID);
+                    break;
+                case "❔":
+                    if (nixEvent.PossibleParticipants.Where(x => x.UserID == react.UserId).Count() > 0)
+                        break;
+                    if (nixEvent.Participants.Where(x => x.UserID == react.UserId).Count() > 0)
+                        break;
+                    nixEvent.PossibleParticipants.Add(nixUser);
+                    break;
+                default:
+                    break;
+            }
+
             storage.Update(nixEvent);
             
-            await embed.EventUpdateAsync(channel, nixEvent);
+            await embed.EventUpdateAsync(channel, react, nixEvent);
         }
 
         public async Task DeleteEvent(ITextChannel channel, int id)
@@ -91,8 +112,10 @@ namespace Nix.Resources.Discord
             for (int i = 0; i < events.Count(); i++)
             {
                 var diff = events[i].Start - DateTime.UtcNow;
-                logger.AppendLog(diff.ToString());
-                if (diff > new TimeSpan(0, 10, 0))
+
+                if (events[i].SentNotice)
+                    continue;
+                else if (diff > new TimeSpan(0, 10, 0))
                     continue;
                 else if (diff < new TimeSpan(0))
                 {
@@ -106,6 +129,9 @@ namespace Nix.Resources.Discord
                     var discordUser = client.GetUser(user.UserID);
                     await discordUser.SendMessageAsync($"{events[i].Name} is starting soon, get ready gamer!");
                 }
+
+                events[i].SentNotice = true;
+                storage.Update(events[i]);
             }
         }
     }

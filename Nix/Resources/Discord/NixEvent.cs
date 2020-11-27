@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Discord.WebSocket;
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace Nix.Resources
 {
@@ -16,6 +17,7 @@ namespace Nix.Resources
         public List<NixUser> Participants { get; set; } = new List<NixUser>();
         public List<NixUser> PossibleParticipants { get; set; } = new List<NixUser>();
         public DateTime StoredAt { get; set; }
+        public bool SentNotice { get; set; }
 
         public override string ToString()
         {
