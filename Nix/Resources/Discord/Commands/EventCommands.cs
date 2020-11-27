@@ -52,7 +52,7 @@ namespace Nix.Resources.Discord.Commands
             DateTime.TryParse("2020/" + response.Content, out var start);
             await prompt.DeleteAsync();
             await response.DeleteAsync();
-            await eventService.CreateEvent(Context.Channel as ITextChannel, Context.Message, name, description, start);
+            await eventService.CreateEvent(Context.Channel as ITextChannel, Context.Message, name, description, start.ToUniversalTime());
         }
 
         [Command("del")]
