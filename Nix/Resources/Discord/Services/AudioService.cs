@@ -47,7 +47,6 @@ namespace Nix.Resources.Discord
             {
                 this.channel = channel;
                 await lavaNode.JoinAsync(state?.VoiceChannel);
-                await player.UpdateVolumeAsync(defaultVolume);
                 users.Clear();
                 await reply.MessageAsync(channel, $"Joined {state?.VoiceChannel.Name}");
                 return true;
@@ -333,9 +332,9 @@ namespace Nix.Resources.Discord
             var player = args.Player;
             if (!player.Queue.TryDequeue(out var track))
             {
-                channel = null;
                 await reply.ErrorAsync(channel, "No more tracks in the queue");
                 await lavaNode.LeaveAsync(args.Player.VoiceChannel);
+                channel = null;
                 users.Clear();
                 return;
             }
@@ -354,6 +353,7 @@ namespace Nix.Resources.Discord
             }
 
             await reply.AudioPlayAsync(channel, args.Track);
+            await args.Player.UpdateVolumeAsync(defaultVolume);
         }
     }
 }
