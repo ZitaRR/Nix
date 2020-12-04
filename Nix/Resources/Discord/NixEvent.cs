@@ -29,6 +29,7 @@ namespace Nix.Resources
             return $"Name: {Name}\n" +
             $"ID: {ID}\n" +
             $"Guild ID: {GuildID}\n" +
+            $"Message ID: {MessageID}\n" + 
             $"Start: {Start.ToLongTimeString()}\n" + 
             $"Stored At: {StoredAt}\n" +
             $"Users: {users}";

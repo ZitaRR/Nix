@@ -36,24 +36,24 @@ namespace Nix.Resources.Discord
         public async Task CreateEvent(ITextChannel channel, IMessage message, string name, string description, DateTime start)
         {
             var user = storage.FindOne<NixUser>(x => message.Author.Id == x.UserID && x.GuildID == channel.GuildId);
-            storage.Store(new NixEvent
+            var nixEvent = new NixEvent
             {
-                Name = name,
                 Creator = user,
+                Name = name, 
+                Description = description,
                 GuildID = channel.GuildId,
                 Start = start,
-                MessageID = message.Id,
-                Description = description
-            });
-            var nixEvent = storage.FindOne<NixEvent>(x => x.GuildID == channel.GuildId && x.MessageID == message.Id);
-            await embed.EventAsync(channel, message.Author as SocketUser, name, description, nixEvent.ID, start);
+            };
+            storage.Store(nixEvent);
+            await embed.EventAsync(channel, nixEvent);
         }
 
         public async Task UpdateEvent(ITextChannel channel, SocketReaction react)
         {
             if (react.UserId == client.CurrentUser.Id)
                 return;
-            
+
+            var t = storage.FindAll<NixEvent>();
             var nixEvent = storage.FindOne<NixEvent>(x => react.MessageId == x.MessageID && channel.GuildId == x.GuildID);
             var nixUser = storage.FindOne<NixUser>(x => react.UserId == x.UserID && channel.GuildId == x.GuildID);
 

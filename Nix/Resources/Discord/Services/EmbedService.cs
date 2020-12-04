@@ -14,9 +14,10 @@ namespace Nix.Resources.Discord
         private readonly Color NormalColor;
         private readonly Color errorColor;
         private readonly int length;
+        private readonly DiscordSocketClient client;
+        private readonly InteractiveService interactive;
+        private readonly IPersistentStorage storage;
         private EmbedBuilder embed;
-        private DiscordSocketClient client;
-        private InteractiveService interactive;
 
         public EmbedFooterBuilder Footer
             => new EmbedFooterBuilder
@@ -25,10 +26,11 @@ namespace Nix.Resources.Discord
                 IconUrl = client.CurrentUser.GetAvatarUrl()
             };
 
-        public EmbedService(DiscordSocketClient client, InteractiveService interactive)
+        public EmbedService(DiscordSocketClient client, InteractiveService interactive, IPersistentStorage storage)
         {
             this.client = client;
             this.interactive = interactive;
+            this.storage = storage;
             NormalColor = new Color(254, 254, 254);
             errorColor = new Color(254, 50, 50);
             length = 25;
@@ -186,20 +188,19 @@ namespace Nix.Resources.Discord
             await channel.SendMessageAsync(embed: embed.Build());
         }
 
-        public async Task EventAsync(ITextChannel channel, SocketUser creator,
-            string name, string description, int id, DateTime start)
+        public async Task EventAsync(ITextChannel channel, NixEvent nixEvent)
         {
             embed = new EmbedBuilder
             {
                 Author = new EmbedAuthorBuilder
                 {
-                    Name = creator.Username,
-                    IconUrl = creator.GetAvatarUrl()
+                    Name = nixEvent.Creator.Name,
+                    IconUrl = nixEvent.Creator.AvatarURL
                 },
-                Title = name,
-                Description =   $"**ID** ``{id}``\n" +
-                                $"**Time** ``{start:yyyy-MM-dd, HH:mm UTCz}``\n\n" +
-                                $"{description}",
+                Title = nixEvent.Name,
+                Description =   $"**ID** ``{nixEvent.ID}``\n" +
+                                $"**Time** ``{nixEvent.Start:yyyy-MM-dd, HH:mm UTCz}``\n\n" +
+                                $"{nixEvent.Description}",
                 Fields = new List<EmbedFieldBuilder>
                 {
                     new EmbedFieldBuilder
@@ -223,6 +224,9 @@ namespace Nix.Resources.Discord
             await message.AddReactionAsync(new Emoji("✔️"));
             await message.AddReactionAsync(new Emoji("❌"));
             await message.AddReactionAsync(new Emoji("❔"));
+
+            nixEvent.MessageID = message.Id;
+            storage.Update(nixEvent);
         }
 
         public async Task EventUpdateAsync(ITextChannel channel, SocketReaction react, NixEvent nixEvent)
