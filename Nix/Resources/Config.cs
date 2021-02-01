@@ -29,10 +29,6 @@ namespace Nix.Resources
             else
             {
                 Load();
-                new NotificationView("Config was intialized.")
-                {
-                    Name = "Config"
-                }.Display();
             }
 
             initialized = true;
