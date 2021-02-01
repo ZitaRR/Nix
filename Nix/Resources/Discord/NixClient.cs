@@ -44,6 +44,7 @@ namespace Nix.Resources
                 .AddSingleton<AudioService>()
                 .AddSingleton<EmbedService>()
                 .AddSingleton<EventService>()
+                .AddSingleton<ScriptService>()
                 .AddLavaNode(x => x.SelfDeaf = true)
                 .BuildServiceProvider();
         }
@@ -115,7 +116,8 @@ namespace Nix.Resources
                 msg.HasMentionPrefix(Client.CurrentUser, ref argPos))
             {
                 var context = new NixCommandContext(Client, msg, storage,
-                    this, services.GetRequiredService<EmbedService>());
+                    this, services.GetRequiredService<EmbedService>(),
+                    services.GetRequiredService<ScriptService>());
                 IResult result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)

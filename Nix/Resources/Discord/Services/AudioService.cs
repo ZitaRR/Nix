@@ -2,6 +2,7 @@
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Victoria;
@@ -19,8 +20,9 @@ namespace Nix.Resources.Discord
         private Queue<SocketGuildUser> users;
         private bool repeat = false;
 
-        public AudioService(LavaNode lavaNode, EmbedService reply)
+        public AudioService(LavaNode lavaNode, EmbedService reply, ScriptService script)
         {
+            script.RunScript("run_lavalink.ps1", out var _);
             this.lavaNode = lavaNode;
             this.reply = reply;
             this.lavaNode.OnTrackEnded += OnTrackEnd;

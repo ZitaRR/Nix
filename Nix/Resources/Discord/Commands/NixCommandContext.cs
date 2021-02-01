@@ -11,16 +11,18 @@ namespace Nix.Resources.Discord
             => storage.FindOne<NixChannel>(x => x.ChannelID == Channel.Id);
         public NixClient NixClient { get; }
         public EmbedService Reply { get; }
+        public ScriptService Script { get; }
 
         private readonly IPersistentStorage storage;
 
         public NixCommandContext(DiscordSocketClient client, SocketUserMessage message,
             IPersistentStorage storage, NixClient nixClient,
-            EmbedService reply) : base(client, message)
+            EmbedService reply, ScriptService script) : base(client, message)
         {
             this.storage = storage;
             NixClient = nixClient;
             Reply = reply;
+            Script = script;
         }
     }
 }
