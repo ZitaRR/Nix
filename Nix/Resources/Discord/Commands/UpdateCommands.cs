@@ -1,7 +1,9 @@
 ﻿using Discord;
 using Discord.Commands;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord.Commands
@@ -39,7 +41,7 @@ namespace Nix.Resources.Discord.Commands
             Context.Script.RunScript("update.ps1", out string result, false);
             await Context.Reply.MessageAsync(Context.Channel as ITextChannel, result);
 
-            Context.Script.RunScript("nix_run.ps1", out var _);
+            Process.Start(new ProcessStartInfo("dotnet", Assembly.GetEntryAssembly().Location));
             Environment.Exit(0);
         }
 
