@@ -9,12 +9,6 @@ namespace Nix.Resources.Discord
 {
     public class MiscCommands : ModuleBase<NixCommandContext>
     {
-        [Command("ping")]
-        public async Task Ping()
-        {
-            await Context.User.SendMessageAsync("Pong!");
-        }
-
         [Command("info")]
         public async Task GetInfo(SocketGuildUser user = null)
         {
