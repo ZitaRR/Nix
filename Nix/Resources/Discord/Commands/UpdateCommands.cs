@@ -45,6 +45,14 @@ namespace Nix.Resources.Discord.Commands
             Environment.Exit(0);
         }
 
+        [Command("restart")]
+        public async Task Restart()
+        {
+            await Context.Reply.MessageAsync(Context.Channel as ITextChannel, "Restarting...");
+            Process.Start(new ProcessStartInfo("dotnet", Assembly.GetEntryAssembly().Location));
+            Environment.Exit(0);
+        }
+
         private bool UpdateAvailable()
         {
             Context.Script.RunScript("check_update.ps1", out string result, false);
