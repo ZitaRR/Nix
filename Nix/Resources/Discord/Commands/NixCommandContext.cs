@@ -15,9 +15,13 @@ namespace Nix.Resources.Discord
 
         private readonly IPersistentStorage storage;
 
-        public NixCommandContext(DiscordSocketClient client, SocketUserMessage message,
-            IPersistentStorage storage, NixClient nixClient,
-            EmbedService reply, ScriptService script) : base(client, message)
+        public NixCommandContext(DiscordSocketClient client,
+            SocketUserMessage message,
+            IPersistentStorage storage, 
+            NixClient nixClient,
+            EmbedService reply, 
+            ScriptService script) 
+            : base(client, message)
         {
             this.storage = storage;
             NixClient = nixClient;
