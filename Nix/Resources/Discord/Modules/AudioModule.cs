@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord
 {
-    public class AudioCommands : ModuleBase<NixCommandContext>
+    public class AudioModule : ModuleBase<NixCommandContext>
     {
         private readonly AudioService audio;
 
-        public AudioCommands(AudioService audio)
+        public AudioModule(AudioService audio)
         {
             this.audio = audio;
         }

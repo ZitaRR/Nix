@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord.Commands
 {
-    public class UpdateCommands : ModuleBase<NixCommandContext>
+    public class UpdateModule : ModuleBase<NixCommandContext>
     {
         [Command("check")]
         public async Task CheckUpdate()

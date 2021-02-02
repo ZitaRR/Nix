@@ -7,7 +7,7 @@ using System.Globalization;
 
 namespace Nix.Resources.Discord
 {
-    public class MiscCommands : ModuleBase<NixCommandContext>
+    public class MiscModule : ModuleBase<NixCommandContext>
     {
         [Command("info")]
         public async Task GetInfo(SocketGuildUser user = null)
