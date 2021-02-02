@@ -13,7 +13,7 @@ namespace Nix.Resources.Discord.Commands
         [Command("check")]
         public async Task CheckUpdate()
         {
-            if (!UpdateAvailable())
+            if (!(await UpdateAvailable()))
             {
                 await Context.Reply.MessageAsync(Context.Channel as ITextChannel,
                         "There's nothing new, I'm up to date!");
@@ -27,7 +27,7 @@ namespace Nix.Resources.Discord.Commands
         [Command("update")]
         public async Task Update()
         {
-            if (!UpdateAvailable())
+            if (!(await UpdateAvailable()))
             {
                 await Context.Reply.ErrorAsync(Context.Channel as ITextChannel,
                     "There's nothing new, please use the ``check`` command next time!");
@@ -38,10 +38,10 @@ namespace Nix.Resources.Discord.Commands
                 "This might take a few moments.\n" +
                 "Updating...");
 
-            Context.Script.RunScript("update.ps1", out string result, false);
+            var result = await Context.Script.RunScript("update.ps1");
             await Context.Reply.MessageAsync(Context.Channel as ITextChannel, result);
 
-            Process.Start(new ProcessStartInfo("dotnet", Assembly.GetEntryAssembly().Location));
+            await Context.Script.RunScript("run_nix.ps1", false);
             Environment.Exit(0);
         }
 
@@ -49,13 +49,13 @@ namespace Nix.Resources.Discord.Commands
         public async Task Restart()
         {
             await Context.Reply.MessageAsync(Context.Channel as ITextChannel, "Restarting...");
-            Process.Start(new ProcessStartInfo("dotnet", Assembly.GetEntryAssembly().Location));
+            await Context.Script.RunScript("run_nix.ps1", false);
             Environment.Exit(0);
         }
 
-        private bool UpdateAvailable()
+        private async Task<bool> UpdateAvailable()
         {
-            Context.Script.RunScript("check_update.ps1", out string result, false);
+            var result = await Context.Script.RunScript("check_update.ps1");
 
             return result switch
             {

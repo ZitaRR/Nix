@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord
@@ -14,29 +15,20 @@ namespace Nix.Resources.Discord
         public ScriptService(ILogger logger)
         {
             this.logger = logger;
-            scriptPath = $"{Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent}\\Scripts\\";
+            scriptPath = @"..\..\..\scripts\";
         }
 
-        public void RunScript(string script, out string result, bool redirectOutput = true)
+        public async Task<string> RunScript(string script, bool redirect = true)
         {
-            var process = Process.Start(new ProcessStartInfo("powershell.exe", scriptPath + script)
+            var process = Process.Start(new ProcessStartInfo("cmd.exe", 
+                $"/C powershell.exe {scriptPath}{script}")
             {
-                RedirectStandardOutput = true
+                RedirectStandardOutput = redirect,
+                WorkingDirectory = Directory.GetParent(Assembly.GetEntryAssembly().Location).FullName
             });
 
-            process.Start();
-            if (redirectOutput)
-            {
-                result = "N/A";
-                process.OutputDataReceived += (s, e) => logger.AppendLog(e.Data);
-                process.BeginOutputReadLine();
-            }
-            else
-            {
-                result = process.StandardOutput.ReadLine();
-            }
-
             logger.AppendLog($"Running script: {script}");
+            return await process.StandardOutput.ReadLineAsync();
         }
     }
 }

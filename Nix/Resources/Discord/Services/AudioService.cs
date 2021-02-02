@@ -22,7 +22,7 @@ namespace Nix.Resources.Discord
 
         public AudioService(LavaNode lavaNode, EmbedService reply, ScriptService script)
         {
-            script.RunScript("run_lavalink.ps1", out var _);
+            Task.Run(async () => await script.RunScript("run_lavalink.ps1"));
             this.lavaNode = lavaNode;
             this.reply = reply;
             this.lavaNode.OnTrackEnded += OnTrackEnd;
