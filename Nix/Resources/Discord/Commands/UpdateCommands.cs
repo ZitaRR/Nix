@@ -1,9 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord.Commands
@@ -25,6 +22,7 @@ namespace Nix.Resources.Discord.Commands
         }
 
         [Command("update")]
+        [RequireOwner]
         public async Task Update()
         {
             if (!(await UpdateAvailable()))
@@ -46,6 +44,7 @@ namespace Nix.Resources.Discord.Commands
         }
 
         [Command("restart")]
+        [RequireOwner]
         public async Task Restart()
         {
             await Context.Reply.MessageAsync(Context.Channel as ITextChannel, "Restarting...");
