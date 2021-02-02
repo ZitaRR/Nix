@@ -48,7 +48,8 @@ namespace Nix.Resources.Discord
             try
             {
                 this.channel = channel;
-                await lavaNode.JoinAsync(state?.VoiceChannel);
+                player = await lavaNode.JoinAsync(state?.VoiceChannel);
+                await player.UpdateVolumeAsync(defaultVolume);
                 users.Clear();
                 await reply.MessageAsync(channel, $"Joined {state?.VoiceChannel.Name}");
                 return true;
@@ -160,7 +161,7 @@ namespace Nix.Resources.Discord
                 return;
             }
 
-            var queries = search.Split(' ');
+            var queries = search.Split(',');
             foreach (var query in queries)
             {
                 var response = await lavaNode.SearchYouTubeAsync(query);
@@ -355,7 +356,6 @@ namespace Nix.Resources.Discord
             }
 
             await reply.AudioPlayAsync(channel, args.Track);
-            await args.Player.UpdateVolumeAsync(defaultVolume);
         }
     }
 }
