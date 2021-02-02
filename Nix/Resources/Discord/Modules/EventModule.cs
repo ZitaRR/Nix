@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord.Commands
 {
-    public class EventCommands : InteractiveBase<NixCommandContext>
+    public class EventModule : InteractiveBase<NixCommandContext>
     {
         private readonly EventService eventService;
         private readonly EmbedService embed;
         private readonly TimeSpan timeout = new TimeSpan(0, 1, 30);
 
-        public EventCommands(EventService eventService, EmbedService embed)
+        public EventModule(EventService eventService, EmbedService embed)
         {
             this.eventService = eventService;
             this.embed = embed;
