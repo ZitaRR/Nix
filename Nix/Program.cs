@@ -14,13 +14,16 @@ namespace Nix
         static void Main(string[] args)
         {
             Console.CursorVisible = false;
-            Console.Title = Assembly.GetExecutingAssembly().GetName().Name;
+            Console.Title = $"{Name()} v{Version()}";
             Extensions.AddServices(new ServiceCollection()).BuildServiceProvider().GetService<HomeController>();
         }
 
         public static string Version()
             => FileVersionInfo.GetVersionInfo(
                 Assembly.GetExecutingAssembly().Location).ProductVersion;
+
+        public static string Name()
+            => Assembly.GetExecutingAssembly().GetName().Name;
     }
 
     static class Extensions
