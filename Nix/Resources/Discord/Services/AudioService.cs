@@ -31,10 +31,14 @@ namespace Nix.Resources.Discord
             this.lavaNode.OnTrackStarted += OnTrackStart;
         }
 
-        public async Task<bool> JoinAsync(IVoiceState state, ITextChannel channel)
+        public async Task<bool> JoinAsync(IVoiceState state, ITextChannel channel, bool command = false)
         {
             if (!(player is null))
             {
+                if (command)
+                {
+                    return true;
+                }
                 await reply.ErrorAsync(channel, $"I'm already connected to {player.VoiceChannel.Name}");
                 return true;
             }
@@ -94,7 +98,7 @@ namespace Nix.Resources.Discord
                 await reply.ErrorAsync(channel, "No query was provided");
                 return;
             }
-            if (!await JoinAsync(state, channel))
+            if (!await JoinAsync(state, channel, true))
                 return;
 
             var response = await SearchAsync(search);
