@@ -4,6 +4,7 @@ using Nix.Controllers;
 using Nix.Resources;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Nix
@@ -16,6 +17,10 @@ namespace Nix
             Console.Title = Assembly.GetExecutingAssembly().GetName().Name;
             Extensions.AddServices(new ServiceCollection()).BuildServiceProvider().GetService<HomeController>();
         }
+
+        public static string Version()
+            => FileVersionInfo.GetVersionInfo(
+                Assembly.GetExecutingAssembly().Location).ProductVersion;
     }
 
     static class Extensions
