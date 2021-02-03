@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord
 {
+    [RequireVoice]
     public class AudioModule : ModuleBase<NixCommandContext>
     {
         private readonly AudioService audio;
@@ -19,23 +20,19 @@ namespace Nix.Resources.Discord
 
         [Command("leave")]
         public async Task LeaveAsync()
-            => await audio.LeaveAsync(Context.User as IVoiceState, Context.Channel as ITextChannel);
+            => await audio.LeaveAsync(Context.User as IVoiceState);
 
         [Command("play")]
         public async Task PlayAsync([Remainder] string search)
             => await audio.PlayAsync(Context.User as IVoiceState, Context.Channel as ITextChannel, search);
 
-        [Command("ytplay")]
-        public async Task PlayYoutubeAsync([Remainder] string search)
-            => await audio.PlayYoutubeAsync(Context.User as IVoiceState, Context.Channel as ITextChannel, search);
-
         [Command("duration")]
         public async Task DurationAsync()
-            => await audio.DurationAsync(Context.Channel as ITextChannel);
+            => await audio.DurationAsync();
 
         [Command("skip")]
         public async Task SkipAsync(int amount = 1)
-            => await audio.SkipAsync(Context.User as IVoiceState, Context.Channel as ITextChannel, amount);
+            => await audio.SkipAsync(amount);
 
         [Command("current")]
         public async Task CurrentAsync()
@@ -55,6 +52,6 @@ namespace Nix.Resources.Discord
 
         [Command("volume")]
         public async Task VolumeAsync(ushort volume)
-            => await audio.VolumeAsync(Context.User as IVoiceState, volume);
+            => await audio.VolumeAsync(volume);
     }
 }

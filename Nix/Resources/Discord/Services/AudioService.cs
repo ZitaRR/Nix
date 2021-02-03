@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
+using Victoria.Responses.Rest;
 
 namespace Nix.Resources.Discord
 {
@@ -17,8 +18,9 @@ namespace Nix.Resources.Discord
         private readonly EmbedService reply;
         private readonly ushort defaultVolume = 50;
         private ITextChannel channel;
-        private Queue<SocketGuildUser> users;
+        private Queue<SocketGuildUser> users = new Queue<SocketGuildUser>();
         private bool repeat = false;
+        private LavaPlayer player;
 
         public AudioService(LavaNode lavaNode, EmbedService reply, ScriptService script)
         {
@@ -27,29 +29,26 @@ namespace Nix.Resources.Discord
             this.reply = reply;
             this.lavaNode.OnTrackEnded += OnTrackEnd;
             this.lavaNode.OnTrackStarted += OnTrackStart;
-            users = new Queue<SocketGuildUser>();
         }
 
-        public async Task<bool> JoinAsync(IVoiceState state, ITextChannel channel, bool playCommand = false)
+        public async Task<bool> JoinAsync(IVoiceState state, ITextChannel channel)
         {
-            if (state?.VoiceChannel is null)
+            if (!(player is null))
             {
-                await reply.ErrorAsync(channel, "You must be connected to a voice-channel");
-                return false;
-            }
-            if (lavaNode.TryGetPlayer(state.VoiceChannel.Guild, out LavaPlayer player))
-            {
-                if (playCommand)
-                    return true;
                 await reply.ErrorAsync(channel, $"I'm already connected to {player.VoiceChannel.Name}");
                 return true;
             }
 
+            this.channel = channel;
+
             try
             {
-                this.channel = channel;
-                player = await lavaNode.JoinAsync(state?.VoiceChannel);
-                await player.UpdateVolumeAsync(defaultVolume);
+                await lavaNode.JoinAsync(state?.VoiceChannel)
+                    .ContinueWith(async (t) =>
+                    {
+                        player = await t;
+                        await player.UpdateVolumeAsync(defaultVolume);
+                    });
                 users.Clear();
                 await reply.MessageAsync(channel, $"Joined {state?.VoiceChannel.Name}");
                 return true;
@@ -61,14 +60,9 @@ namespace Nix.Resources.Discord
             }
         }
 
-        public async Task<bool> LeaveAsync(IVoiceState state, ITextChannel channel)
+        public async Task<bool> LeaveAsync(IVoiceState state)
         {
-            if (state?.VoiceChannel is null)
-            {
-                await reply.ErrorAsync(channel, "You must be connected to a voice-channel");
-                return false;
-            }
-            if (!lavaNode.HasPlayer(state?.VoiceChannel.Guild))
+            if (player is null)
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return true;
@@ -76,7 +70,6 @@ namespace Nix.Resources.Discord
 
             try
             {
-                this.channel = null;
                 await lavaNode.LeaveAsync(state?.VoiceChannel);
                 users.Clear();
                 await reply.MessageAsync(channel, $"Left {state?.VoiceChannel.Name}");
@@ -87,6 +80,11 @@ namespace Nix.Resources.Discord
                 await reply.ExceptionAsync(channel, e);
                 return false;
             }
+            finally
+            {
+                channel = null;
+                player = null;
+            }
         }
 
         public async Task PlayAsync(IVoiceState state, ITextChannel channel, string search)
@@ -96,14 +94,14 @@ namespace Nix.Resources.Discord
                 await reply.ErrorAsync(channel, "No query was provided");
                 return;
             }
-            if (!await JoinAsync(state, channel, true))
+            if (!await JoinAsync(state, channel))
                 return;
 
-            var response = await lavaNode.SearchAsync(search);
+            var response = await SearchAsync(search);
             if (response.LoadStatus == LoadStatus.LoadFailed ||
                 response.LoadStatus == LoadStatus.NoMatches)
             {
-                await reply.ErrorAsync(channel, "Invalid URL");
+                await reply.ErrorAsync(channel, "No matches");
                 return;
             }
 
@@ -120,14 +118,19 @@ namespace Nix.Resources.Discord
                         users.Enqueue(state as SocketGuildUser);
                     }
 
-                    await reply.AudioEnqueueManyAsync(channel, response.Tracks);
+                    await reply.MessageAsync(channel,
+                        $"**Enqueued** ``{response.Tracks.Count} tracks``\n" +
+                        $"**Length** ``{response.Tracks.Sum(x => x.Duration.TotalSeconds):m\\:ss}``");
                 }
                 else
                 {
                     var track = response.Tracks[0];
                     player.Queue.Enqueue(track);
                     users.Enqueue(state as SocketGuildUser);
-                    await reply.AudioEnqueueSingleAsync(channel, track);
+
+                    await reply.MessageAsync(channel, 
+                        $"**Enqueued** ``{track.Title}``\n" +
+                        $"**Length** ``{track.Duration:m\\:ss}``");
                 }
             }
             else
@@ -143,7 +146,10 @@ namespace Nix.Resources.Discord
                         users.Enqueue(state as SocketGuildUser);
                     }
 
-                    await reply.AudioEnqueueManyAsync(channel, response.Tracks);
+                    var duration = new TimeSpan(0, 0, response.Tracks.Sum(x => x.Duration.Seconds));
+                    await reply.MessageAsync(channel,
+                        $"**Enqueued** ``{response.Tracks.Count} tracks``\n" +
+                        $"**Length** ``{duration:m\\:ss}``");
                 }
                 else
                 {
@@ -153,34 +159,11 @@ namespace Nix.Resources.Discord
             }
         }
 
-        public async Task PlayYoutubeAsync(IVoiceState state, ITextChannel channel, string search)
+        public async Task DurationAsync()
         {
-            if (string.IsNullOrWhiteSpace(search))
+            if (player is null)
             {
-                await reply.ErrorAsync(channel, "No query was provided");
-                return;
-            }
-
-            var queries = search.Split(',');
-            foreach (var query in queries)
-            {
-                var response = await lavaNode.SearchYouTubeAsync(query);
-                if (response.LoadStatus == LoadStatus.LoadFailed ||
-                    response.LoadStatus == LoadStatus.NoMatches)
-                {
-                    await reply.ErrorAsync(channel, $"No matches for {query}");
-                    return;
-                }
-
-                await PlayAsync(state, channel, response.Tracks.FirstOrDefault().Url);
-            }
-        }
-
-        public async Task DurationAsync(ITextChannel channel)
-        {
-            if (!lavaNode.TryGetPlayer(channel.Guild, out LavaPlayer player))
-            {
-                await reply.ErrorAsync(channel, $"I'm not connected to any vice-channel");
+                await reply.ErrorAsync(channel, $"I'm not connected to any voice-channel");
                 return;
             }
             if (player.PlayerState == PlayerState.Stopped || player.Track is null)
@@ -193,14 +176,9 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, $"{track.Position:mm\\:ss} / {track.Duration:mm\\:ss}");
         }
 
-        public async Task SkipAsync(IVoiceState state, ITextChannel channel, int amount)
+        public async Task SkipAsync(int amount)
         {
-            if (state?.VoiceChannel is null)
-            {
-                await reply.ErrorAsync(channel, "You must be connected to a voice-channel");
-                return;
-            }
-            if (!lavaNode.TryGetPlayer(channel.Guild, out LavaPlayer player))
+            if (player is null)
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return;
@@ -214,22 +192,27 @@ namespace Nix.Resources.Discord
 
             var track = player.Track;
             if (amount == 1)
-                await reply.AudioSkipAsync(channel, track, player.Queue.Count);
+            {
+                await reply.MessageAsync(channel,
+                    $"**Skipped** ``{track.Title}``\n" +
+                    $"**Tracks in Queue** ``{player.Queue.Count}``");
+            }
             else
             {
-                for (int i = 0; i < amount; i++)
+                var content = $"**Skipped** ``{track.Title}``\n";
+                for (int i = 0; i < amount - 1; i++)
                 {
-                    if (!player.Queue.TryDequeue(out LavaTrack _))
+                    if (player.Queue.TryDequeue(out track))
                     {
-                        await reply.AudioSkipAsync(channel, i, player.Queue.Count);
-                        break;
+                        content += $"**Skipped** ``{track.Title}``\n";
                     }
-                    else if (i == amount - 1)
+                    else
                     {
-                        await reply.AudioSkipAsync(channel, i + 1, player.Queue.Count);
-                        break;
+                        content += $"**Failed to Skip** ``{track.Title}``\n";
                     }
                 }
+                content += $"\n**Tracks in Queue** ``{player.Queue.Count}``";
+                await reply.MessageAsync(channel, content);
             }
 
             await player.StopAsync();
@@ -237,7 +220,7 @@ namespace Nix.Resources.Discord
 
         public async Task CurrentAsync()
         {
-            if (!lavaNode.TryGetPlayer(channel.Guild, out LavaPlayer player))
+            if (player is null)
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return;
@@ -250,12 +233,17 @@ namespace Nix.Resources.Discord
             }
 
             LavaTrack track = player.Track;
-            await reply.AudioCurrentlyPlayingAsync(channel, users.Peek(), track, player.Volume, repeat);
+            await reply.MessageAsync(channel, 
+                $"**Playing** ``{track.Title}``\n" +
+                $"**Length** ``{track.Duration:m\\:ss}``\n" +
+                $"**Requested By** ``{users.Peek().Username}``\n" +
+                $"**Volume** ``{player.Volume}``\n" +
+                $"**Repeat** ``{repeat}``");
         }
 
         public async Task ArtworkAsync()
         {
-            if (!lavaNode.TryGetPlayer(channel.Guild, out LavaPlayer player))
+            if (player is null)
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return;
@@ -284,12 +272,12 @@ namespace Nix.Resources.Discord
                 return;
             }
 
-            await reply.AudioQueueAsync(context, player.Queue.ToList(), player.Track);
+            await reply.ErrorAsync(channel, "This command is currently not working");
         }
 
         public async Task RepeatAsync()
         {
-            if (!lavaNode.TryGetPlayer(channel.Guild, out LavaPlayer player))
+            if (player is null)
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return;
@@ -300,14 +288,9 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, result);
         }
 
-        public async Task VolumeAsync(IVoiceState state, ushort volume)
+        public async Task VolumeAsync(ushort volume)
         {
-            if (state?.VoiceChannel is null)
-            {
-                await reply.ErrorAsync(channel, "You must be connected to a voice-channel");
-                return;
-            }
-            if (!lavaNode.TryGetPlayer(channel.Guild, out LavaPlayer player))
+            if (player is null)
             {
                 await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
                 return;
@@ -355,7 +338,20 @@ namespace Nix.Resources.Discord
                 return;
             }
 
-            await reply.AudioPlayAsync(channel, args.Track);
+            await reply.MessageAsync(channel, 
+                $"**Playing** ``{args.Track.Title}``\n" +
+                $"**Length** ``{args.Track.Duration:m\\:ss}``");
+        }
+
+        private async Task<SearchResponse> SearchAsync(string query)
+        {
+            var response = await lavaNode.SearchAsync(query);
+            if (response.Tracks.Count > 0)
+            {
+                return response;
+            }
+
+            return await lavaNode.SearchYouTubeAsync(query);
         }
     }
 }
