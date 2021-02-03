@@ -137,7 +137,15 @@ namespace Nix.Resources
 #if DEBUG
             await Client.SetGameAsync("myself being created", type: ActivityType.Watching);
 #else
-            await Client.SetGameAsync($"over {users.Count()} users | v{Program.Version()}", type: ActivityType.Watching);
+            _ = Task.Run(async () =>
+            {
+                while (true)
+                {
+                    users = storage.FindAll<NixUser>();
+                    await Client.SetGameAsync($"{users.Count()} users | v{Program.Version()}", type: ActivityType.Listening);
+                    await Task.Delay((1000 * 60) * 15);
+                }
+            });
 #endif
 
             eventService = services.GetRequiredService<EventService>();
