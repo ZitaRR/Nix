@@ -122,9 +122,10 @@ namespace Nix.Resources.Discord
                         users.Enqueue(state as SocketGuildUser);
                     }
 
+                    var duration = new TimeSpan(0, 0, response.Tracks.Sum(x => x.Duration.Seconds));
                     await reply.MessageAsync(channel,
                         $"**Enqueued** ``{response.Tracks.Count} tracks``\n" +
-                        $"**Length** ``{response.Tracks.Sum(x => x.Duration.TotalSeconds):m\\:ss}``");
+                        $"**Length** ``{duration:m\\:ss}``");
                 }
                 else
                 {
@@ -276,7 +277,17 @@ namespace Nix.Resources.Discord
                 return;
             }
 
-            await reply.ErrorAsync(channel, "This command is currently not working");
+            var content = "";
+            int index = 0;
+            foreach (var track in player.Queue)
+            {
+                content += $"**{++index}** ``{track.Title}`` **|** ``{track.Duration:m\\:ss}``\n";
+                if (index >= 15)
+                {
+                    break;
+                }
+            }
+            await reply.MessageAsync(channel, content);
         }
 
         public async Task RepeatAsync()
@@ -309,6 +320,23 @@ namespace Nix.Resources.Discord
             var previous = player.Volume;
             await player.UpdateVolumeAsync(volume);
             await reply.MessageAsync(channel, $"Changed volume to {player.Volume} from {previous}");
+        }
+
+        public async Task ShuffleAsync()
+        {
+            if (player is null)
+            {
+                await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
+                return;
+            }
+            if (player.Queue.Count > 0)
+            {
+                await reply.ErrorAsync(channel, "There are no tracks in the queue");
+                return;
+            }
+
+            player.Queue.Shuffle();
+            await reply.MessageAsync(channel, "Playlist has been shuffled");
         }
 
         private async Task OnTrackEnd(TrackEndedEventArgs args)
