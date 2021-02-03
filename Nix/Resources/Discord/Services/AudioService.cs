@@ -364,6 +364,7 @@ namespace Nix.Resources.Discord
                 await reply.ErrorAsync(channel, "No more tracks in the queue");
                 await lavaNode.LeaveAsync(args.Player.VoiceChannel);
                 channel = null;
+                this.player = null;
                 users.Clear();
                 return;
             }
