@@ -278,16 +278,28 @@ namespace Nix.Resources.Discord
             }
 
             var content = "";
-            int index = 0;
-            foreach (var track in player.Queue)
+            var tracks = player.Queue.ToList();
+            var pages = new List<string>();
+
+            for (int i = 0; i < tracks.Count; )
             {
-                content += $"**{++index}** ``{track.Title}`` **|** ``{track.Duration:m\\:ss}``\n";
-                if (index >= 15)
+                var track = tracks[i];
+                var title = track.Title.Length > 25 ? 
+                    track.Title.Substring(0, 25) + "..." : track.Title;
+                content += $"**{++i}** ``{title}`` **|** ``{track.Duration:m\\:ss}``\n";
+                if (i % 10 == 0)
                 {
-                    break;
+                    pages.Add(content);
+                    content = "";
                 }
             }
-            await reply.MessageAsync(channel, content);
+
+            if (!string.IsNullOrEmpty(content))
+            {
+                pages.Add(content);
+            }
+
+            await reply.PaginatedMessageAsync(context, pages: pages);
         }
 
         public async Task RepeatAsync()

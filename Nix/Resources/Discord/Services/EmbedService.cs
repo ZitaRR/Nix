@@ -75,6 +75,18 @@ namespace Nix.Resources.Discord
             await channel.SendMessageAsync(embed: embed.Build());
         }
 
+        public async Task PaginatedMessageAsync(NixCommandContext context, List<string> pages, string title = null)
+        {
+            var pager = new PaginatedMessage
+            {
+                Title = title,
+                Pages = pages,
+                Color = NormalColor
+            };
+
+            await interactive.SendPaginatedMessageAsync(context, pager);
+        }
+
         public async Task EventAsync(ITextChannel channel, NixEvent nixEvent)
         {
             embed = new EmbedBuilder
