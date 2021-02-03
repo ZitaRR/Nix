@@ -341,7 +341,7 @@ namespace Nix.Resources.Discord
                 await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
                 return;
             }
-            if (player.Queue.Count > 0)
+            if (player.Queue.Count <= 0)
             {
                 await reply.ErrorAsync(channel, "There are no tracks in the queue");
                 return;
