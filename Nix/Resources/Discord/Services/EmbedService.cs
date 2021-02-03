@@ -13,27 +13,16 @@ namespace Nix.Resources.Discord
     {
         private readonly Color NormalColor;
         private readonly Color errorColor;
-        private readonly int length;
-        private readonly DiscordSocketClient client;
         private readonly InteractiveService interactive;
         private readonly IPersistentStorage storage;
         private EmbedBuilder embed;
 
-        public EmbedFooterBuilder Footer
-            => new EmbedFooterBuilder
-            {
-                Text = $"{DateTime.UtcNow:yyyy\\-MM\\-dd} - {DateTime.UtcNow:HH\\:mm} UTC ◈ Latency: {client.Latency}ms",
-                IconUrl = client.CurrentUser.GetAvatarUrl()
-            };
-
-        public EmbedService(DiscordSocketClient client, InteractiveService interactive, IPersistentStorage storage)
+        public EmbedService(InteractiveService interactive, IPersistentStorage storage)
         {
-            this.client = client;
             this.interactive = interactive;
             this.storage = storage;
             NormalColor = new Color(254, 254, 254);
             errorColor = new Color(254, 50, 50);
-            length = 25;
         }
 
         public async Task ErrorAsync(ITextChannel channel, string message)
@@ -42,7 +31,6 @@ namespace Nix.Resources.Discord
             {
                 Description = message,
                 Color = errorColor,
-                Footer = Footer
             };
 
             await channel.SendMessageAsync(embed: embed.Build());
@@ -54,7 +42,6 @@ namespace Nix.Resources.Discord
             {
                 Description = $"**ERROR** ``{e.HResult}``\n{e.StackTrace}",
                 Color = errorColor,
-                Footer = Footer
             };
 
             await channel.SendMessageAsync(embed: embed.Build());
@@ -66,7 +53,6 @@ namespace Nix.Resources.Discord
             {
                 Description = message,
                 Color = NormalColor,
-                Footer = Footer
             };
 
             await channel.SendMessageAsync(embed: embed.Build());
@@ -113,7 +99,6 @@ namespace Nix.Resources.Discord
                     }
                 },
                 Color = NormalColor,
-                Footer = Footer
             };
 
             var message = await channel.SendMessageAsync(embed: embed.Build());
@@ -170,7 +155,6 @@ namespace Nix.Resources.Discord
                     }
                 },
                 Color = NormalColor,
-                Footer = Footer
             };
 
             await message.ModifyAsync(x => x.Embed = embed.Build()).ConfigureAwait(false);
