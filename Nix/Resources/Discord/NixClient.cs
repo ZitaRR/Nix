@@ -130,12 +130,15 @@ namespace Nix.Resources
 
         public async Task OnReady()
         {
-#if DEBUG
-            await Client.SetGameAsync("myself being created", type: ActivityType.Watching);
-#endif
             var guilds = storage.FindAll<NixGuild>();
             var users = storage.FindAll<NixUser>();
             logger.AppendLog($"{guilds.Count()} guild(s) are registered with {users.Count()} user(s)");
+
+#if DEBUG
+            await Client.SetGameAsync("myself being created", type: ActivityType.Watching);
+#else
+            await Client.SetGameAsync($"over {users.Count()} users | v{Program.Version()}", type: ActivityType.Watching);
+#endif
 
             eventService = services.GetRequiredService<EventService>();
             var lavaNode = services.GetRequiredService<LavaNode>();
