@@ -65,7 +65,7 @@ namespace Nix.Resources.Discord
             }
         }
 
-        public async Task<bool> LeaveAsync(IVoiceState state)
+        public async Task<bool> LeaveAsync(IVoiceState state, ITextChannel channel)
         {
             if (player is null)
             {
@@ -87,7 +87,7 @@ namespace Nix.Resources.Discord
             }
             finally
             {
-                channel = null;
+                this.channel = null;
                 player = null;
             }
         }
@@ -111,7 +111,6 @@ namespace Nix.Resources.Discord
             }
 
             var player = lavaNode.GetPlayer(state?.VoiceChannel.Guild);
-            this.channel = channel;
             if (player.PlayerState == PlayerState.Playing ||
                 player.PlayerState == PlayerState.Paused)
             {
@@ -165,7 +164,7 @@ namespace Nix.Resources.Discord
             }
         }
 
-        public async Task DurationAsync()
+        public async Task DurationAsync(ITextChannel channel)
         {
             if (player is null)
             {
@@ -182,7 +181,7 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, $"{track.Position:mm\\:ss} / {track.Duration:mm\\:ss}");
         }
 
-        public async Task SkipAsync(int amount)
+        public async Task SkipAsync(ITextChannel channel, int amount)
         {
             if (player is null)
             {
@@ -224,7 +223,7 @@ namespace Nix.Resources.Discord
             await player.StopAsync();
         }
 
-        public async Task CurrentAsync()
+        public async Task CurrentAsync(ITextChannel channel)
         {
             if (player is null)
             {
@@ -247,7 +246,7 @@ namespace Nix.Resources.Discord
                 $"**Repeat** ``{repeat}``");
         }
 
-        public async Task ArtworkAsync()
+        public async Task ArtworkAsync(ITextChannel channel)
         {
             if (player is null)
             {
@@ -267,14 +266,14 @@ namespace Nix.Resources.Discord
 
         public async Task ListQueueAsync(NixCommandContext context)
         {
-            if (!lavaNode.TryGetPlayer(channel.Guild, out LavaPlayer player))
+            if (player is null)
             {
-                await channel.SendMessageAsync("I'm not connected to a voice-channel");
+                await context.Channel.SendMessageAsync("I'm not connected to a voice-channel");
                 return;
             }
             if (player.Queue.Count <= 0)
             {
-                await reply.ErrorAsync(channel, "No more tracks in the queue");
+                await reply.ErrorAsync(context.Channel as ITextChannel, "No more tracks in the queue");
                 return;
             }
 
@@ -301,7 +300,7 @@ namespace Nix.Resources.Discord
             await reply.PaginatedMessageAsync(context, pages: pages);
         }
 
-        public async Task RepeatAsync()
+        public async Task RepeatAsync(ITextChannel channel)
         {
             if (player is null)
             {
@@ -314,7 +313,7 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, result);
         }
 
-        public async Task VolumeAsync(ushort volume)
+        public async Task VolumeAsync(ITextChannel channel, ushort volume)
         {
             if (player is null)
             {
@@ -333,7 +332,7 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, $"Changed volume to {player.Volume} from {previous}");
         }
 
-        public async Task ShuffleAsync()
+        public async Task ShuffleAsync(ITextChannel channel)
         {
             if (player is null)
             {
