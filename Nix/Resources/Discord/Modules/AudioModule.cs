@@ -53,5 +53,9 @@ namespace Nix.Resources.Discord
         [Command("volume")]
         public async Task VolumeAsync(ushort volume)
             => await audio.VolumeAsync(volume);
+
+        [Command("shuffle")]
+        public async Task ShuffleAsync()
+            => await audio.ShuffleAsync();
     }
 }
