@@ -121,7 +121,10 @@ namespace Nix.Resources
                 IResult result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)
+                {
+                    await context.Reply.ErrorAsync(context.Channel as ITextChannel, result.ErrorReason);
                     logger.AppendLog(result.ErrorReason, LogSeverity.Warning);
+                }
             }
         }
 
