@@ -17,6 +17,7 @@ namespace Nix.Resources.Discord
         private readonly LavaNode lavaNode;
         private readonly EmbedService reply;
         private readonly ushort defaultVolume = 50;
+        private readonly int length = 40;
         private ITextChannel channel;
         private Queue<SocketGuildUser> users = new Queue<SocketGuildUser>();
         private bool repeat = false;
@@ -199,21 +200,21 @@ namespace Nix.Resources.Discord
             if (amount == 1)
             {
                 await reply.MessageAsync(channel,
-                    $"**Skipped** ``{track.Title}``\n" +
+                    $"**Skipped** {GetTitleAsUrl(track)}\n" +
                     $"**Tracks in Queue** ``{player.Queue.Count}``");
             }
             else
             {
-                var content = $"**Skipped** ``{track.Title}``\n";
+                var content = $"**Skipped** {GetTitleAsUrl(track)}\n";
                 for (int i = 0; i < amount - 1; i++)
                 {
                     if (player.Queue.TryDequeue(out track))
                     {
-                        content += $"**Skipped** ``{track.Title}``\n";
+                        content += $"**Skipped** {GetTitleAsUrl(track)}\n";
                     }
                     else
                     {
-                        content += $"**Failed to Skip** ``{track.Title}``\n";
+                        content += $"**Failed to Skip** {GetTitleAsUrl(track)}\n";
                     }
                 }
                 content += $"\n**Tracks in Queue** ``{player.Queue.Count}``";
@@ -239,7 +240,7 @@ namespace Nix.Resources.Discord
 
             LavaTrack track = player.Track;
             await reply.MessageAsync(channel, 
-                $"**Playing** ``{track.Title}``\n" +
+                $"**Playing** {GetTitleAsUrl(track)}\n" +
                 $"**Length** ``{track.Duration:m\\:ss}``\n" +
                 $"**Requested By** ``{users.Peek().Username}``\n" +
                 $"**Volume** ``{player.Volume}``\n" +
@@ -284,9 +285,7 @@ namespace Nix.Resources.Discord
             for (int i = 0; i < tracks.Count; )
             {
                 var track = tracks[i];
-                var title = track.Title.Length > 25 ? 
-                    track.Title.Substring(0, 25) + "..." : track.Title;
-                content += $"**{++i}** ``{title}`` **|** ``{track.Duration:m\\:ss}``\n";
+                content += $"**{++i}** {GetTitleAsUrl(track)} **|** ``{track.Duration:m\\:ss}``\n";
                 if (i % 10 == 0)
                 {
                     pages.Add(content);
@@ -383,7 +382,7 @@ namespace Nix.Resources.Discord
             }
 
             await reply.MessageAsync(channel, 
-                $"**Playing** ``{args.Track.Title}``\n" +
+                $"**Playing** {GetTitleAsUrl(args.Track)}\n" +
                 $"**Length** ``{args.Track.Duration:m\\:ss}``");
         }
 
@@ -397,5 +396,11 @@ namespace Nix.Resources.Discord
 
             return await lavaNode.SearchYouTubeAsync(query);
         }
+
+        private string FormatTitleLength(string title)
+            => title.Length > length ? title.Substring(0, length) + "..." : title;
+
+        private string GetTitleAsUrl(LavaTrack track)
+            => $"[{FormatTitleLength(track.Title)}]({track.Url})";
     }
 }

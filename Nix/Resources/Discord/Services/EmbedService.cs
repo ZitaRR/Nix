@@ -36,9 +36,6 @@ namespace Nix.Resources.Discord
             length = 25;
         }
 
-        private string FormatTrackTitle(string title)
-            => title.Length > length ? title.Substring(0, length) + "..." : title;
-
         public async Task ErrorAsync(ITextChannel channel, string message)
         {
             embed = new EmbedBuilder
