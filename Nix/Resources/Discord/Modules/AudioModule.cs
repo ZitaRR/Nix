@@ -57,5 +57,17 @@ namespace Nix.Resources.Discord
         [Command("shuffle")]
         public async Task ShuffleAsync()
             => await audio.ShuffleAsync(Context.Channel as ITextChannel);
+
+        [Command("time")]
+        public async Task SeekAsync(ushort seconds)
+            => await audio.SeekAsync(Context.Channel as ITextChannel, seconds);
+
+        [Command("pause")]
+        public async Task PauseAsync()
+            => await audio.PauseAsync(Context.Channel as ITextChannel);
+
+        [Command("resume")]
+        public async Task ResumeAsync()
+            => await audio.ResumeAsync(Context.Channel as ITextChannel);
     }
 }

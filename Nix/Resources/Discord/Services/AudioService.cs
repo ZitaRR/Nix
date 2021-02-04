@@ -349,6 +349,61 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, "Playlist has been shuffled");
         }
 
+        public async Task SeekAsync(ITextChannel channel, ushort seconds)
+        {
+            if (player is null)
+            {
+                await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
+                return;
+            }
+            if (player.PlayerState == PlayerState.Stopped ||
+                player.Track is null)
+            {
+                await reply.ErrorAsync(channel, "Nothing is currently playing");
+                return;
+            }
+
+            var time = TimeSpan.FromSeconds(seconds);
+            time = time >= player.Track.Duration ? player.Track.Duration : time;
+            await player.SeekAsync(time);
+        }
+
+        public async Task PauseAsync(ITextChannel channel)
+        {
+            if (player is null)
+            {
+                await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
+                return;
+            }
+            if (player.PlayerState == PlayerState.Stopped ||
+                player.Track is null)
+            {
+                await reply.ErrorAsync(channel, "Nothing is currently playing");
+                return;
+            }
+
+            await player.PauseAsync();
+            await reply.MessageAsync(channel, "Player was paused\n" +
+                "Resume using ``.resume``");
+        }
+
+        public async Task ResumeAsync(ITextChannel channel)
+        {
+            if (player is null)
+            {
+                await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
+                return;
+            }
+            if (player.PlayerState != PlayerState.Paused)
+            {
+                await reply.ErrorAsync(channel, "Player is not paused");
+                return;
+            }
+
+            await player.ResumeAsync();
+            await reply.MessageAsync(channel, "Resumed playing again");
+        }
+
         private async Task OnTrackEnd(TrackEndedEventArgs args)
         {
             if (repeat)
