@@ -204,18 +204,16 @@ namespace Nix.Resources.Discord
             }
             else
             {
-                var content = $"**Skipped** {GetTitleAsUrl(track)}\n";
+                int skipped = 0;
+                int failed = 0;
                 for (int i = 0; i < amount - 1; i++)
                 {
-                    if (player.Queue.TryDequeue(out track))
-                    {
-                        content += $"**Skipped** {GetTitleAsUrl(track)}\n";
-                    }
-                    else
-                    {
-                        content += $"**Failed to Skip** {GetTitleAsUrl(track)}\n";
-                    }
+                    if (player.Queue.TryDequeue(out _))
+                        skipped++;
+                    else failed++;
                 }
+                var content = $"**Skipped** ``{skipped} tracks``\n" +
+                    $"**Failed to Skip** ``{failed} tracks``";
                 content += $"\n**Tracks in Queue** ``{player.Queue.Count}``";
                 await reply.MessageAsync(channel, content);
             }
