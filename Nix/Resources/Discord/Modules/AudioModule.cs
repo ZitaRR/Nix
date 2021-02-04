@@ -22,7 +22,7 @@ namespace Nix.Resources.Discord
         public async Task LeaveAsync()
             => await audio.LeaveAsync(Context.User as IVoiceState, Context.Channel as ITextChannel);
 
-        [Command("play")]
+        [Command("play", RunMode = RunMode.Async)]
         public async Task PlayAsync([Remainder] string search)
             => await audio.PlayAsync(Context.User as IVoiceState, Context.Channel as ITextChannel, search);
 
