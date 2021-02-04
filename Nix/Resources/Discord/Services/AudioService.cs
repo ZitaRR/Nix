@@ -1,5 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ namespace Nix.Resources.Discord
         private Queue<SocketGuildUser> users = new Queue<SocketGuildUser>();
         private bool repeat = false;
         private LavaPlayer player;
+        private SpotifyClient spotify;
 
         public AudioService(LavaNode lavaNode, EmbedService reply, ScriptService script)
         {
@@ -30,6 +32,12 @@ namespace Nix.Resources.Discord
             this.reply = reply;
             this.lavaNode.OnTrackEnded += OnTrackEnd;
             this.lavaNode.OnTrackStarted += OnTrackStart;
+
+            var config = SpotifyClientConfig.CreateDefault()
+                .WithAuthenticator(new ClientCredentialsAuthenticator(
+                    Config.Data.SpotifyId,
+                    Config.Data.SpotifySecret));
+            spotify = new SpotifyClient(config);
         }
 
         public async Task<bool> JoinAsync(IVoiceState state, ITextChannel channel, bool command = false)
@@ -106,6 +114,9 @@ namespace Nix.Resources.Discord
             if (response.LoadStatus == LoadStatus.LoadFailed ||
                 response.LoadStatus == LoadStatus.NoMatches)
             {
+                if (await PlaySpotifyAsync(state, channel, search))
+                    return;
+
                 await reply.ErrorAsync(channel, "No matches");
                 return;
             }
@@ -162,6 +173,53 @@ namespace Nix.Resources.Discord
                     users.Enqueue(state as SocketGuildUser);
                 }
             }
+        }
+
+        public async Task<bool> PlaySpotifyAsync(IVoiceState state, ITextChannel channel, string id)
+        {
+            FullPlaylist playlist;
+            try
+            {
+                id = id.Substring(34);
+                id = id.Substring(0, id.IndexOf("?"));
+                playlist = await spotify.Playlists.Get(id);
+            }
+            catch
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(id))
+                return false;
+            if (!await JoinAsync(state, channel, true))
+                return false;
+
+            await reply.MessageAsync(channel,
+                    $"**Playlist** {playlist.Name}\n" +
+                    $"**Enqueued** {playlist.Tracks.Total} tracks");
+
+            for (int i = 0; i < length; i++)
+            {
+                var item = playlist.Tracks.Items[i];
+                var response = await lavaNode.SearchYouTubeAsync((item.Track as FullTrack).Name);
+
+                if (response.LoadStatus == LoadStatus.LoadFailed ||
+                    response.LoadStatus == LoadStatus.NoMatches)
+                {
+                    continue;
+                }
+                if (player.PlayerState == PlayerState.Stopped ||
+                    player.PlayerState == PlayerState.Connected)
+                {
+                    await player.PlayAsync(response.Tracks[0]);
+                    users.Enqueue(state as SocketGuildUser);
+                    continue;
+                }
+
+                player.Queue.Enqueue(response.Tracks[0]);
+                users.Enqueue(state as SocketGuildUser);
+            }
+            return true;
         }
 
         public async Task DurationAsync(ITextChannel channel)
@@ -386,7 +444,7 @@ namespace Nix.Resources.Discord
                 $"**Length** ``{args.Track.Duration:m\\:ss}``");
         }
 
-        private async Task<SearchResponse> SearchAsync(string query)
+        private async Task<Victoria.Responses.Rest.SearchResponse> SearchAsync(string query)
         {
             var response = await lavaNode.SearchAsync(query);
             if (response.Tracks.Count > 0)
