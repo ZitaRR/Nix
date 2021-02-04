@@ -56,6 +56,8 @@ namespace Nix.Resources
             public string Token { get; set; }
             public string Prefix { get; set; } = ".";
             public string SelectionMarker { get; set; } = " <";
+            public string SpotifyId { get; set; }
+            public string SpotifySecret { get; set; }
             public int FontColour { get; set; } = 0;
             public int BackgroundColour { get; set; } = 15;
         }
