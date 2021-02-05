@@ -203,7 +203,7 @@ namespace Nix.Resources.Discord
             {
                 FullTrack track = playlist.Tracks.Items[i].Track as FullTrack;
                 var response = await lavaNode.SearchYouTubeAsync(
-                    $"{string.Join(", ", track.Artists)} {track.Name}");
+                    $"{track.Artists[0].Name} {track.Name}");
 
                 if (response.LoadStatus == LoadStatus.LoadFailed ||
                     response.LoadStatus == LoadStatus.NoMatches)
