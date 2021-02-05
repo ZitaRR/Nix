@@ -104,11 +104,9 @@ namespace Nix.Resources.Discord
 
         private async void OnElapsed(object sender, ElapsedEventArgs e)
         {
-            logger.AppendLog("Scanning for events...");
             var events = storage.FindAll<NixEvent>().ToList();
             if (events.Count() <= 0)
                 return;
-            logger.AppendLog($"Found {events.Count()} event(s)");
 
             for (int i = 0; i < events.Count(); i++)
             {
