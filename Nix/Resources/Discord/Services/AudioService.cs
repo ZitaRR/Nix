@@ -175,12 +175,13 @@ namespace Nix.Resources.Discord
             }
         }
 
-        public async Task<bool> PlaySpotifyAsync(IVoiceState state, ITextChannel channel, string id)
+        public async Task<bool> PlaySpotifyAsync(IVoiceState state, ITextChannel channel, string url)
         {
+            string id;
             FullPlaylist playlist;
             try
             {
-                id = id.Substring(34);
+                id = url.Substring(34);
                 id = id.Substring(0, id.IndexOf("?"));
                 playlist = await spotify.Playlists.Get(id);
             }
@@ -195,10 +196,10 @@ namespace Nix.Resources.Discord
                 return false;
 
             await reply.MessageAsync(channel,
-                    $"**Playlist** {playlist.Name}\n" +
-                    $"**Enqueued** {playlist.Tracks.Total} tracks");
+                    $"**Playlist** [{playlist.Name}]({url})\n" +
+                    $"**Enqueued** {playlist.Tracks.Items.Count} tracks");
 
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < playlist.Tracks.Items.Count; i++)
             {
                 var item = playlist.Tracks.Items[i];
                 var response = await lavaNode.SearchYouTubeAsync((item.Track as FullTrack).Name);

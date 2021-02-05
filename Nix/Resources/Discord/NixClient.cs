@@ -141,8 +141,8 @@ namespace Nix.Resources
             {
                 while (true)
                 {
-                    users = storage.FindAll<NixUser>();
-                    await Client.SetGameAsync($"{users.Count()} users | v{Program.Version()}", type: ActivityType.Listening);
+                    var totalUsers = Client.Guilds.Sum(x => x.Users.Count);
+                    await Client.SetGameAsync($"{totalUsers} users | v{Program.Version()}", type: ActivityType.Listening);
                     await Task.Delay((1000 * 60) * 15);
                 }
             });
