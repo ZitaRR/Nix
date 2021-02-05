@@ -201,8 +201,9 @@ namespace Nix.Resources.Discord
 
             for (int i = 0; i < playlist.Tracks.Items.Count; i++)
             {
-                var item = playlist.Tracks.Items[i];
-                var response = await lavaNode.SearchYouTubeAsync((item.Track as FullTrack).Name);
+                FullTrack track = playlist.Tracks.Items[i].Track as FullTrack;
+                var response = await lavaNode.SearchYouTubeAsync(
+                    $"{string.Join(", ", track.Artists)} {track.Name}");
 
                 if (response.LoadStatus == LoadStatus.LoadFailed ||
                     response.LoadStatus == LoadStatus.NoMatches)
