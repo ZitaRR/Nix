@@ -462,6 +462,28 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, "Resumed playing again");
         }
 
+        public async Task LyricsAsync(ITextChannel channel)
+        {
+            if (player is null)
+            {
+                await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
+                return;
+            }
+            if (player.PlayerState == PlayerState.Stopped)
+            {
+                await reply.MessageAsync(channel, "Nothing is currently playing");
+                return;
+            }
+
+            var lyrics = await player.Track.FetchLyricsFromGeniusAsync();
+            if (string.IsNullOrEmpty(lyrics))
+                lyrics = await player.Track.FetchLyricsFromOVHAsync();
+            if (string.IsNullOrEmpty(lyrics))
+                lyrics = "Could not find any lyrics for the current playing track";
+
+            await reply.MessageAsync(channel, lyrics);
+        }
+
         private async Task OnTrackEnd(TrackEndedEventArgs args)
         {
             if (repeat)

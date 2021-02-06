@@ -69,5 +69,9 @@ namespace Nix.Resources.Discord
         [Command("resume")]
         public async Task ResumeAsync()
             => await audio.ResumeAsync(Context.Channel as ITextChannel);
+
+        [Command("lyrics")]
+        public async Task LyricsAsync()
+            => await audio.LyricsAsync(Context.Channel as ITextChannel);
     }
 }
