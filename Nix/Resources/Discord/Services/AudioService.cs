@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Victoria;
 using Victoria.Enums;
@@ -24,6 +25,9 @@ namespace Nix.Resources.Discord
         private bool repeat = false;
         private LavaPlayer player;
         private SpotifyClient spotify;
+        private CancellationTokenSource source;
+        private CancellationToken token;
+        private readonly TimeSpan inactivity = TimeSpan.FromMinutes(1);
 
         public AudioService(LavaNode lavaNode, EmbedService reply, ScriptService script)
         {
@@ -484,6 +488,28 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, lyrics);
         }
 
+        public async Task InitiateDisconnectAsync()
+        {
+            source = new CancellationTokenSource();
+            token = source.Token;
+            var cancelled = SpinWait.SpinUntil(() => token.IsCancellationRequested, inactivity);
+
+            if (cancelled)
+                return;
+
+            await reply.MessageAsync(channel, "Leaving due to inactivity");
+            await lavaNode.LeaveAsync(player.VoiceChannel);
+            channel = null;
+            player = null;
+            users.Clear();
+        }
+
+        public Task CancelDisconnect()
+        {
+            source?.Cancel();
+            return Task.CompletedTask;
+        }
+
         private async Task OnTrackEnd(TrackEndedEventArgs args)
         {
             if (repeat)
@@ -495,11 +521,9 @@ namespace Nix.Resources.Discord
             var player = args.Player;
             if (!player.Queue.TryDequeue(out var track))
             {
-                await reply.ErrorAsync(channel, "No more tracks in the queue");
-                await lavaNode.LeaveAsync(args.Player.VoiceChannel);
-                channel = null;
-                this.player = null;
-                users.Clear();
+                await reply.ErrorAsync(channel, "No more tracks in the queue\n" +
+                    $"Leaving in {inactivity:m\\:ss}");
+                await InitiateDisconnectAsync();
                 return;
             }
 
@@ -516,6 +540,7 @@ namespace Nix.Resources.Discord
                 return;
             }
 
+            await CancelDisconnect();
             await reply.MessageAsync(channel, 
                 $"**Playing** {GetTitleAsUrl(args.Track)}\n" +
                 $"**Length** ``{args.Track.Duration:m\\:ss}``");

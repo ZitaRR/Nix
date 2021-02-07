@@ -56,6 +56,7 @@ namespace Nix.Resources
             Client.GuildAvailable += Client_GuildAvailable;
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;
+            Client.UserVoiceStateUpdated += OnUserVoiceStateUpdate;
             Client.Ready += OnReady;
 
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
@@ -93,6 +94,25 @@ namespace Nix.Resources
         {
             register.RegisterGuild(guild.GetNixGuild());
             return Task.CompletedTask;
+        }
+
+        private async Task OnUserVoiceStateUpdate(SocketUser user, SocketVoiceState origin, SocketVoiceState destination)
+        {
+            if (user.IsBot)
+                return;
+
+            var nix = origin.VoiceChannel?.GetUser(Client.CurrentUser.Id) ??
+                destination.VoiceChannel?.GetUser(Client.CurrentUser.Id);
+
+            if (nix is null)
+                return;
+
+            var audio = services.GetRequiredService<AudioService>();
+
+            if (nix.VoiceChannel.Users.Count > 1)
+                await audio.CancelDisconnect();
+            else if (nix.VoiceChannel.Users.Count == 1)
+                _ = Task.Run(() => audio.InitiateDisconnectAsync());
         }
 
         public async Task Dispose()
