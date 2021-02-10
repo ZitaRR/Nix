@@ -24,24 +24,19 @@ namespace Nix.Resources.Discord
         private Queue<SocketGuildUser> users = new Queue<SocketGuildUser>();
         private bool repeat = false;
         private LavaPlayer player;
-        private SpotifyClient spotify;
+        private SpotifyService spotify;
         private CancellationTokenSource source;
         private CancellationToken token;
         private readonly TimeSpan inactivity = TimeSpan.FromMinutes(1);
 
-        public AudioService(LavaNode lavaNode, EmbedService reply, ScriptService script)
+        public AudioService(LavaNode lavaNode, EmbedService reply, ScriptService script, SpotifyService spotify)
         {
             Task.Run(async () => await script.RunScript("run_lavalink.ps1"));
             this.lavaNode = lavaNode;
             this.reply = reply;
+            this.spotify = spotify;
             this.lavaNode.OnTrackEnded += OnTrackEnd;
             this.lavaNode.OnTrackStarted += OnTrackStart;
-
-            var config = SpotifyClientConfig.CreateDefault()
-                .WithAuthenticator(new ClientCredentialsAuthenticator(
-                    Config.Data.SpotifyId,
-                    Config.Data.SpotifySecret));
-            spotify = new SpotifyClient(config);
         }
 
         public async Task<bool> JoinAsync(IVoiceState state, ITextChannel channel, bool command = false)
@@ -181,51 +176,66 @@ namespace Nix.Resources.Discord
 
         public async Task<bool> PlaySpotifyAsync(IVoiceState state, ITextChannel channel, string url)
         {
-            string id;
-            FullPlaylist playlist;
-            try
-            {
-                id = url.Substring(34);
-                id = id.Substring(0, id.IndexOf("?"));
-                playlist = await spotify.Playlists.Get(id);
-            }
-            catch
-            {
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(id))
-                return false;
             if (!await JoinAsync(state, channel, true))
                 return false;
 
-            await reply.MessageAsync(channel,
-                    $"**Playlist** [{playlist.Name}]({url})\n" +
-                    $"**Enqueued** {playlist.Tracks.Items.Count} tracks");
+            FullTrack track;
+            var playlist = await spotify.GetPlaylist(url);
 
-            for (int i = 0; i < playlist.Tracks.Items.Count; i++)
+            if (playlist != null)
             {
-                FullTrack track = playlist.Tracks.Items[i].Track as FullTrack;
+                await reply.MessageAsync(channel,
+                    $"**Playlist** [{playlist.Value.playlistName}]({url})\n" +
+                    $"**Enqueued** {playlist.Value.tracks.Count} tracks");
+
+                for (int i = 0; i < playlist.Value.tracks.Count; i++)
+                {
+                    track = playlist.Value.tracks[i];
+                    var response = await lavaNode.SearchYouTubeAsync(
+                        $"{track.Artists[0].Name} {track.Name} Audio");
+
+                    if (response.LoadStatus == LoadStatus.LoadFailed ||
+                        response.LoadStatus == LoadStatus.NoMatches)
+                    {
+                        continue;
+                    }
+                    if (player.PlayerState == PlayerState.Stopped ||
+                        player.PlayerState == PlayerState.Connected)
+                    {
+                        await player.PlayAsync(response.Tracks[0]);
+                        users.Enqueue(state as SocketGuildUser);
+                        continue;
+                    }
+
+                    player.Queue.Enqueue(response.Tracks[0]);
+                    users.Enqueue(state as SocketGuildUser);
+                }
+                return true;
+            }
+
+            track = await spotify.GetTrack(url);
+            if (track != null)
+            {
                 var response = await lavaNode.SearchYouTubeAsync(
-                    $"{track.Artists[0].Name} {track.Name}");
+                    $"{track.Artists[0].Name} {track.Name} Audio");
 
                 if (response.LoadStatus == LoadStatus.LoadFailed ||
                     response.LoadStatus == LoadStatus.NoMatches)
-                {
-                    continue;
-                }
+                    return false;
                 if (player.PlayerState == PlayerState.Stopped ||
                     player.PlayerState == PlayerState.Connected)
                 {
                     await player.PlayAsync(response.Tracks[0]);
                     users.Enqueue(state as SocketGuildUser);
-                    continue;
+                    return true;
                 }
 
                 player.Queue.Enqueue(response.Tracks[0]);
                 users.Enqueue(state as SocketGuildUser);
+                return true;
             }
-            return true;
+
+            return false;
         }
 
         public async Task DurationAsync(ITextChannel channel)

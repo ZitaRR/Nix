@@ -42,6 +42,7 @@ namespace Nix.Resources
                 .AddSingleton(logger)
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<AudioService>()
+                .AddSingleton<SpotifyService>()
                 .AddSingleton<EmbedService>()
                 .AddSingleton<EventService>()
                 .AddSingleton<ScriptService>()
