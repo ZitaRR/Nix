@@ -110,7 +110,8 @@ namespace Nix.Resources
 
             var audio = services.GetRequiredService<AudioService>();
 
-            if (nix.VoiceChannel.Users.Count > 1)
+            if (nix.VoiceChannel.Id == destination.VoiceChannel?.Id &&
+                nix.VoiceChannel.Users.Count == 2)
                 await audio.CancelDisconnect();
             else if (nix.VoiceChannel.Users.Count == 1)
                 _ = Task.Run(() => audio.InitiateDisconnectAsync());

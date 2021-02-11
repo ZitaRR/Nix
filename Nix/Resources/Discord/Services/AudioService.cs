@@ -37,6 +37,9 @@ namespace Nix.Resources.Discord
             this.spotify = spotify;
             this.lavaNode.OnTrackEnded += OnTrackEnd;
             this.lavaNode.OnTrackStarted += OnTrackStart;
+
+            source = new CancellationTokenSource();
+            token = source.Token;
         }
 
         public async Task<bool> JoinAsync(IVoiceState state, ITextChannel channel, bool command = false)
@@ -500,12 +503,15 @@ namespace Nix.Resources.Discord
 
         public async Task InitiateDisconnectAsync()
         {
-            source = new CancellationTokenSource();
-            token = source.Token;
             var cancelled = SpinWait.SpinUntil(() => token.IsCancellationRequested, inactivity);
 
             if (cancelled)
+            {
+                source.Dispose();
+                source = new CancellationTokenSource();
+                token = source.Token;
                 return;
+            }
 
             await reply.MessageAsync(channel, "Leaving due to inactivity");
             await lavaNode.LeaveAsync(player.VoiceChannel);
@@ -516,7 +522,7 @@ namespace Nix.Resources.Discord
 
         public Task CancelDisconnect()
         {
-            source?.Cancel();
+            source.Cancel();
             return Task.CompletedTask;
         }
 
@@ -550,7 +556,6 @@ namespace Nix.Resources.Discord
                 return;
             }
 
-            await CancelDisconnect();
             await reply.MessageAsync(channel, 
                 $"**Playing** {GetTitleAsUrl(args.Track)}\n" +
                 $"**Length** ``{args.Track.Duration:m\\:ss}``");
