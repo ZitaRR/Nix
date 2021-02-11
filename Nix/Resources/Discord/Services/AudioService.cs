@@ -45,6 +45,8 @@ namespace Nix.Resources.Discord
 
             this.lavaNode.OnTrackEnded += OnTrackEnd;
             this.lavaNode.OnTrackStarted += OnTrackStart;
+            this.lavaNode.OnTrackStuck += OnTrackStuck;
+            this.lavaNode.OnTrackException += OnTrackException;
             this.discord.Client.Ready += OnReady;
 
             source = new CancellationTokenSource();
@@ -569,6 +571,19 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, 
                 $"**Playing** {GetTitleAsUrl(args.Track)}\n" +
                 $"**Length** ``{args.Track.Duration:m\\:ss}``");
+        }
+
+        private async Task OnTrackStuck(TrackStuckEventArgs args)
+        {
+            //Placeholder
+            Console.WriteLine($"{args.Track.Title} got stuck");
+        }
+
+        private async Task OnTrackException(TrackExceptionEventArgs args)
+        {
+            //Placeholder
+            Console.WriteLine($"{args.Track.Title} threw an exception\n" +
+                $"{args.ErrorMessage}");
         }
 
         /* Does this fix the reconnection issue?
