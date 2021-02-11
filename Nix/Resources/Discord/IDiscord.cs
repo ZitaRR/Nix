@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Nix.Resources
 {
-    interface IDiscord
+    public interface IDiscord
     {
         DiscordSocketClient Client { get; }
         Task StartAsync();

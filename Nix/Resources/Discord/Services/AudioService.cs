@@ -18,6 +18,7 @@ namespace Nix.Resources.Discord
     {
         private readonly LavaNode lavaNode;
         private readonly EmbedService reply;
+        private readonly IDiscord discord;
         private readonly ushort defaultVolume = 50;
         private readonly int length = 40;
         private ITextChannel channel;
@@ -29,14 +30,22 @@ namespace Nix.Resources.Discord
         private CancellationToken token;
         private readonly TimeSpan inactivity = TimeSpan.FromMinutes(1);
 
-        public AudioService(LavaNode lavaNode, EmbedService reply, ScriptService script, SpotifyService spotify)
+        public AudioService(
+            LavaNode lavaNode,
+            EmbedService reply,
+            ScriptService script,
+            SpotifyService spotify,
+            IDiscord discord)
         {
             Task.Run(async () => await script.RunScript("run_lavalink.ps1"));
             this.lavaNode = lavaNode;
             this.reply = reply;
             this.spotify = spotify;
+            this.discord = discord;
+
             this.lavaNode.OnTrackEnded += OnTrackEnd;
             this.lavaNode.OnTrackStarted += OnTrackStart;
+            this.discord.Client.Ready += OnReady;
 
             source = new CancellationTokenSource();
             token = source.Token;
@@ -528,13 +537,14 @@ namespace Nix.Resources.Discord
 
         private async Task OnTrackEnd(TrackEndedEventArgs args)
         {
+            LavaPlayer player = args.Player;
+
             if (repeat)
             {
-                await args.Player.PlayAsync(args.Track);
+                await player.PlayAsync(args.Track);
                 return;
             }
 
-            var player = args.Player;
             if (!player.Queue.TryDequeue(out var track))
             {
                 await reply.ErrorAsync(channel, "No more tracks in the queue\n" +
@@ -544,7 +554,7 @@ namespace Nix.Resources.Discord
             }
 
             users.Dequeue();
-            await args.Player.PlayAsync(track);
+            await player.PlayAsync(track);
         }
 
         private async Task OnTrackStart(TrackStartEventArgs args)
@@ -559,6 +569,36 @@ namespace Nix.Resources.Discord
             await reply.MessageAsync(channel, 
                 $"**Playing** {GetTitleAsUrl(args.Track)}\n" +
                 $"**Length** ``{args.Track.Duration:m\\:ss}``");
+        }
+
+        /* Does this fix the reconnection issue?
+         * Leave it be until we know for sure
+         * Hopefully it does, otherwise ima head out
+         */
+        private async Task OnReady()
+        {
+            if (player is null)
+                return;
+            else if (player.PlayerState == PlayerState.Stopped)
+                return;
+
+            LavaTrack current = player.Track;
+            var queue = player.Queue.ToList();
+            IVoiceChannel channel = player.VoiceChannel;
+
+            await lavaNode.LeaveAsync(channel);
+            await lavaNode.JoinAsync(channel)
+                    .ContinueWith(async (t) =>
+                    {
+                        player = await t;
+                        await player.UpdateVolumeAsync(defaultVolume);
+                    });
+
+            await player.PlayAsync(current);
+            foreach (var track in queue)
+            {
+                player.Queue.Enqueue(track);
+            }
         }
 
         private async Task<Victoria.Responses.Rest.SearchResponse> SearchAsync(string query)

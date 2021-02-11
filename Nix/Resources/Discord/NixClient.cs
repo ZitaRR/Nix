@@ -36,6 +36,7 @@ namespace Nix.Resources
             commands = new CommandService();
 
             services = new ServiceCollection()
+                .AddSingleton(this as IDiscord)
                 .AddSingleton(Client)
                 .AddSingleton(commands)
                 .AddSingleton(storage)
