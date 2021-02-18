@@ -1,9 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,16 +17,17 @@ namespace Nix.Resources.Discord
         private readonly LavaNode lavaNode;
         private readonly EmbedService reply;
         private readonly IDiscord discord;
+        private readonly TimeSpan inactivity = TimeSpan.FromMinutes(1);
         private readonly ushort defaultVolume = 50;
         private readonly int length = 40;
         private ITextChannel channel;
-        private Queue<SocketGuildUser> users = new Queue<SocketGuildUser>();
+        private Queue<SocketGuildUser> users;
         private bool repeat = false;
         private LavaPlayer player;
         private SpotifyService spotify;
         private CancellationTokenSource source;
         private CancellationToken token;
-        private readonly TimeSpan inactivity = TimeSpan.FromMinutes(1);
+        private LavalinkData data;
 
         public AudioService(
             LavaNode lavaNode,
@@ -47,8 +46,10 @@ namespace Nix.Resources.Discord
             this.lavaNode.OnTrackStarted += OnTrackStart;
             this.lavaNode.OnTrackStuck += OnTrackStuck;
             this.lavaNode.OnTrackException += OnTrackException;
+            this.discord.Client.Disconnected += OnDisconnection;
             this.discord.Client.Ready += OnReady;
 
+            users = new Queue<SocketGuildUser>();
             source = new CancellationTokenSource();
             token = source.Token;
         }
@@ -193,7 +194,7 @@ namespace Nix.Resources.Discord
             if (!await JoinAsync(state, channel, true))
                 return false;
 
-            FullTrack track;
+            SpotifyAPI.Web.FullTrack track;
             var playlist = await spotify.GetPlaylist(url);
 
             if (playlist != null)
@@ -586,37 +587,44 @@ namespace Nix.Resources.Discord
                 $"{args.ErrorMessage}");
         }
 
+        private async Task OnDisconnection(Exception e)
+        {
+            if (player is null)
+                return;
+
+            data = new LavalinkData(player);
+            await lavaNode.LeaveAsync(player.VoiceChannel);
+        }
+
         /* Does this fix the reconnection issue?
          * Leave it be until we know for sure
          * Hopefully it does, otherwise ima head out
          */
         private async Task OnReady()
         {
-            if (player is null)
-                return;
-            else if (player.PlayerState == PlayerState.Stopped)
+            if (data.Equals(default(LavalinkData)))
                 return;
 
-            LavaTrack current = player.Track;
-            var queue = player.Queue.ToList();
-            IVoiceChannel channel = player.VoiceChannel;
-
-            await lavaNode.LeaveAsync(channel);
-            await lavaNode.JoinAsync(channel)
+            await lavaNode.JoinAsync(data.VoiceChannel, data.TextChannel)
                     .ContinueWith(async (t) =>
                     {
                         player = await t;
-                        await player.UpdateVolumeAsync(defaultVolume);
+                        await player.UpdateVolumeAsync((ushort)data.Volume);
                     });
 
-            await player.PlayAsync(current);
-            foreach (var track in queue)
+            await player.PlayAsync(data.CurrentTrack)
+                .ContinueWith(async (p) =>
+                {
+                    await player.SeekAsync(data.Position);
+                });
+
+            foreach (var track in data.Queue)
             {
                 player.Queue.Enqueue(track);
             }
         }
 
-        private async Task<Victoria.Responses.Rest.SearchResponse> SearchAsync(string query)
+        private async Task<SearchResponse> SearchAsync(string query)
         {
             var response = await lavaNode.SearchAsync(query);
             if (response.Tracks.Count > 0)
