@@ -596,10 +596,6 @@ namespace Nix.Resources.Discord
             await lavaNode.LeaveAsync(player.VoiceChannel);
         }
 
-        /* Does this fix the reconnection issue?
-         * Leave it be until we know for sure
-         * Hopefully it does, otherwise ima head out
-         */
         private async Task OnReady()
         {
             if (data.Equals(default(LavalinkData)))
