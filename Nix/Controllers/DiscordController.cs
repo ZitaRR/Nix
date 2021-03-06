@@ -2,6 +2,7 @@
 using Nix.Views;
 using System;
 using System.Collections.Generic;
+using Nix.Models;
 
 namespace Nix.Controllers
 {

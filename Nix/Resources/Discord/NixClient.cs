@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Nix.Resources.Discord;
+using Nix.Models;
 using System;
 using System.Diagnostics;
 using System.Linq;

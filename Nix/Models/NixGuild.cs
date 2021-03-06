@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Nix.Resources;
 
-namespace Nix.Resources
+namespace Nix.Models
 {
     public class NixGuild : IStorable
     {

@@ -2,10 +2,10 @@
 using Discord.WebSocket;
 using LiteDB;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using Nix.Models;
 
 namespace Nix.Resources.Discord
 {

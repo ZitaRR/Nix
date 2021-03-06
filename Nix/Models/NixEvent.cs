@@ -1,9 +1,8 @@
-﻿using Discord.WebSocket;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Nix.Resources;
 
-namespace Nix.Resources
+namespace Nix.Models
 {
     public class NixEvent : IStorable
     {

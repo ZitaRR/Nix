@@ -1,6 +1,7 @@
 ﻿using System;
+using Nix.Resources;
 
-namespace Nix.Resources
+namespace Nix.Models
 {
     public class NixChannel : IStorable
     {

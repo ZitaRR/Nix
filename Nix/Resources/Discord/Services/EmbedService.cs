@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Victoria;
+using Nix.Models;
 
 namespace Nix.Resources.Discord
 {

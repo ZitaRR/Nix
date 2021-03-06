@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Victoria;
+using Nix.Models;
 
-namespace Nix.Resources.Discord
+namespace Nix.Resources
 {
     public struct LavalinkData
     {

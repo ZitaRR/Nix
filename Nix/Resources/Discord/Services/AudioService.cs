@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.WebSocket;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,6 +9,7 @@ using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
 using Victoria.Responses.Rest;
+using Nix.Models;
 
 namespace Nix.Resources.Discord
 {

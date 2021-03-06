@@ -4,8 +4,9 @@ using System.Linq;
 using System.Threading;
 using Victoria;
 using Discord;
+using Nix.Resources;
 
-namespace Nix.Resources.Discord
+namespace Nix.Models
 {
     public sealed class NixPlayer 
     {
