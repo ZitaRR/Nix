@@ -102,20 +102,20 @@ namespace Nix.Resources
         {
             if (user.IsBot)
                 return;
-
+        
             var nix = origin.VoiceChannel?.GetUser(Client.CurrentUser.Id) ??
                 destination.VoiceChannel?.GetUser(Client.CurrentUser.Id);
-
+        
             if (nix is null)
                 return;
-
+        
             var audio = services.GetRequiredService<AudioService>();
-
+        
             if (nix.VoiceChannel.Id == destination.VoiceChannel?.Id &&
                 nix.VoiceChannel.Users.Count == 2)
-                await audio.CancelDisconnect();
+                await audio.CancelDisconnect(nix.VoiceChannel.Guild);
             else if (nix.VoiceChannel.Users.Count == 1)
-                _ = Task.Run(() => audio.InitiateDisconnectAsync());
+                _ = Task.Run(() => audio.InitiateDisconnectAsync(nix.VoiceChannel.Guild));
         }
 
         public async Task Dispose()
@@ -151,7 +151,7 @@ namespace Nix.Resources
             }
         }
 
-        public async Task OnReady()
+        private async Task OnReady()
         {
             var guilds = storage.FindAll<NixGuild>();
             var users = storage.FindAll<NixUser>();

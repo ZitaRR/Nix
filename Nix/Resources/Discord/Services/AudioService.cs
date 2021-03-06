@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,22 +16,19 @@ namespace Nix.Resources.Discord
     public sealed class AudioService
     {
         private readonly LavaNode lavaNode;
+        private readonly ILogger logger;
         private readonly EmbedService reply;
+        private readonly SpotifyService spotify;
         private readonly IDiscord discord;
-        private readonly TimeSpan inactivity = TimeSpan.FromMinutes(1);
+        private readonly TimeSpan inactivity = TimeSpan.FromSeconds(3);
         private readonly ushort defaultVolume = 50;
         private readonly int length = 40;
-        private ITextChannel channel;
-        private Queue<SocketGuildUser> users;
-        private bool repeat = false;
-        private LavaPlayer player;
-        private SpotifyService spotify;
-        private CancellationTokenSource source;
-        private CancellationToken token;
-        private LavalinkData data;
+        private ConcurrentDictionary<ulong, NixPlayer> players;
+        private ConcurrentDictionary<LavaPlayer, LavalinkData> data;
 
         public AudioService(
             LavaNode lavaNode,
+            ILogger logger,
             EmbedService reply,
             ScriptService script,
             SpotifyService spotify,
@@ -38,6 +36,7 @@ namespace Nix.Resources.Discord
         {
             Task.Run(async () => await script.RunScript("run_lavalink.ps1"));
             this.lavaNode = lavaNode;
+            this.logger = logger;
             this.reply = reply;
             this.spotify = spotify;
             this.discord = discord;
@@ -49,34 +48,33 @@ namespace Nix.Resources.Discord
             this.discord.Client.Disconnected += OnDisconnection;
             this.discord.Client.Ready += OnReady;
 
-            users = new Queue<SocketGuildUser>();
-            source = new CancellationTokenSource();
-            token = source.Token;
+            players = new ConcurrentDictionary<ulong, NixPlayer>();
+            data = new ConcurrentDictionary<LavaPlayer, LavalinkData>();
         }
 
         public async Task<bool> JoinAsync(IVoiceState state, ITextChannel channel, bool command = false)
         {
-            if (!(player is null))
+            if (players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 if (command)
                 {
                     return true;
                 }
-                await reply.ErrorAsync(channel, $"I'm already connected to {player.VoiceChannel.Name}");
+                await reply.ErrorAsync(channel, $"I'm already connected to {nix.VoiceChannel.Name}");
                 return true;
             }
 
-            this.channel = channel;
-
             try
             {
-                await lavaNode.JoinAsync(state?.VoiceChannel)
-                    .ContinueWith(async (t) =>
+                await lavaNode.JoinAsync(state.VoiceChannel, channel)
+                    .ContinueWith(async (p) =>
                     {
-                        player = await t;
-                        await player.UpdateVolumeAsync(defaultVolume);
+                        var nix = new NixPlayer(await p);
+                        players.TryAdd(channel.GuildId, nix);
+                        await nix.Player.UpdateVolumeAsync(defaultVolume);
                     });
-                users.Clear();
+                logger.AppendLog("AUDIO", $"New player in [{channel.Guild.Name}]. " +
+                    $"({players.Count - 1} -> {players.Count})");
                 await reply.MessageAsync(channel, $"Joined {state?.VoiceChannel.Name}");
                 return true;
             }
@@ -89,7 +87,7 @@ namespace Nix.Resources.Discord
 
         public async Task<bool> LeaveAsync(IVoiceState state, ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out _))
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return true;
@@ -98,7 +96,9 @@ namespace Nix.Resources.Discord
             try
             {
                 await lavaNode.LeaveAsync(state?.VoiceChannel);
-                users.Clear();
+                players.Remove(channel.GuildId, out NixPlayer nix);
+                logger.AppendLog("AUDIO", $"Player disposed in [{channel.Guild.Name}]. " +
+                    $"({players.Count + 1} -> {players.Count})");
                 await reply.MessageAsync(channel, $"Left {state?.VoiceChannel.Name}");
                 return true;
             }
@@ -106,11 +106,6 @@ namespace Nix.Resources.Discord
             {
                 await reply.ExceptionAsync(channel, e);
                 return false;
-            }
-            finally
-            {
-                this.channel = null;
-                player = null;
             }
         }
 
@@ -135,16 +130,21 @@ namespace Nix.Resources.Discord
                 return;
             }
 
-            var player = lavaNode.GetPlayer(state?.VoiceChannel.Guild);
-            if (player.PlayerState == PlayerState.Playing ||
-                player.PlayerState == PlayerState.Paused)
+
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
+            {
+                await reply.ErrorAsync(channel, "Could not find the player!");
+                return;
+            }
+
+            if (nix.Player.PlayerState == PlayerState.Playing ||
+                nix.Player.PlayerState == PlayerState.Paused)
             {
                 if (!string.IsNullOrWhiteSpace(response.Playlist.Name))
                 {
                     foreach (var track in response.Tracks)
                     {
-                        player.Queue.Enqueue(track);
-                        users.Enqueue(state as SocketGuildUser);
+                        nix.Player.Queue.Enqueue(track);
                     }
 
                     var duration = new TimeSpan(0, 0, response.Tracks.Sum(x => x.Duration.Seconds));
@@ -155,8 +155,7 @@ namespace Nix.Resources.Discord
                 else
                 {
                     var track = response.Tracks[0];
-                    player.Queue.Enqueue(track);
-                    users.Enqueue(state as SocketGuildUser);
+                    nix.Player.Queue.Enqueue(track);
 
                     await reply.MessageAsync(channel, 
                         $"**Enqueued** ``{track.Title}``\n" +
@@ -171,9 +170,8 @@ namespace Nix.Resources.Discord
                     for (int i = 0; i < response.Tracks.Count; i++)
                     {
                         if (i == 0)
-                            await player.PlayAsync(track);
-                        else player.Queue.Enqueue(response.Tracks[i]);
-                        users.Enqueue(state as SocketGuildUser);
+                            await nix.Player.PlayAsync(track);
+                        else nix.Player.Queue.Enqueue(response.Tracks[i]);
                     }
 
                     var duration = new TimeSpan(0, 0, response.Tracks.Sum(x => x.Duration.Seconds));
@@ -183,8 +181,7 @@ namespace Nix.Resources.Discord
                 }
                 else
                 {
-                    await player.PlayAsync(track);
-                    users.Enqueue(state as SocketGuildUser);
+                    await nix.Player.PlayAsync(track);
                 }
             }
         }
@@ -192,6 +189,8 @@ namespace Nix.Resources.Discord
         public async Task<bool> PlaySpotifyAsync(IVoiceState state, ITextChannel channel, string url)
         {
             if (!await JoinAsync(state, channel, true))
+                return false;
+            if (players.TryGetValue(channel.GuildId, out NixPlayer nix))
                 return false;
 
             SpotifyAPI.Web.FullTrack track;
@@ -214,16 +213,14 @@ namespace Nix.Resources.Discord
                     {
                         continue;
                     }
-                    if (player.PlayerState == PlayerState.Stopped ||
-                        player.PlayerState == PlayerState.Connected)
+                    if (nix.Player.PlayerState == PlayerState.Stopped ||
+                        nix.Player.PlayerState == PlayerState.Connected)
                     {
-                        await player.PlayAsync(response.Tracks[0]);
-                        users.Enqueue(state as SocketGuildUser);
+                        await nix.Player.PlayAsync(response.Tracks[0]);
                         continue;
                     }
 
-                    player.Queue.Enqueue(response.Tracks[0]);
-                    users.Enqueue(state as SocketGuildUser);
+                    nix.Player.Queue.Enqueue(response.Tracks[0]);
                 }
                 return true;
             }
@@ -237,16 +234,14 @@ namespace Nix.Resources.Discord
                 if (response.LoadStatus == LoadStatus.LoadFailed ||
                     response.LoadStatus == LoadStatus.NoMatches)
                     return false;
-                if (player.PlayerState == PlayerState.Stopped ||
-                    player.PlayerState == PlayerState.Connected)
+                if (nix.Player.PlayerState == PlayerState.Stopped ||
+                    nix.Player.PlayerState == PlayerState.Connected)
                 {
-                    await player.PlayAsync(response.Tracks[0]);
-                    users.Enqueue(state as SocketGuildUser);
+                    await nix.Player.PlayAsync(response.Tracks[0]);
                     return true;
                 }
 
-                player.Queue.Enqueue(response.Tracks[0]);
-                users.Enqueue(state as SocketGuildUser);
+                nix.Player.Queue.Enqueue(response.Tracks[0]);
                 return true;
             }
 
@@ -255,41 +250,42 @@ namespace Nix.Resources.Discord
 
         public async Task DurationAsync(ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to any voice-channel");
                 return;
             }
-            if (player.PlayerState == PlayerState.Stopped || player.Track is null)
+            if (nix.Player.PlayerState == PlayerState.Stopped ||
+                nix.Player.Track is null)
             {
                 await reply.ErrorAsync(channel, "Nothing is currently playing");
                 return;
             }
 
-            LavaTrack track = player.Track;
+            LavaTrack track = nix.Player.Track;
             await reply.MessageAsync(channel, $"{track.Position:mm\\:ss} / {track.Duration:mm\\:ss}");
         }
 
         public async Task SkipAsync(ITextChannel channel, int amount)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return;
             }
-            if (player.PlayerState == PlayerState.Stopped ||
-                player.Track is null)
+            if (nix.Player.PlayerState == PlayerState.Stopped ||
+                nix.Player.Track is null)
             {
                 await reply.ErrorAsync(channel, "Nothing is currently playing");
                 return;
             }
 
-            var track = player.Track;
+            var track = nix.Player.Track;
             if (amount == 1)
             {
                 await reply.MessageAsync(channel,
                     $"**Skipped** {GetTitleAsUrl(track)}\n" +
-                    $"**Tracks in Queue** ``{player.Queue.Count}``");
+                    $"**Tracks in Queue** ``{nix.Player.Queue.Count}``");
             }
             else
             {
@@ -297,75 +293,74 @@ namespace Nix.Resources.Discord
                 int failed = 0;
                 for (int i = 0; i < amount - 1; i++)
                 {
-                    if (player.Queue.TryDequeue(out _))
+                    if (nix.Player.Queue.TryDequeue(out _))
                         skipped++;
                     else failed++;
                 }
                 var content = $"**Skipped** ``{skipped} tracks``\n" +
                     $"**Failed to Skip** ``{failed} tracks``";
-                content += $"\n**Tracks in Queue** ``{player.Queue.Count}``";
+                content += $"\n**Tracks in Queue** ``{nix.Player.Queue.Count}``";
                 await reply.MessageAsync(channel, content);
             }
 
-            await player.StopAsync();
+            await nix.Player.StopAsync();
         }
 
         public async Task CurrentAsync(ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return;
             }
-            if (player.PlayerState == PlayerState.Stopped || 
-                player.Track is null)
+            if (nix.Player.PlayerState == PlayerState.Stopped || 
+                nix.Player.Track is null)
             {
                 await reply.ErrorAsync(channel, "Nothing is currently playing");
                 return;
             }
 
-            LavaTrack track = player.Track;
+            LavaTrack track = nix.Player.Track;
             await reply.MessageAsync(channel, 
                 $"**Playing** {GetTitleAsUrl(track)}\n" +
                 $"**Length** ``{track.Duration:m\\:ss}``\n" +
-                $"**Requested By** ``{users.Peek().Username}``\n" +
-                $"**Volume** ``{player.Volume}``\n" +
-                $"**Repeat** ``{repeat}``");
+                $"**Volume** ``{nix.Player.Volume}``\n" +
+                $"**Repeat** ``{nix.OnRepeat}``");
         }
 
         public async Task ArtworkAsync(ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return;
             }
-            if (player.PlayerState != PlayerState.Playing ||
-                player.Track is null)
+            if (nix.Player.PlayerState != PlayerState.Playing ||
+                nix.Player.Track is null)
             {
                 await reply.ErrorAsync(channel, "Nothing is currently playing");
                 return;
             }
 
-            string artwork = await player.Track.FetchArtworkAsync();
+            string artwork = await nix.Player.Track.FetchArtworkAsync();
             await channel.SendMessageAsync(artwork);
         }
 
         public async Task ListQueueAsync(NixCommandContext context)
         {
-            if (player is null)
+            if (!players.TryGetValue(context.Guild.Id, out NixPlayer nix))
             {
                 await context.Channel.SendMessageAsync("I'm not connected to a voice-channel");
                 return;
             }
-            if (player.Queue.Count <= 0)
+            if (nix.Player.Queue.Count <= 0)
             {
                 await reply.ErrorAsync(context.Channel as ITextChannel, "No more tracks in the queue");
                 return;
             }
 
             var content = "";
-            var tracks = player.Queue.ToList();
+            var tracks = nix.Player.Queue.ToList();
             var pages = new List<string>();
 
             for (int i = 0; i < tracks.Count; )
@@ -384,240 +379,246 @@ namespace Nix.Resources.Discord
                 pages.Add(content);
             }
 
-            await reply.PaginatedMessageAsync(context, pages: pages);
+            await reply.PaginatedMessageAsync(context, pages);
         }
 
         public async Task RepeatAsync(ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, $"I'm not connected to a voice-channel");
                 return;
             }
 
-            repeat = !repeat;
-            string result = repeat is true ? "Repeat turned on" : "Repeat turned off";
+            nix.OnRepeat = !nix.OnRepeat;
+            string result = nix.OnRepeat is true ? "Repeat turned on" : "Repeat turned off";
             await reply.MessageAsync(channel, result);
         }
 
         public async Task VolumeAsync(ITextChannel channel, ushort volume)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
                 return;
             }
-            if (player.PlayerState == PlayerState.Stopped ||
-                player.Track is null)
+            if (nix.Player.PlayerState == PlayerState.Stopped ||
+                nix.Player.Track is null)
             {
                 await reply.ErrorAsync(channel, "Nothing is currently playing");
                 return;
             }
 
-            var previous = player.Volume;
-            await player.UpdateVolumeAsync(volume);
-            await reply.MessageAsync(channel, $"Changed volume to {player.Volume} from {previous}");
+            var previous = nix.Player.Volume;
+            await nix.Player.UpdateVolumeAsync(volume);
+            await reply.MessageAsync(channel, $"Changed volume to {nix.Player.Volume} from {previous}");
         }
 
         public async Task ShuffleAsync(ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
                 return;
             }
-            if (player.Queue.Count <= 0)
+            if (nix.Player.Queue.Count <= 0)
             {
                 await reply.ErrorAsync(channel, "There are no tracks in the queue");
                 return;
             }
 
-            player.Queue.Shuffle();
+            nix.Player.Queue.Shuffle();
             await reply.MessageAsync(channel, "Playlist has been shuffled");
         }
 
         public async Task SeekAsync(ITextChannel channel, ushort seconds)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
                 return;
             }
-            if (player.PlayerState == PlayerState.Stopped ||
-                player.Track is null)
+            if (nix.Player.PlayerState == PlayerState.Stopped ||
+                nix.Player.Track is null)
             {
                 await reply.ErrorAsync(channel, "Nothing is currently playing");
                 return;
             }
 
             var time = TimeSpan.FromSeconds(seconds);
-            time = time >= player.Track.Duration ? player.Track.Duration : time;
-            await player.SeekAsync(time);
+            time = time >= nix.Player.Track.Duration ? nix.Player.Track.Duration : time;
+            await nix.Player.SeekAsync(time);
         }
 
         public async Task PauseAsync(ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
                 return;
             }
-            if (player.PlayerState == PlayerState.Stopped ||
-                player.Track is null)
+            if (nix.Player.PlayerState == PlayerState.Stopped ||
+                nix.Player.Track is null)
             {
                 await reply.ErrorAsync(channel, "Nothing is currently playing");
                 return;
             }
 
-            await player.PauseAsync();
+            await nix.Player.PauseAsync();
             await reply.MessageAsync(channel, "Player was paused\n" +
                 "Resume using ``.resume``");
         }
 
         public async Task ResumeAsync(ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
                 return;
             }
-            if (player.PlayerState != PlayerState.Paused)
+            if (nix.Player.PlayerState != PlayerState.Paused)
             {
                 await reply.ErrorAsync(channel, "Player is not paused");
                 return;
             }
 
-            await player.ResumeAsync();
+            await nix.Player.ResumeAsync();
             await reply.MessageAsync(channel, "Resumed playing again");
         }
 
         public async Task LyricsAsync(ITextChannel channel)
         {
-            if (player is null)
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
             {
                 await reply.ErrorAsync(channel, "I'm not connected to a voice-channel");
                 return;
             }
-            if (player.PlayerState == PlayerState.Stopped)
+            if (nix.Player.PlayerState == PlayerState.Stopped)
             {
                 await reply.MessageAsync(channel, "Nothing is currently playing");
                 return;
             }
 
-            var lyrics = await player.Track.FetchLyricsFromGeniusAsync();
+            var lyrics = await nix.Player.Track.FetchLyricsFromGeniusAsync();
             if (string.IsNullOrEmpty(lyrics))
-                lyrics = await player.Track.FetchLyricsFromOVHAsync();
+                lyrics = await nix.Player.Track.FetchLyricsFromOVHAsync();
             if (string.IsNullOrEmpty(lyrics))
                 lyrics = "Could not find any lyrics for the current playing track";
 
             await reply.MessageAsync(channel, lyrics);
         }
 
-        public async Task InitiateDisconnectAsync()
+        public async Task InitiateDisconnectAsync(IGuild guild)
         {
-            var cancelled = SpinWait.SpinUntil(() => token.IsCancellationRequested, inactivity);
+            if (!players.TryGetValue(guild.Id, out NixPlayer nix))
+                return;
+
+            var cancelled = SpinWait.SpinUntil(() => nix.Token.IsCancellationRequested, inactivity);
 
             if (cancelled)
             {
-                source.Dispose();
-                source = new CancellationTokenSource();
-                token = source.Token;
+                nix.ResetCancellation();
                 return;
             }
 
-            await reply.MessageAsync(channel, "Leaving due to inactivity");
-            await lavaNode.LeaveAsync(player.VoiceChannel);
-            channel = null;
-            player = null;
-            users.Clear();
+            await reply.MessageAsync(nix.TextChannel, "Leaving due to inactivity");
+            await lavaNode.LeaveAsync(nix.VoiceChannel);
+            players.Remove(guild.Id, out _);
+            logger.AppendLog("AUDIO", $"Player disposed in [{guild.Name}]." +
+                $"({players.Count + 1} -> {players.Count})");
         }
 
-        public Task CancelDisconnect()
+        public Task CancelDisconnect(IGuild guild)
         {
-            source.Cancel();
+            if (!players.TryGetValue(guild.Id, out NixPlayer nix))
+                return Task.CompletedTask;
+
+            nix.ResetCancellation();
             return Task.CompletedTask;
         }
 
         private async Task OnTrackEnd(TrackEndedEventArgs args)
         {
-            LavaPlayer player = args.Player;
+            IGuild guild = args.Player.VoiceChannel.Guild;
+            if (!players.TryGetValue(guild.Id, out NixPlayer nix))
+                return;
 
-            if (repeat)
+            if (nix.OnRepeat)
             {
-                await player.PlayAsync(args.Track);
+                await nix.Player.PlayAsync(args.Track);
                 return;
             }
 
-            if (!player.Queue.TryDequeue(out var track))
+            if (!nix.Player.Queue.TryDequeue(out var track))
             {
-                await reply.ErrorAsync(channel, "No more tracks in the queue\n" +
+                await reply.ErrorAsync(nix.TextChannel, "No more tracks in the queue\n" +
                     $"Leaving in {inactivity:m\\:ss}");
-                await InitiateDisconnectAsync();
+                await InitiateDisconnectAsync(guild);
                 return;
             }
 
-            users.Dequeue();
-            await player.PlayAsync(track);
+            await nix.Player.PlayAsync(track);
         }
 
         private async Task OnTrackStart(TrackStartEventArgs args)
         {
             if (args.Player.PlayerState != PlayerState.Playing ||
                 args.Track is null)
-            {
-                users.Clear();
                 return;
-            }
 
-            await reply.MessageAsync(channel, 
+            await reply.MessageAsync(args.Player.TextChannel, 
                 $"**Playing** {GetTitleAsUrl(args.Track)}\n" +
                 $"**Length** ``{args.Track.Duration:m\\:ss}``");
         }
 
-        private async Task OnTrackStuck(TrackStuckEventArgs args)
+        private Task OnTrackStuck(TrackStuckEventArgs args)
         {
             //Placeholder
-            Console.WriteLine($"{args.Track.Title} got stuck");
+            logger.AppendLog("AUDIO", $"{args.Track.Title} got stuck");
+            return Task.CompletedTask;
         }
 
-        private async Task OnTrackException(TrackExceptionEventArgs args)
+        private Task OnTrackException(TrackExceptionEventArgs args)
         {
             //Placeholder
-            Console.WriteLine($"{args.Track.Title} threw an exception\n" +
+            logger.AppendLog("AUDIO", $"{args.Track.Title} threw an exception\n" +
                 $"{args.ErrorMessage}");
+            return Task.CompletedTask;
         }
 
         private async Task OnDisconnection(Exception e)
         {
-            if (player is null)
-                return;
+            foreach (NixPlayer nix in players.Values)
+            {
+                data.TryAdd(nix.Player, new LavalinkData(nix));
+                await lavaNode.LeaveAsync(nix.VoiceChannel);
+            }
 
-            data = new LavalinkData(player);
-            await lavaNode.LeaveAsync(player.VoiceChannel);
+            players.Clear();
         }
 
         private async Task OnReady()
         {
-            if (data.Equals(default(LavalinkData)))
-                return;
-
-            await lavaNode.JoinAsync(data.VoiceChannel, data.TextChannel)
-                    .ContinueWith(async (t) =>
-                    {
-                        player = await t;
-                        await player.UpdateVolumeAsync((ushort)data.Volume);
-                    });
-
-            await player.PlayAsync(data.CurrentTrack)
-                .ContinueWith(async (p) =>
-                {
-                    await player.SeekAsync(data.Position);
-                });
-
-            foreach (var track in data.Queue)
+            foreach (var data in data)
             {
-                player.Queue.Enqueue(track);
+                await lavaNode.JoinAsync(data.Value.VoiceChannel, data.Value.TextChannel)
+                    .ContinueWith(async (p) =>
+                    {
+                        var nix = new NixPlayer(await p);
+                        players.TryAdd(nix.VoiceChannel.GuildId, nix);
+
+                        await nix.Player.UpdateVolumeAsync((ushort)data.Value.Volume);
+                        await nix.Player.PlayAsync(data.Value.CurrentTrack);
+                        await nix.Player.SeekAsync(data.Value.Position);
+
+                        foreach (var track in data.Value.Queue)
+                        {
+                            nix.Player.Queue.Enqueue(track);
+                        }
+                    });
             }
+
+            data.Clear();
         }
 
         private async Task<SearchResponse> SearchAsync(string query)

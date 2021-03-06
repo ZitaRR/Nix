@@ -14,15 +14,17 @@ namespace Nix.Resources.Discord
         public ITextChannel TextChannel { get; }
         public TimeSpan Position { get; }
         public int Volume { get; }
+        public bool OnRepeat { get; }
 
-        public LavalinkData(LavaPlayer player)
+        public LavalinkData(NixPlayer player)
         {
-            CurrentTrack = player.Track ?? null;
+            CurrentTrack = player.CurrentTrack ?? null;
             Queue = player.Queue.ToList();
             VoiceChannel = player.VoiceChannel;
             TextChannel = player.TextChannel;
-            Position = player.Track?.Position ?? TimeSpan.Zero;
+            Position = CurrentTrack?.Position ?? TimeSpan.Zero;
             Volume = player.Volume;
+            OnRepeat = player.OnRepeat;
         }
     }
 }
