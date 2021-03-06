@@ -20,7 +20,7 @@ namespace Nix.Resources.Discord
         private readonly EmbedService reply;
         private readonly SpotifyService spotify;
         private readonly IDiscord discord;
-        private readonly TimeSpan inactivity = TimeSpan.FromSeconds(3);
+        private readonly TimeSpan inactivity = TimeSpan.FromMinutes(1);
         private readonly ushort defaultVolume = 50;
         private readonly int length = 40;
         private ConcurrentDictionary<ulong, NixPlayer> players;
