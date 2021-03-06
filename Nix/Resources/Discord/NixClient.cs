@@ -59,12 +59,12 @@ namespace Nix.Resources
             Client.JoinedGuild += Client_JoinedGuild;
             Client.LeftGuild += Client_LeftGuild;
             Client.UserVoiceStateUpdated += OnUserVoiceStateUpdate;
+            Client.Disconnected += OnDisconnection;
             Client.Ready += OnReady;
 
             await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
             await Client.LoginAsync(TokenType.Bot, Config.Data.Token);
             await Client.StartAsync();
-            Watch.Start();
         }
 
         private async Task Client_ReactionAdded(Cacheable<IUserMessage, ulong> cache,
@@ -151,6 +151,12 @@ namespace Nix.Resources
             }
         }
 
+        private Task OnDisconnection(Exception e)
+        {
+            Watch.Stop();
+            return Task.CompletedTask;
+        }
+
         private async Task OnReady()
         {
             var guilds = storage.FindAll<NixGuild>();
@@ -177,6 +183,7 @@ namespace Nix.Resources
                 await lavaNode.ConnectAsync();
 
             logger.AppendLog("Discord initialized");
+            Watch.Start();
         }
 
         private void HandleUser(SocketGuildUser user)
