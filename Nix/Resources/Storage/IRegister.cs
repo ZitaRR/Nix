@@ -1,4 +1,6 @@
-﻿namespace Nix.Resources
+﻿using Nix.Models;
+
+namespace Nix.Resources
 {
     public interface IRegister
     {

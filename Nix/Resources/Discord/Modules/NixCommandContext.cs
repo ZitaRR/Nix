@@ -1,5 +1,6 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
+using Nix.Models;
 
 namespace Nix.Resources.Discord
 {

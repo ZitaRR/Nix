@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Nix.Controllers;
 using Nix.Resources;
+using Nix.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
