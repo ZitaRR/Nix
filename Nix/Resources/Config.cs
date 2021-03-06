@@ -10,8 +10,18 @@ namespace Nix.Resources
     {
         internal static ConfigData Data { get; set; } = new ConfigData();
 
-        private static readonly string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\config.json";
+        private static readonly string directory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
+        private static readonly string path;
         private static bool initialized = false;
+
+        static Config()
+        {
+#if DEBUG
+            path = $"{directory}\\devconfig.json";
+#else 
+            path = $"{directory}\\config.json";
+#endif
+        }
 
         public static void Initialize()
         {

@@ -11,12 +11,20 @@ namespace Nix.Resources
     internal sealed class PersistentStorage : IPersistentStorage
     {
         private readonly LiteDatabase context;
-        private readonly string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Nix.db";
+        private readonly string directory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
+        private readonly string path;
         private readonly ILogger logger; 
 
         public PersistentStorage(ILogger logger)
         {
             this.logger = logger;
+
+#if DEBUG
+            path = $"{directory}\\devNix.db";
+#else
+            path = $"{directory}\\Nix.db";
+#endif
+
             context = new LiteDatabase(path);
             logger.AppendLog("DATABASE", $"Database initialized [{path}]");
         }
