@@ -64,7 +64,12 @@ namespace Nix.Resources.Discord
             {
                 Title = title,
                 Pages = pages,
-                Color = NormalColor
+                Color = NormalColor,
+                Options = new PaginatedAppearanceOptions
+                {
+                    JumpDisplayOptions = JumpDisplayOptions.Never,
+                    DisplayInformationIcon = false
+                }
             };
 
             await interactive.SendPaginatedMessageAsync(context, pager);
