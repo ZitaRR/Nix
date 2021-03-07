@@ -533,7 +533,7 @@ namespace Nix.Resources.Discord
             if (!players.TryGetValue(guild.Id, out NixPlayer nix))
                 return Task.CompletedTask;
 
-            nix.ResetCancellation();
+            nix.Source.Cancel();
             return Task.CompletedTask;
         }
 
@@ -637,5 +637,12 @@ namespace Nix.Resources.Discord
 
         private string GetTitleAsUrl(LavaTrack track)
             => $"[{FormatTitleLength(track.Title)}]({track.Url})";
+
+        public NixPlayer GetPlayer(ulong id)
+        {
+            if (!players.TryGetValue(id, out NixPlayer nix))
+                return null;
+            return nix;
+        }
     }
 }
