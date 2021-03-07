@@ -1,15 +1,17 @@
 ﻿using SpotifyAPI.Web;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord
 {
     public sealed class SpotifyService
     {
-        private const int TRACK = 31;
-        private const int PLAYLIST = 34;
-
+        private readonly Regex UrlRegex 
+            = new Regex(@"(?<=(playlist|track)\/).*?(?=\?)");
+        private readonly Regex UriRegex
+            = new Regex("(?<=(playlist|track):).*");
         private SpotifyClient client;
 
         public SpotifyService()
@@ -23,20 +25,13 @@ namespace Nix.Resources.Discord
 
         public async Task<(List<FullTrack> tracks, string playlistName)?> GetPlaylist(string url)
         {
-            string id;
-            FullPlaylist playlist;
-
-            try
-            {
-                id = GetIdFromUrl(url, PLAYLIST);
-                playlist = await client.Playlists.Get(id);
-            }
-            catch
-            {
+            string id = GetId(url);
+            if (id == "")
                 return null;
-            }
 
+            FullPlaylist playlist = await client.Playlists.Get(id);
             var tracks = new List<FullTrack>();
+
             foreach (var item in playlist.Tracks.Items)
             {
                 tracks.Add(item.Track as FullTrack);
@@ -46,38 +41,40 @@ namespace Nix.Resources.Discord
 
         public async Task<FullTrack> GetTrack(string url)
         {
-            string id;
-            FullTrack track;
+            string id = GetId(url);
+            if (id == "")
+                return null;
 
-            try
-            {
-                id = GetIdFromUrl(url, TRACK);
-                track = await client.Tracks.Get(id);
-            }
-            catch
-            {
-                throw;
-            }
-
+            FullTrack track = await client.Tracks.Get(id);
             return track;
         }
 
-        private string GetIdFromUrl(string url, int offset)
+        public bool IsSpotifyUri(string url)
         {
-            string id;
+            if (url.Contains("spotify"))
+                return true;
+            return false;
+        }
 
-            try
-            {
-                id = url.Substring(offset);
-                id = id.Substring(0, id.IndexOf("?"));
-            }
-            catch
-            {
-                throw;
-            }
+        public bool IsPlaylist(string url)
+        {
+            if (url.Contains("playlist"))
+                return true;
+            return false;
+        }
 
-            if (string.IsNullOrEmpty(id))
-                throw new ArgumentException("Invalid URL");
+        public bool IsTrack(string url)
+        {
+            if (url.Contains("track"))
+                return true;
+            return false;
+        }
+
+        private string GetId(string url)
+        {
+            string id = UrlRegex.Match(url).Value;
+            if (id == "")
+                id = UriRegex.Match(url).Value;
 
             return id;
         }

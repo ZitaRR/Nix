@@ -118,14 +118,16 @@ namespace Nix.Resources.Discord
             }
             if (!await JoinAsync(state, channel, true))
                 return;
+            if (spotify.IsSpotifyUri(search))
+            {
+                await PlaySpotifyAsync(state, channel, search);
+                return;
+            }
 
             var response = await SearchAsync(search);
             if (response.LoadStatus == LoadStatus.LoadFailed ||
                 response.LoadStatus == LoadStatus.NoMatches)
             {
-                if (await PlaySpotifyAsync(state, channel, search))
-                    return;
-
                 await reply.ErrorAsync(channel, "No matches");
                 return;
             }
@@ -186,66 +188,72 @@ namespace Nix.Resources.Discord
             }
         }
 
-        public async Task<bool> PlaySpotifyAsync(IVoiceState state, ITextChannel channel, string url)
+        public async Task PlaySpotifyAsync(IVoiceState state, ITextChannel channel, string url)
         {
             if (!await JoinAsync(state, channel, true))
-                return false;
-            if (players.TryGetValue(channel.GuildId, out NixPlayer nix))
-                return false;
+                return;
+            if (!players.TryGetValue(channel.GuildId, out NixPlayer nix))
+                return;
 
             SpotifyAPI.Web.FullTrack track;
-            var playlist = await spotify.GetPlaylist(url);
 
-            if (playlist != null)
+            if (spotify.IsPlaylist(url))
             {
-                await reply.MessageAsync(channel,
-                    $"**Playlist** [{playlist.Value.playlistName}]({url})\n" +
-                    $"**Enqueued** {playlist.Value.tracks.Count} tracks");
+                var playlist = await spotify.GetPlaylist(url);
 
-                for (int i = 0; i < playlist.Value.tracks.Count; i++)
+                if (playlist != null)
                 {
-                    track = playlist.Value.tracks[i];
+                    await reply.MessageAsync(channel,
+                        $"**Playlist** [{playlist.Value.playlistName}]({url})\n" +
+                        $"**Enqueued** {playlist.Value.tracks.Count} tracks");
+
+                    for (int i = 0; i < playlist.Value.tracks.Count; i++)
+                    {
+                        track = playlist.Value.tracks[i];
+                        var response = await lavaNode.SearchYouTubeAsync(
+                            $"{track.Artists[0].Name} {track.Name} Audio");
+
+                        if (response.LoadStatus == LoadStatus.LoadFailed ||
+                            response.LoadStatus == LoadStatus.NoMatches)
+                        {
+                            continue;
+                        }
+                        if (nix.Player.PlayerState == PlayerState.Stopped ||
+                            nix.Player.PlayerState == PlayerState.Connected)
+                        {
+                            await nix.Player.PlayAsync(response.Tracks[0]);
+                            continue;
+                        }
+
+                        nix.Player.Queue.Enqueue(response.Tracks[0]);
+                    }
+                    return;
+                }
+            }
+            else
+            {
+                track = await spotify.GetTrack(url);
+                if (track != null)
+                {
                     var response = await lavaNode.SearchYouTubeAsync(
                         $"{track.Artists[0].Name} {track.Name} Audio");
 
                     if (response.LoadStatus == LoadStatus.LoadFailed ||
                         response.LoadStatus == LoadStatus.NoMatches)
-                    {
-                        continue;
-                    }
+                        return;
                     if (nix.Player.PlayerState == PlayerState.Stopped ||
                         nix.Player.PlayerState == PlayerState.Connected)
                     {
                         await nix.Player.PlayAsync(response.Tracks[0]);
-                        continue;
+                        return;
                     }
 
                     nix.Player.Queue.Enqueue(response.Tracks[0]);
+                    return;
                 }
-                return true;
             }
 
-            track = await spotify.GetTrack(url);
-            if (track != null)
-            {
-                var response = await lavaNode.SearchYouTubeAsync(
-                    $"{track.Artists[0].Name} {track.Name} Audio");
-
-                if (response.LoadStatus == LoadStatus.LoadFailed ||
-                    response.LoadStatus == LoadStatus.NoMatches)
-                    return false;
-                if (nix.Player.PlayerState == PlayerState.Stopped ||
-                    nix.Player.PlayerState == PlayerState.Connected)
-                {
-                    await nix.Player.PlayAsync(response.Tracks[0]);
-                    return true;
-                }
-
-                nix.Player.Queue.Enqueue(response.Tracks[0]);
-                return true;
-            }
-
-            return false;
+            return;
         }
 
         public async Task DurationAsync(ITextChannel channel)
