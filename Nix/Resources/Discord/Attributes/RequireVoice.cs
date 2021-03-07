@@ -12,19 +12,12 @@ namespace Nix.Resources.Discord
             CommandInfo command,
             IServiceProvider services)
         {
-            if (context.User is SocketGuildUser user)
-            {
-                if (user.VoiceState is null)
-                {
-                    return Task.FromResult(PreconditionResult.FromError("You must be connected to a voice-channel"));
-                }
+            if (context.User is SocketGuildUser user &&
+                user.VoiceState is null)
+                return Task.FromResult(PreconditionResult
+                    .FromError("You must be connected to a voice-channel"));
 
-                return Task.FromResult(PreconditionResult.FromSuccess());
-            }
-            else
-            {
-                return Task.FromResult(PreconditionResult.FromError("You must be in a server"));
-            }
+            return Task.FromResult(PreconditionResult.FromSuccess());
         }
     }
 }
