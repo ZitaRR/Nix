@@ -22,7 +22,7 @@ namespace Nix.Resources.Discord
         private readonly IDiscord discord;
         private readonly TimeSpan inactivity = TimeSpan.FromMinutes(1);
         private readonly ushort defaultVolume = 50;
-        private readonly int length = 40;
+        private readonly int titleLength = 40;
         private ConcurrentDictionary<ulong, NixPlayer> players;
         private ConcurrentDictionary<LavaPlayer, LavalinkData> data;
 
@@ -640,11 +640,24 @@ namespace Nix.Resources.Discord
             return await lavaNode.SearchYouTubeAsync(query);
         }
 
-        private string FormatTitleLength(string title)
-            => title.Length > length ? title.Substring(0, length) + "..." : title;
+        private string FormatTitle(string title)
+        {
+            int index = title.IndexOfAny(new char[] { '(', '[' });
+            if (index != -1)
+                title = title.Substring(0, index);
+
+            if (title.Length > titleLength)
+            {
+                title = title.Substring(0, titleLength);
+                if (char.IsWhiteSpace(title[^1]))
+                    return title[0..^1] + "...";
+                return title + "...";
+            }
+            return title;
+        }
 
         private string GetTitleAsUrl(LavaTrack track)
-            => $"[{FormatTitleLength(track.Title)}]({track.Url})";
+            => $"[{FormatTitle(track.Title)}]({track.Url})";
 
         public NixPlayer GetPlayer(ulong id)
         {
