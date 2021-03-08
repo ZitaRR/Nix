@@ -75,7 +75,8 @@ namespace Nix.Resources.Discord
                     });
                 logger.AppendLog("AUDIO", $"New player in [{channel.Guild.Name}]. " +
                     $"({players.Count - 1} -> {players.Count})");
-                await reply.MessageAsync(channel, $"Joined {state?.VoiceChannel.Name}");
+                await reply.MessageAsync(channel, $"Joined {state?.VoiceChannel.Name}\n" +
+                    $"Audio commands are now bounded to {channel.Name}");
                 return true;
             }
             catch(Exception e)
