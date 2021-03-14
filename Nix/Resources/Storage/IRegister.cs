@@ -1,14 +1,15 @@
-﻿using Nix.Models;
+﻿using Discord.WebSocket;
+using System.Threading.Tasks;
 
 namespace Nix.Resources
 {
     public interface IRegister
     {
-        void RegisterGuild(NixGuild guild);
-        void UnRegisterGuild(NixGuild guild);
-        void RegisterUser(NixUser user);
-        void UnregisterUser(NixUser user);
-        void RegisterChannel(NixChannel channel);
-        void UnregisterChannel(NixChannel channel);
+        Task RegisterGuild(SocketGuild guild);
+        Task UnregisterGuild(SocketGuild guild);
+        Task RegisterUser(SocketGuildUser user);
+        Task UnregisterUser(SocketGuildUser user);
+        Task RegisterChannel(SocketGuildChannel channel);
+        Task UnregisterChannel(SocketGuildChannel channel);
     }
 }

@@ -5,17 +5,17 @@ namespace Nix.Models
 {
     public class NixChannel : IStorable
     {
+        public int Id { get; set; }
+        public string DiscordId { get; set; }
+        public string GuildId { get; set; }
         public string Name { get; set; }
-        public int ID { get; set; }
-        public ulong ChannelID { get; set; }
-        public ulong GuildID { get; set; }
         public DateTime StoredAt { get; set; }
 
         public override string ToString()
             => $"Name: {Name}\n" +
-            $"ID: {ID}\n" +
-            $"Channel ID: {ChannelID}\n" +
-            $"Guild ID: {GuildID}\n" +
+            $"ID: {Id}\n" +
+            $"Channel ID: {DiscordId}\n" +
+            $"Guild ID: {GuildId}\n" +
             $"Stored At: {StoredAt}";
     }
 }

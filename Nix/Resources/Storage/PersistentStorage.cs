@@ -1,86 +1,167 @@
-﻿using LiteDB;
+﻿using Dapper;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using System.Data;
+using System.Data.SqlClient;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace Nix.Resources
 {
     internal sealed class PersistentStorage : IPersistentStorage
     {
-        private readonly LiteDatabase context;
-        private readonly string directory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
-        private readonly string path;
-        private readonly ILogger logger; 
+        private readonly ILogger logger;
+        private readonly string connectionString;
+        private IDbConnection connection;
 
         public PersistentStorage(ILogger logger)
         {
             this.logger = logger;
+            connectionString = Program.ConnectionString();
 
-#if DEBUG
-            path = $"{directory}\\devNix.db";
-#else
-            path = $"{directory}\\Nix.db";
-#endif
-
-            context = new LiteDatabase(path);
-            logger.AppendLog("DATABASE", $"Database initialized [{path}]");
+            logger.AppendLog("DATABASE", $"Database initialized [{connectionString}]");
         }
 
-        public void Store<T>(T entity) where T : IStorable
+        public async Task InsertAsync<T>(T entity) where T : IStorable
         {
-            if (Exists<T>(x => x.ID == entity.ID))
-            {
-                logger.AppendLog("DATABASE", $"Entity already exists");
-                return;
-            }
+            entity.StoredAt = DateTime.UtcNow;
+            PropertyInfo[] props = GetProperties(entity);
+            var cols = string.Join(",", props.Select(x => x.Name));
+            var values = string.Join(",", props.Select(x => $"@{x.Name}"));
+            var sql = $"INSERT INTO [dbo].[{entity.GetType().Name}]({cols})VALUES({values})";
 
-            entity.StoredAt = DateTime.Now;
-            var collection = context.GetCollection<T>();
-            collection.Insert(entity);
-            logger.AppendLog("DATABASE", $"Entity of type {entity.GetType().Name} has been stored");
-        }
-
-        public void Delete<T>(Expression<Func<T, bool>> predicate) where T : IStorable
-        {
-            try
+            using(connection = new SqlConnection(connectionString))
             {
-                var collection = context.GetCollection<T>();
-                collection.DeleteMany(predicate);
-            }
-            catch (LiteException e)
-            {
-                logger.AppendLog(e);
+                connection.Open();
+                int rows = await connection.ExecuteAsync(sql, entity);
+                connection.Close();
             }
         }
 
-        public IEnumerable<T> Find<T>(Expression<Func<T, bool>> predicate) where T : IStorable
+        public async Task UpdateAsync<T>(T entity) where T : IStorable
         {
-            var collection = context.GetCollection<T>();
-            return collection.Find(predicate);
+            PropertyInfo[] props = GetProperties(entity);
+            var expressions = string.Join(",", props.Select(x => $"{x.Name} = @{x.Name}"));
+            var sql = $"UPDATE [dbo].[{entity.GetType().Name}] SET {expressions} WHERE DiscordId = @DiscordId";
+
+            using (connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    await connection.ExecuteAsync(sql, entity);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
         }
 
-        public IEnumerable<T> FindAll<T>() where T : IStorable
+        public async Task DeleteAsync<T>(T entity) where T : IStorable
         {
-            var collection = context.GetCollection<T>();
-            return collection.FindAll();
+            using (connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    await connection.ExecuteAsync(
+                        $"DELETE [dbo].[{entity.GetType().Name}]" +
+                        $"WHERE Id = @Id",
+                        new { entity.Id });
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
         }
 
-        public T FindOne<T>(Expression<Func<T, bool>> predicate) where T : IStorable
-            => Find(predicate).FirstOrDefault();
-
-        public void Update<T>(T entity) where T : IStorable
+        public async Task<T> FindOneAsync<T>(string sql, object obj = null) where T : IStorable
         {
-            var collection = context.GetCollection<T>();
-            collection.Update(entity);
+            using(connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    T result = await connection.QuerySingleAsync<T>(sql, obj);
+                    return result;
+                }
+                catch { }
+                finally
+                {
+                    connection.Close();
+                }
+                return default;
+            }
         }
 
-        public bool Exists<T>(Expression<Func<T, bool>> predicate) where T : IStorable
+        public async Task<IEnumerable<T>> FindAsync<T>(string sql, object obj = null) where T : IStorable
         {
-            var collection = context.GetCollection<T>();
-            return collection.Exists(predicate);
+            using(connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    IEnumerable<T> result = await connection.QueryAsync<T>(sql, obj);
+                    return result;
+                }
+                catch { }
+                finally
+                {
+                    connection.Close();
+                }
+                return default;
+            }
+        }
+
+        public async Task<IEnumerable<T>> FindAllAsync<T>() where T : IStorable
+        {
+            using (connection = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    connection.Open();
+                    IEnumerable<T> result = await connection.QueryAsync<T>(
+                        $"SELECT * FROM [dbo].[{typeof(T).Name}]");
+                    return result;
+                }
+                catch { }
+                finally
+                {
+                    connection.Close();
+                }
+                return default;
+            }
+        }
+
+        public async Task<bool> ExistsAsync<T>(T entity) where T : IStorable
+        {
+            using (connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                try
+                {
+                    var result = await connection.QuerySingleAsync<T>(
+                        $"SELECT * FROM [dbo].[{entity.GetType().Name}]" +
+                        $"WHERE DiscordId = @DiscordId",
+                        new { DiscordId = entity.DiscordId });
+                    return true;
+                }
+                catch { }
+                finally
+                {
+                    connection.Close();
+                }
+                return false;
+            }
+        }
+
+        private PropertyInfo[] GetProperties<T>(T entity) where T : IStorable
+        {
+            Type type = entity.GetType();
+            return type.GetProperties().Where(x => x.Name != "Id").ToArray();
         }
     }
 }

@@ -1,12 +1,11 @@
-﻿using LiteDB;
-using System;
+﻿using System;
 
 namespace Nix.Resources
 {
     public interface IStorable
     {
-        [BsonId]
-        public int ID { get; }
+        public int Id { get; }
+        public string DiscordId { get; set; }
         public DateTime StoredAt { get; set; }
     }
 }
