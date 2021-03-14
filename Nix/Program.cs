@@ -4,6 +4,7 @@ using Nix.Controllers;
 using Nix.Resources;
 using Nix.Models;
 using System;
+using System.Configuration;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -25,6 +26,17 @@ namespace Nix
 
         public static string Name()
             => Assembly.GetExecutingAssembly().GetName().Name;
+
+        public static string ConnectionString()
+        {
+            string name;
+#if DEBUG
+            name = "DevNixDB";
+#else
+            name = "NixDB";
+#endif
+            return ConfigurationManager.ConnectionStrings[name].ConnectionString;
+        }
     }
 
     static class Extensions
@@ -38,23 +50,10 @@ namespace Nix
                 .AddSingleton<SettingsController>()
                 .AddSingleton<DiscordController>();
 
-        public static IEnumerable<NixRole> GetNixRoles(this IReadOnlyCollection<SocketRole> roles)
+        public static ulong ToUlong(this string s)
         {
-            if (roles is null)
-                throw new ArgumentNullException(nameof(roles));
-            else if (roles.Count <= 0)
-                throw new ArgumentOutOfRangeException(nameof(roles));
-
-            var list = new List<NixRole>();
-            foreach (var role in roles)
-            {
-                list.Add(new NixRole 
-                { 
-                    RoleID = role.Id,
-                    Name = role.Name 
-                });
-            }
-            return list;
+            ulong.TryParse(s, out ulong result);
+            return result;
         }
 
         public static NixUser GetNixUser(this SocketGuildUser user)
@@ -64,13 +63,11 @@ namespace Nix
 
             return new NixUser
             {
-                Name = user.Username,
-                UserID = user.Id,
-                GuildID = user.Guild.Id,
-                AvatarURL = user.GetAvatarUrl(),
+                UserName = user.Username,
+                DiscordId = user.Id.ToString(),
+                AvatarUrl = user.GetAvatarUrl(),
                 CreatedAt = user.CreatedAt.DateTime,
                 JoinedAt = user.JoinedAt.GetValueOrDefault().DateTime,
-                Roles = user.Roles.GetNixRoles(),
                 TotalMessages = 0
             };
         }
@@ -80,26 +77,10 @@ namespace Nix
             if (guild is null)
                 throw new ArgumentNullException(nameof(guild));
 
-            var users = new List<NixUser>();
-            foreach (var user in guild.Users)
-            {
-                users.Add(user.GetNixUser());
-            }
-
-            var channels = new List<NixChannel>();
-            foreach (var channel in guild.Channels)
-            {
-                if (channel is ISocketMessageChannel)
-                    channels.Add(channel.GetNixChannel());
-            }
-
             return new NixGuild
             {
                 Name = guild.Name,
-                GuildID = guild.Id,
-                Users = users,
-                Channels = channels,
-                Client = guild.CurrentUser.GetNixUser()
+                DiscordId = guild.Id.ToString()
             };
         }
 
@@ -111,8 +92,8 @@ namespace Nix
             return new NixChannel
             {
                 Name = channel.Name,
-                ChannelID = channel.Id,
-                GuildID = channel.Guild.Id
+                DiscordId = channel.Id.ToString(),
+                GuildId = channel.Guild.Id.ToString()
             };
         }
     }

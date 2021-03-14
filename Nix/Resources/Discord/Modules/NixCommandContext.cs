@@ -6,15 +6,10 @@ namespace Nix.Resources.Discord
 {
     public class NixCommandContext : SocketCommandContext
     {
-        public NixUser GetNixUser
-            => storage.FindOne<NixUser>(x => x.UserID == User.Id && x.GuildID == Guild.Id);
-        public NixChannel GetNixChannel
-            => storage.FindOne<NixChannel>(x => x.ChannelID == Channel.Id);
+        public IPersistentStorage Storage { get; }
         public NixClient NixClient { get; }
         public EmbedService Reply { get; }
         public ScriptService Script { get; }
-
-        private readonly IPersistentStorage storage;
 
         public NixCommandContext(DiscordSocketClient client,
             SocketUserMessage message,
@@ -24,7 +19,7 @@ namespace Nix.Resources.Discord
             ScriptService script) 
             : base(client, message)
         {
-            this.storage = storage;
+            Storage = storage;
             NixClient = nixClient;
             Reply = reply;
             Script = script;

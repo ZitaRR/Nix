@@ -1,8 +1,6 @@
 ﻿using Discord;
-using LiteDB;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Nix.Resources
 {
@@ -40,9 +38,6 @@ namespace Nix.Resources
 
         public void AppendLog(Exception exception)
             => AppendLog("CLIENT", exception.Message, ConsoleColor.DarkRed);
-
-        public void AppendLog(LiteException exception)
-            => AppendLog("DATABASE", exception.Message, ConsoleColor.DarkRed);
 
         public void WriteLog(NixLogMessage log)
         {

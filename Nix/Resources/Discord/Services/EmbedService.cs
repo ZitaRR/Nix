@@ -77,93 +77,12 @@ namespace Nix.Resources.Discord
 
         public async Task EventAsync(ITextChannel channel, NixEvent nixEvent)
         {
-            embed = new EmbedBuilder
-            {
-                Author = new EmbedAuthorBuilder
-                {
-                    Name = nixEvent.Creator.Name,
-                    IconUrl = nixEvent.Creator.AvatarURL
-                },
-                Title = nixEvent.Name,
-                Description =   $"**ID** ``{nixEvent.ID}``\n" +
-                                $"**Time** ``{nixEvent.Start:yyyy-MM-dd, HH:mm UTCz}``\n\n" +
-                                $"{nixEvent.Description}",
-                Fields = new List<EmbedFieldBuilder>
-                {
-                    new EmbedFieldBuilder
-                    {
-                        IsInline = true,
-                        Name = "Participants",
-                        Value = "N/A"
-                    },
-                    new EmbedFieldBuilder
-                    {
-                        IsInline = true,
-                        Name = "Interested",
-                        Value = "N/A"
-                    }
-                },
-                Color = NormalColor,
-            };
-
-            var message = await channel.SendMessageAsync(embed: embed.Build());
-            await message.AddReactionAsync(new Emoji("✔️"));
-            await message.AddReactionAsync(new Emoji("❌"));
-            await message.AddReactionAsync(new Emoji("❔"));
-
-            nixEvent.MessageID = message.Id;
-            storage.Update(nixEvent);
+            throw new NotImplementedException($"{nameof(EventAsync)} has not implemented yet.");
         }
 
         public async Task EventUpdateAsync(ITextChannel channel, SocketReaction react, NixEvent nixEvent)
         {
-            var message = await channel.GetMessageAsync(nixEvent.MessageID) as IUserMessage;
-            if (message is null)
-                return;
-
-            var participants = nixEvent.Participants.FirstOrDefault()?.Name ?? "N/A";
-            for (int i = 1; i < nixEvent.Participants.Count; i++)
-            {
-                participants += $", {nixEvent.Participants[i].Name}";
-            }
-
-            var interested = nixEvent.PossibleParticipants.FirstOrDefault()?.Name ?? "N/A";
-            for (int i = 1; i < nixEvent.PossibleParticipants.Count; i++)
-            {
-                participants += $", {nixEvent.PossibleParticipants[i].Name}";
-            }
-
-            embed = new EmbedBuilder
-            {
-                Author = new EmbedAuthorBuilder
-                {
-                    Name = nixEvent.Creator.Name,
-                    IconUrl = nixEvent.Creator.AvatarURL
-                },
-                Title = nixEvent.Name,
-                Description =   $"**ID** ``{nixEvent.ID}``\n" +
-                                $"**Time** ``{nixEvent.Start:yyyy-MM-dd, HH:mm UTCz}``\n\n" +
-                                $"{nixEvent.Description}",
-                Fields = new List<EmbedFieldBuilder> 
-                { 
-                    new EmbedFieldBuilder
-                    {
-                        IsInline = true,
-                        Name = "Participants",
-                        Value = participants
-                    },
-                    new EmbedFieldBuilder
-                    {
-                        IsInline = true,
-                        Name = "Interested",
-                        Value = interested
-                    }
-                },
-                Color = NormalColor,
-            };
-
-            await message.ModifyAsync(x => x.Embed = embed.Build()).ConfigureAwait(false);
-            await message.RemoveReactionAsync(react.Emote, react.User.Value);
+            throw new NotImplementedException($"{nameof(EventUpdateAsync)} has not implemeted yet.");
         }
     }
 }

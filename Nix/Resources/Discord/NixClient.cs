@@ -81,22 +81,19 @@ namespace Nix.Resources
             }
         }
 
-        private Task Client_LeftGuild(SocketGuild guild)
+        private async Task Client_LeftGuild(SocketGuild guild)
         {
-            register.UnRegisterGuild(guild.GetNixGuild());
-            return Task.CompletedTask;
+            await register.UnregisterGuild(guild);
         }
 
-        private Task Client_JoinedGuild(SocketGuild guild)
+        private async Task Client_JoinedGuild(SocketGuild guild)
         {
-            register.RegisterGuild(guild.GetNixGuild());
-            return Task.CompletedTask;
+            await register.RegisterGuild(guild);
         }
 
-        private Task Client_GuildAvailable(SocketGuild guild)
+        private async Task Client_GuildAvailable(SocketGuild guild)
         {
-            register.RegisterGuild(guild.GetNixGuild());
-            return Task.CompletedTask;
+            await register.RegisterGuild(guild);
         }
 
         private async Task OnUserVoiceStateUpdate(SocketUser user, SocketVoiceState origin, SocketVoiceState destination)
@@ -132,7 +129,7 @@ namespace Nix.Resources
             if (msg is null || msg.Author.IsBot)
                 return;
 
-            HandleUser(msg.Author as SocketGuildUser);
+            await HandleUser(msg.Author as SocketGuildUser);
             logger.AppendLog($"{msg.Author.Username} >> {msg.Content}");
 
             int argPos = 0;
@@ -160,8 +157,8 @@ namespace Nix.Resources
 
         private async Task OnReady()
         {
-            var guilds = storage.FindAll<NixGuild>();
-            var users = storage.FindAll<NixUser>();
+            var guilds = await storage.FindAllAsync<NixGuild>();
+            var users = await storage.FindAllAsync<NixUser>();
             logger.AppendLog($"{guilds.Count()} guild(s) are registered with {users.Count()} user(s)");
 
 #if DEBUG
@@ -187,14 +184,21 @@ namespace Nix.Resources
             Watch.Start();
         }
 
-        private void HandleUser(SocketGuildUser user)
+        private async Task HandleUser(SocketGuildUser user)
         {
-            var nixUser = storage.FindOne<NixUser>(x => x.UserID == user.Id && x.GuildID == user.Guild.Id);
+            var nixUser = await storage.FindOneAsync<NixUser>(
+                "SELECT * FROM NixUser " +
+                "WHERE DiscordId = @DiscordId",
+                new { DiscordId = user.Id.ToString() });
+
             if (nixUser is null)
-                register.RegisterUser(nixUser = user.GetNixUser());
+            {
+                await storage.InsertAsync(user.GetNixUser());
+                return;
+            }
 
             nixUser.TotalMessages++;
-            storage.Update(nixUser);
+            await storage.UpdateAsync(nixUser);
         }
     }
 }

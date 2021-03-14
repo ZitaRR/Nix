@@ -3,6 +3,7 @@ using Nix.Views;
 using System;
 using System.Collections.Generic;
 using Nix.Models;
+using System.Threading.Tasks;
 
 namespace Nix.Controllers
 {
@@ -22,6 +23,7 @@ namespace Nix.Controllers
             this.discord = discord;
             this.logger = logger;
             this.storage = storage;
+
 
             Menu = new NavigationView(this)
             {
@@ -57,130 +59,27 @@ namespace Nix.Controllers
 
         private IView Guilds()
         {
-            var _guilds = storage.FindAll<NixGuild>();
-            var options = new List<Option>();
-            foreach (var guild in _guilds)
-            {
-                options.Add(new Option
-                {
-                    Name = guild.Name,
-                    View = () => Guild(guild.GuildID)
-                });
-            }
-
-            int index = guilds?.Index ?? 0;
-
-            return guilds = new NavigationView(this, index)
-            {
-                Name = "Guilds",
-                Parent = Menu,
-                Options = options
-            };
+            throw new NotImplementedException();
         }
 
         private IView Guild(ulong guildId)
         {
-            var _guild = storage.FindOne<NixGuild>(x => x.GuildID == guildId);
-            guild = new NavigationView(this)
-            {
-                Name = _guild.Name ?? "N/A",
-                Parent = Guilds(),
-                Options = new List<Option>
-                    {
-                        new Option { Name = "Users", View = () => Users(guildId) },
-                        new Option { Name = "Channels", View = () => Channels(guildId) },
-                        new Option { Name = "Events", View = () => Events(guildId) }
-                    }
-            };
-            return guild;
+            throw new NotImplementedException();
         }
 
         private IView Channels(ulong guildId)
         {
-            var _channels = storage.Find<NixChannel>(x => x.GuildID == guildId);
-            var options = new List<Option>();
-            foreach (var channel in _channels)
-            {
-                options.Add(new Option
-                {
-                    Name = channel.Name,
-                    View = () =>
-                    {
-                        return new NotificationView(this, channel.ToString())
-                        {
-                            Name = channel.Name,
-                            Parent = Channels(guildId)
-                        };
-                    }
-                });
-            }
-
-            int index = channels?.Index ?? 0;
-
-            return channels = new NavigationView(this, index)
-            {
-                Name = "Channels",
-                Parent = Guild(guildId),
-                Options = options
-            };
+            throw new NotImplementedException();
         }
 
         private IView Users(ulong guildId)
         {
-            var _users = storage.Find<NixUser>(x => x.GuildID == guildId);
-            var options = new List<Option>();
-            foreach (var user in _users)
-            {
-                options.Add(new Option
-                {
-                    Name = user.Name,
-                    View = () =>
-                    {
-                        return new NotificationView(this, user.ToString())
-                        {
-                            Name = user.Name,
-                            Parent = Users(guildId)
-                        };
-                    }
-                });
-            }
-
-            int index = users?.Index ?? 0;
-
-            return users = new NavigationView(this, index)
-            {
-                Name = "Users",
-                Parent = Guild(guildId),
-                Options = options
-            };
+            throw new NotImplementedException();
         }
 
         private IView Events(ulong guildId)
         {
-            var events = storage.Find<NixEvent>(x => x.GuildID == guildId);
-            var options = new List<Option>();
-            foreach (var nixEvent in events)
-            {
-                options.Add(new Option
-                {
-                    Name = nixEvent.Name,
-                    View = () =>
-                    {
-                        return new NotificationView(this, nixEvent.ToString())
-                        {
-                            Name = nixEvent.Name,
-                            Parent = Events(guildId)
-                        };
-                    }
-                });
-            }
-
-            return new NavigationView(this, 0)
-            {
-                Name = "Events",
-                Options = options,
-                Parent = Guild(guildId)
-            };
+            throw new NotImplementedException();
         }
     }
 }
