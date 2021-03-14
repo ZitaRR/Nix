@@ -3,7 +3,7 @@ using Discord.Commands;
 using System;
 using System.Threading.Tasks;
 
-namespace Nix.Resources.Discord.Commands
+namespace Nix.Resources.Discord
 {
     public class UpdateModule : ModuleBase<NixCommandContext>
     {

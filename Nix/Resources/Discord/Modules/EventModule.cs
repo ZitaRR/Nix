@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nix.Resources.Discord.Commands
+namespace Nix.Resources.Discord
 {
     public class EventModule : InteractiveBase<NixCommandContext>
     {
