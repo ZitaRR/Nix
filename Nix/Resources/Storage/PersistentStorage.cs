@@ -29,13 +29,24 @@ namespace Nix.Resources
             PropertyInfo[] props = GetProperties(entity);
             var cols = string.Join(",", props.Select(x => x.Name));
             var values = string.Join(",", props.Select(x => $"@{x.Name}"));
-            var sql = $"INSERT INTO [dbo].[{entity.GetType().Name}]({cols})VALUES({values})";
+            var sql = $"INSERT INTO {entity.GetType().Name} " +
+                $"({cols})VALUES({values})";
 
             using(connection = new SqlConnection(connectionString))
             {
-                connection.Open();
-                int rows = await connection.ExecuteAsync(sql, entity);
-                connection.Close();
+                try
+                {
+                    connection.Open();
+                    await connection.ExecuteAsync(sql, entity);
+                }
+                catch (Exception e)
+                {
+                    logger.AppendLog(e.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                }
             }
         }
 
@@ -43,7 +54,9 @@ namespace Nix.Resources
         {
             PropertyInfo[] props = GetProperties(entity);
             var expressions = string.Join(",", props.Select(x => $"{x.Name} = @{x.Name}"));
-            var sql = $"UPDATE [dbo].[{entity.GetType().Name}] SET {expressions} WHERE DiscordId = @DiscordId";
+            var sql = $"UPDATE {entity.GetType().Name} " +
+                $"SET {expressions} " +
+                $"WHERE Id = @Id";
 
             using (connection = new SqlConnection(connectionString))
             {
@@ -51,6 +64,10 @@ namespace Nix.Resources
                 {
                     connection.Open();
                     await connection.ExecuteAsync(sql, entity);
+                }
+                catch (Exception e)
+                {
+                    logger.AppendLog(e.Message);
                 }
                 finally
                 {
@@ -67,9 +84,12 @@ namespace Nix.Resources
                 {
                     connection.Open();
                     await connection.ExecuteAsync(
-                        $"DELETE [dbo].[{entity.GetType().Name}]" +
-                        $"WHERE Id = @Id",
-                        new { entity.Id });
+                        $"DELETE {entity.GetType().Name} " +
+                        $"WHERE Id = @Id", entity);
+                }
+                catch (Exception e)
+                {
+                    logger.AppendLog(e.Message);
                 }
                 finally
                 {
@@ -78,17 +98,20 @@ namespace Nix.Resources
             }
         }
 
-        public async Task<T> FindOneAsync<T>(string sql, object obj = null) where T : IStorable
+        public async Task<T> FindOneAsync<T>(object param) where T : IStorable
         {
             using(connection = new SqlConnection(connectionString))
             {
                 try
                 {
                     connection.Open();
-                    T result = await connection.QuerySingleAsync<T>(sql, obj);
+                    T result = (await FindAsync<T>(param)).FirstOrDefault();
                     return result;
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    logger.AppendLog(e.Message);
+                }
                 finally
                 {
                     connection.Close();
@@ -97,17 +120,25 @@ namespace Nix.Resources
             }
         }
 
-        public async Task<IEnumerable<T>> FindAsync<T>(string sql, object obj = null) where T : IStorable
+        public async Task<IEnumerable<T>> FindAsync<T>(object param) where T : IStorable
         {
+            PropertyInfo[] props = GetProperties(param);
+            var conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
+            var sql = $"SELECT * FROM {typeof(T).Name} " +
+                $"WHERE {conditions}";
+
             using(connection = new SqlConnection(connectionString))
             {
                 try
                 {
                     connection.Open();
-                    IEnumerable<T> result = await connection.QueryAsync<T>(sql, obj);
+                    IEnumerable<T> result = await connection.QueryAsync<T>(sql, param);
                     return result;
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    logger.AppendLog(e.Message);
+                }
                 finally
                 {
                     connection.Close();
@@ -124,10 +155,13 @@ namespace Nix.Resources
                 {
                     connection.Open();
                     IEnumerable<T> result = await connection.QueryAsync<T>(
-                        $"SELECT * FROM [dbo].[{typeof(T).Name}]");
+                        $"SELECT * FROM {typeof(T).Name}");
                     return result;
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    logger.AppendLog(e.Message);
+                }
                 finally
                 {
                     connection.Close();
@@ -144,12 +178,14 @@ namespace Nix.Resources
                 try
                 {
                     var result = await connection.QuerySingleAsync<T>(
-                        $"SELECT * FROM [dbo].[{entity.GetType().Name}]" +
-                        $"WHERE DiscordId = @DiscordId",
-                        new { DiscordId = entity.DiscordId });
+                        $"SELECT * FROM {typeof(T).Name} " +
+                        $"WHERE DiscordId = @DiscordId", entity);
                     return true;
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    logger.AppendLog(e.Message);
+                }
                 finally
                 {
                     connection.Close();
@@ -158,9 +194,9 @@ namespace Nix.Resources
             }
         }
 
-        private PropertyInfo[] GetProperties<T>(T entity) where T : IStorable
+        private PropertyInfo[] GetProperties(object obj)
         {
-            Type type = entity.GetType();
+            Type type = obj.GetType();
             return type.GetProperties().Where(x => x.Name != "Id").ToArray();
         }
     }

@@ -3,7 +3,7 @@
   <PropertyGroup>   
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
     <Authors>Zita</Authors>
 	<ProductName>Nix</ProductName>
   </PropertyGroup>
@@ -16,7 +16,7 @@
     <PackageReference Include="SpotifyAPI.Web" Version="6.0.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
-    <PackageReference Include="Victoria" Version="5.1.9" />
+    <PackageReference Include="Victoria" Version="5.1.11" />
   </ItemGroup>
 
 </Project>
