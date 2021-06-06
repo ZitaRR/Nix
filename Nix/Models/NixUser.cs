@@ -7,7 +7,8 @@ namespace Nix.Models
     {
         public int Id { get; set; }
         public string DiscordId { get; set; }
-        public string UserName { get; set; }
+        public string GuildId { get; set; }
+        public string Name { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime JoinedAt { get; set; }
         public DateTime StoredAt { get; set; }
@@ -17,7 +18,8 @@ namespace Nix.Models
         public override string ToString()
             => $"ID: {Id}\n" + 
             $"User ID: {DiscordId}\n" +
-            $"Username: {UserName}\n" +
+            $"Guild ID: {GuildId}\n" +
+            $"Username: {Name}\n" +
             $"Created At: {CreatedAt}\n" +
             $"Joined At: {JoinedAt}\n" +
             $"Stored At: {StoredAt}\n" +

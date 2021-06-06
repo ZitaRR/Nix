@@ -24,7 +24,7 @@ namespace Nix.Models
             var users = "";
             foreach (var user in Participants)
             {
-                users += $"\n          {user.UserName}";
+                users += $"\n          {user.Name}";
             }
             return $"Name: {Name}\n" +
             $"ID: {Id}\n" +

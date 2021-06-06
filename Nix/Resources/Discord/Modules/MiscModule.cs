@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Discord;
 using System.Collections.Generic;
+using Discord.WebSocket;
+using Nix.Models;
 
 namespace Nix.Resources.Discord
 {
@@ -15,8 +17,19 @@ namespace Nix.Resources.Discord
         }
 
         [Command("info")]
-        public async Task GetInfo()
+        public async Task GetInfo(SocketGuildUser user = null)
         {
+            NixUser nixUser;
+            if (user != null)
+            {
+                nixUser = await Context.GetNixUser(user.Id);
+                await ReplyAsync(nixUser.ToString());
+                return;
+            }
+            nixUser = await Context.GetNixUser();
+            await ReplyAsync(nixUser.ToString());
+
+            return;
             await Context.Reply.MessageAsync(Context.Channel as ITextChannel,
                 $"**Running On** ``{Context.NixClient.OS.VersionString}``\n" +
                 $"**Uptime** ``{Context.NixClient.Watch.Elapsed:h\\:mm\\:ss}``\n" +

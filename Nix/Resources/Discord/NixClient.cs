@@ -20,18 +20,26 @@ namespace Nix.Resources
         public Stopwatch Watch { get; private set; } = new Stopwatch();
         public OperatingSystem OS { get; } = Environment.OSVersion;
 
-        private CommandService commands;
+        private readonly CommandService commands;
         private readonly IServiceProvider services;
         private readonly ILogger logger;
         private readonly IPersistentStorage storage;
         private readonly IRegister register;
+        private readonly INixUserProvider userProvider;
+        private readonly EmbedService reply;
+        private readonly ScriptService script;
         private EventService eventService;
 
-        public NixClient(ILogger logger, IPersistentStorage storage, IRegister register)
+        public NixClient(
+            ILogger logger,
+            IPersistentStorage storage,
+            IRegister register,
+            INixUserProvider userProvider)
         {
             this.logger = logger;
             this.storage = storage;
             this.register = register;
+            this.userProvider = userProvider;
 
             Client = new DiscordSocketClient();
             commands = new CommandService();
@@ -42,6 +50,7 @@ namespace Nix.Resources
                 .AddSingleton(commands)
                 .AddSingleton(storage)
                 .AddSingleton(logger)
+                .AddSingleton(userProvider)
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<AudioService>()
                 .AddSingleton<SpotifyService>()
@@ -50,6 +59,9 @@ namespace Nix.Resources
                 .AddSingleton<ScriptService>()
                 .AddLavaNode(x => x.SelfDeaf = true)
                 .BuildServiceProvider();
+
+            reply = services.GetService<EmbedService>();
+            script = services.GetService<ScriptService>();
         }
 
         public async Task StartAsync()
@@ -136,9 +148,8 @@ namespace Nix.Resources
             if (msg.HasStringPrefix(Config.Data.Prefix, ref argPos) || 
                 msg.HasMentionPrefix(Client.CurrentUser, ref argPos))
             {
-                var context = new NixCommandContext(Client, msg, storage,
-                    this, services.GetRequiredService<EmbedService>(),
-                    services.GetRequiredService<ScriptService>());
+                var context = new NixCommandContext(Client, msg, this, 
+                    reply, script, userProvider);
                 IResult result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)
@@ -187,9 +198,7 @@ namespace Nix.Resources
         private async Task HandleUser(SocketGuildUser user)
         {
             var nixUser = await storage.FindOneAsync<NixUser>(
-                "SELECT * FROM NixUser " +
-                "WHERE DiscordId = @DiscordId",
-                new { DiscordId = user.Id.ToString() });
+                new { DiscordId = user.Id.ToString(), GuildId = user.Guild.Id.ToString() });
 
             if (nixUser is null)
             {

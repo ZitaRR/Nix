@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using Nix.Resources.Discord;
 
 namespace Nix
 {
@@ -46,6 +47,7 @@ namespace Nix
                 .AddSingleton<ILogger, Logger>()
                 .AddSingleton<IPersistentStorage, PersistentStorage>()
                 .AddSingleton<IRegister, Register>()
+                .AddSingleton<INixUserProvider, NixUserProvider>()
                 .AddSingleton<HomeController>()
                 .AddSingleton<SettingsController>()
                 .AddSingleton<DiscordController>();
@@ -63,8 +65,9 @@ namespace Nix
 
             return new NixUser
             {
-                UserName = user.Username,
+                Name = user.Username,
                 DiscordId = user.Id.ToString(),
+                GuildId = user.Guild.Id.ToString(),
                 AvatarUrl = user.GetAvatarUrl(),
                 CreatedAt = user.CreatedAt.DateTime,
                 JoinedAt = user.JoinedAt.GetValueOrDefault().DateTime,
