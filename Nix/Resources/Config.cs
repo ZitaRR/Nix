@@ -9,7 +9,7 @@ namespace Nix.Resources
     {
         internal static ConfigData Data { get; set; } = new ConfigData();
 
-        private static readonly string directory = Directory.GetCurrentDirectory();
+        private static readonly string directory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
         private static readonly string path;
         private static bool initialized = false;
 

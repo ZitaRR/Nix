@@ -11,7 +11,7 @@ namespace Nix.Controllers
         private readonly DiscordController discord;
         private readonly SettingsController settings;
 
-        public HomeController(IServiceProvider services)
+        public HomeController(DiscordController discord, SettingsController settings)
         {
             CurrentView = Menu = new NavigationView(this)
             {
@@ -25,8 +25,8 @@ namespace Nix.Controllers
                 },
             };
 
-            discord = services.GetRequiredService<DiscordController>();
-            settings = services.GetRequiredService<SettingsController>();
+            this.discord = discord;
+            this.settings = settings;
 
             Display();
         }

@@ -18,7 +18,11 @@ namespace Nix
         {
             Console.CursorVisible = false;
             Console.Title = $"{Name()} v{Version()}";
-            Extensions.AddServices(new ServiceCollection()).BuildServiceProvider().GetService<HomeController>();
+
+            new ServiceCollection()
+                .AddServices()
+                .BuildServiceProvider()
+                .GetRequiredService<HomeController>();
         }
 
         public static string Version()
