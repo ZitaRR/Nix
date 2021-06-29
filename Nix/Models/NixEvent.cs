@@ -6,7 +6,7 @@ namespace Nix.Models
 {
     public class NixEvent : IStorable
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string DiscordId { get; set; }
         public long GuildID { get; set; }
         public long MessageID { get; set; }

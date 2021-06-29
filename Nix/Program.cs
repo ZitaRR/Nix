@@ -66,12 +66,12 @@ namespace Nix
             return new NixUser
             {
                 Name = user.Username,
-                DiscordId = user.Id.ToString(),
+                Id = user.Id.ToString(),
                 GuildId = user.Guild.Id.ToString(),
                 AvatarUrl = user.GetAvatarUrl(),
                 CreatedAt = user.CreatedAt.DateTime,
                 JoinedAt = user.JoinedAt.GetValueOrDefault().DateTime,
-                TotalMessages = 0
+                Messages = 0
             };
         }
 
@@ -83,7 +83,8 @@ namespace Nix
             return new NixGuild
             {
                 Name = guild.Name,
-                DiscordId = guild.Id.ToString()
+                Id = guild.Id.ToString(),
+                CreatedAt = guild.CreatedAt.DateTime
             };
         }
 
@@ -91,12 +92,15 @@ namespace Nix
         {
             if (channel is null)
                 throw new ArgumentNullException(nameof(channel));
+            else if (channel is SocketCategoryChannel)
+                return null;
 
             return new NixChannel
             {
                 Name = channel.Name,
-                DiscordId = channel.Id.ToString(),
-                GuildId = channel.Guild.Id.ToString()
+                Id = channel.Id.ToString(),
+                GuildId = channel.Guild.Id.ToString(),
+                CreatedAt = channel.CreatedAt.DateTime
             };
         }
     }

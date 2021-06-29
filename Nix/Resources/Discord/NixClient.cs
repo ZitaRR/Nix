@@ -198,7 +198,7 @@ namespace Nix.Resources
         private async Task HandleUser(SocketGuildUser user)
         {
             var nixUser = await storage.FindOneAsync<NixUser>(
-                new { DiscordId = user.Id.ToString(), GuildId = user.Guild.Id.ToString() });
+                new { Id = user.Id.ToString(), GuildId = user.Guild.Id.ToString() });
 
             if (nixUser is null)
             {
@@ -206,7 +206,7 @@ namespace Nix.Resources
                 return;
             }
 
-            nixUser.TotalMessages++;
+            nixUser.Messages++;
             await storage.UpdateAsync(nixUser);
         }
     }

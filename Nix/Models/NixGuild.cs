@@ -6,9 +6,9 @@ namespace Nix.Models
 {
     public class NixGuild : IStorable
     {
-        public int Id { get; set; }
-        public string DiscordId { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
+        public DateTime CreatedAt { get; set; }
         public DateTime StoredAt { get; set; }
     }
 }

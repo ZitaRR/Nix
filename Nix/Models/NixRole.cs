@@ -5,7 +5,7 @@ namespace Nix.Models
 {
     public class NixRole : IStorable
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string DiscordId { get; set; }
         public string GuildId { get; set; }
         public string Name { get; set; }

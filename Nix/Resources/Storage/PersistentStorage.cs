@@ -177,10 +177,10 @@ namespace Nix.Resources
                 connection.Open();
                 try
                 {
-                    var result = await connection.QuerySingleAsync<T>(
+                    var result = await connection.QuerySingleOrDefaultAsync<T>(
                         $"SELECT * FROM {typeof(T).Name} " +
-                        $"WHERE DiscordId = @DiscordId", entity);
-                    return true;
+                        $"WHERE Id = @Id", entity);
+                    return result != null;
                 }
                 catch (Exception e)
                 {
@@ -197,7 +197,7 @@ namespace Nix.Resources
         private PropertyInfo[] GetProperties(object obj)
         {
             Type type = obj.GetType();
-            return type.GetProperties().Where(x => x.Name != "Id").ToArray();
+            return type.GetProperties();
         }
     }
 }

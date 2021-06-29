@@ -36,7 +36,9 @@ namespace Nix.Resources
         {
             var nixChannel = channel.GetNixChannel();
 
-            if (await storage.ExistsAsync(nixChannel))
+            if (nixChannel is null)
+                return;
+            else if (await storage.ExistsAsync(nixChannel))
                 return;
 
             await storage.InsertAsync(nixChannel);
