@@ -72,8 +72,16 @@ namespace Nix.Views
                         catch { break; }
                         return;
                     case ConsoleKey.Enter:
-                        Options[Index].View().Display();
-                        Options[Index].View().Parent.Display();
+                        try
+                        {
+                            Options[Index].View().Display();
+                            Options[Index].View().Parent.Display();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"\nERROR: {e.Message}");
+                            break;
+                        }
                         return;
                 }
             } while (true);
