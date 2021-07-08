@@ -15,9 +15,9 @@ namespace Nix.Resources
         static Config()
         {
 #if DEBUG
-            path = $"{directory}\\devconfig.json";
+            path = $"{directory}/devconfig.json";
 #else 
-            path = $"{directory}\\config.json";
+            path = $"{directory}/config.json";
 #endif
         }
 
