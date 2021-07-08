@@ -1,5 +1,5 @@
 ﻿using System;
-using Nix.Views;
+using Nix.MVC;
 
 namespace Nix.Resources
 {

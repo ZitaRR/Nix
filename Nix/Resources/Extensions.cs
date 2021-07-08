@@ -1,7 +1,6 @@
 ﻿using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Nix.Controllers;
-using Nix.Models;
+using Nix.MVC;
 using System;
 
 namespace Nix.Resources

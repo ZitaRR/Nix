@@ -1,5 +1,5 @@
 ﻿using Discord.WebSocket;
-using Nix.Models;
+using Nix.MVC; 
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

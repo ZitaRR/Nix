@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using System.Collections.Generic;
 using Discord.WebSocket;
-using Nix.Models;
+using Nix.MVC;
 
 namespace Nix.Resources.Discord
 {

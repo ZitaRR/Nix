@@ -1,9 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Nix.Models;
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Nix.Resources

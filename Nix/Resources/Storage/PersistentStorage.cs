@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Linq;
-using Nix.Models;
+using Nix.MVC; 
 
 namespace Nix.Resources
 {

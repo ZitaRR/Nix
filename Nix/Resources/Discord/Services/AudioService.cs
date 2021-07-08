@@ -9,7 +9,7 @@ using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
 using Victoria.Responses.Rest;
-using Nix.Models;
+using Nix.MVC;
 
 namespace Nix.Resources.Discord
 {

@@ -3,7 +3,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Nix.Models;
+using Nix.MVC;
 using Nix.Resources.Discord;
 using System;
 using System.Reflection;

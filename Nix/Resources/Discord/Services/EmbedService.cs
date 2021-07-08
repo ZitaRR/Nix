@@ -2,10 +2,9 @@
 using Discord.WebSocket;
 using Discord.Addons.Interactive;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Nix.Models;
+using Nix.MVC;
 
 namespace Nix.Resources.Discord
 {

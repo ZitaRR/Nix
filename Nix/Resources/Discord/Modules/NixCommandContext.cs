@@ -1,7 +1,7 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Nix.Models;
+using Nix.MVC;
 using System;
 using System.Threading.Tasks;
 

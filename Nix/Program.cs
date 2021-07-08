@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Nix.Controllers;
+using Nix.MVC;
 using Nix.Resources;
 using System;
 
