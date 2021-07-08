@@ -7,7 +7,6 @@ namespace Nix.Resources
     {
         DiscordSocketClient Client { get; }
         Task StartAsync();
-        Task ProcessMessage(SocketMessage message);
         Task Dispose();
     }
 }

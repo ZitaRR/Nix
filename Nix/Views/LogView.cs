@@ -25,6 +25,7 @@ namespace Nix.Views
             base.Display();
             Console.SetCursorPosition(0, OFFSET);
             logger.WriteLogs();
+            Console.ReadLine();
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System;
-using Nix.Resources;
+﻿using Nix.Resources;
 using Nix.Views;
+using System.Collections.Generic;
 
 namespace Nix.Controllers
 {
@@ -13,7 +13,6 @@ namespace Nix.Controllers
         public Controller()
         {
             Title = GetType().Name.Replace(nameof(Controller), "");
-            Config.Initialize();
         }
 
         internal void Display()

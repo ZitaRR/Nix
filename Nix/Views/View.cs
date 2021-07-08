@@ -12,7 +12,7 @@ namespace Nix.Views
         public string Name { get; internal set; }
         public IView Parent { get; internal set; }
 
-        private string asciiTitle;
+        private readonly string asciiTitle;
 
         public View() { }
 

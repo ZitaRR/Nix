@@ -34,7 +34,7 @@ namespace Nix.Resources.Discord
             SpotifyService spotify,
             IDiscord discord)
         {
-            Task.Run(async () => await script.RunScript("run_lavalink.ps1"));
+            _ = script.RunScript("run_lavalink.ps1");
             this.lavaNode = lavaNode;
             this.logger = logger;
             this.reply = reply;

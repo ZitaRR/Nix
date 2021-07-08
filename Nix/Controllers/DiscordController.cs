@@ -2,14 +2,12 @@
 using Nix.Views;
 using System;
 using System.Collections.Generic;
-using Nix.Models;
-using System.Threading.Tasks;
 
 namespace Nix.Controllers
 {
     internal sealed class DiscordController : Controller
     {
-        private readonly IDiscord discord;
+        private readonly NixClient nix;
         private readonly ILogger logger;
         private readonly IPersistentStorage storage;
         private LogView log;
@@ -18,12 +16,11 @@ namespace Nix.Controllers
         private NavigationView channels;
         private NavigationView users;
 
-        public DiscordController(IDiscord discord, ILogger logger, IPersistentStorage storage)
+        public DiscordController(NixClient nix, ILogger logger, IPersistentStorage storage)
         {
-            this.discord = discord;
+            this.nix = nix;
             this.logger = logger;
             this.storage = storage;
-
 
             Menu = new NavigationView(this)
             {
@@ -36,13 +33,8 @@ namespace Nix.Controllers
                 }
             };
 
-            AppDomain.CurrentDomain.ProcessExit += OnExit;
-
-            this.discord.StartAsync();
+            _ = this.nix.StartAsync();
         }
-
-        private void OnExit(object sender, EventArgs e)
-            => discord.Dispose();
 
         private IView Logs()
         {

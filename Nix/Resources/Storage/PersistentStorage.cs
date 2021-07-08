@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Linq;
+using Nix.Models;
 
 namespace Nix.Resources
 {
@@ -18,7 +19,7 @@ namespace Nix.Resources
         public PersistentStorage(ILogger logger)
         {
             this.logger = logger;
-            connectionString = Program.ConnectionString();
+            connectionString = Utility.ConnectionString;
 
             logger.AppendLog("DATABASE", $"Database initialized [{connectionString}]");
         }
@@ -54,9 +55,12 @@ namespace Nix.Resources
         {
             PropertyInfo[] props = GetProperties(entity);
             var expressions = string.Join(",", props.Select(x => $"{x.Name} = @{x.Name}"));
-            var sql = $"UPDATE {entity.GetType().Name} " +
+            var sql = $"UPDATE {typeof(T).Name} " +
                 $"SET {expressions} " +
                 $"WHERE Id = @Id";
+
+            if (!(entity is NixGuild))
+                sql += " AND GuildId = @GuildId";
 
             using (connection = new SqlConnection(connectionString))
             {
@@ -76,16 +80,19 @@ namespace Nix.Resources
             }
         }
 
-        public async Task DeleteAsync<T>(T entity) where T : IStorable
+        public async Task DeleteAsync<T>(object param) where T : IStorable
         {
+            PropertyInfo[] props = GetProperties(param);
+            var conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
+            var sql = $"DELETE * FROM {typeof(T).Name} " +
+                $"WHERE {conditions}";
+
             using (connection = new SqlConnection(connectionString))
             {
                 try
                 {
                     connection.Open();
-                    await connection.ExecuteAsync(
-                        $"DELETE {entity.GetType().Name} " +
-                        $"WHERE Id = @Id", entity);
+                    await connection.ExecuteAsync(sql, param);
                 }
                 catch (Exception e)
                 {
@@ -170,16 +177,19 @@ namespace Nix.Resources
             }
         }
 
-        public async Task<bool> ExistsAsync<T>(T entity) where T : IStorable
+        public async Task<bool> ExistsAsync<T>(object param) where T : IStorable
         {
+            PropertyInfo[] props = GetProperties(param);
+            var conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
+            var sql = $"SELECT * FROM {typeof(T).Name} " +
+                $"WHERE {conditions}";
+
             using (connection = new SqlConnection(connectionString))
             {
                 connection.Open();
                 try
                 {
-                    var result = await connection.QuerySingleOrDefaultAsync<T>(
-                        $"SELECT * FROM {typeof(T).Name} " +
-                        $"WHERE Id = @Id", entity);
+                    var result = await connection.QuerySingleOrDefaultAsync<T>(sql, param);
                     return result != null;
                 }
                 catch (Exception e)

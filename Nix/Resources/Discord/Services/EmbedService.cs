@@ -14,13 +14,11 @@ namespace Nix.Resources.Discord
         private readonly Color NormalColor;
         private readonly Color errorColor;
         private readonly InteractiveService interactive;
-        private readonly IPersistentStorage storage;
         private EmbedBuilder embed;
 
-        public EmbedService(InteractiveService interactive, IPersistentStorage storage)
+        public EmbedService(InteractiveService interactive)
         {
             this.interactive = interactive;
-            this.storage = storage;
             NormalColor = new Color(254, 254, 254);
             errorColor = new Color(254, 50, 50);
         }

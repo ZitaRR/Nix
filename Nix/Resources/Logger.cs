@@ -64,7 +64,6 @@ namespace Nix.Resources
             {
                 WriteLog(log);
             }
-            Console.ReadLine();
         }
     }
 }

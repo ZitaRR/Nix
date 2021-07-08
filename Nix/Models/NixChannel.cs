@@ -15,7 +15,7 @@ namespace Nix.Models
             => $"Name: {Name}\n" +
             $"ID: {Id}\n" +
             $"Guild ID: {GuildId}\n" +
-            $"Created At: {CreatedAt}" +
+            $"Created At: {CreatedAt}\n" +
             $"Stored At: {StoredAt}";
     }
 }

@@ -10,7 +10,7 @@ namespace Nix.Resources
         Task<T> FindOneAsync<T>(object param) where T : IStorable;
         Task InsertAsync<T>(T entity) where T : IStorable;
         Task UpdateAsync<T>(T entity) where T : IStorable;
-        Task DeleteAsync<T>(T entity) where T : IStorable;
-        Task<bool> ExistsAsync<T>(T entity) where T : IStorable;
+        Task DeleteAsync<T>(object param) where T : IStorable;
+        Task<bool> ExistsAsync<T>(object param) where T : IStorable;
     }
 }

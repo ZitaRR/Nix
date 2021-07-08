@@ -31,9 +31,8 @@ namespace Nix.Resources.Discord
 
             return;
             await Context.Reply.MessageAsync(Context.Channel as ITextChannel,
-                $"**Running On** ``{Context.NixClient.OS.VersionString}``\n" +
                 $"**Uptime** ``{Context.NixClient.Watch.Elapsed:h\\:mm\\:ss}``\n" +
-                $"**Version** ``{Program.Version()}``");
+                $"**Version** ``{Utility.Version}``");
         }
 
         [Command("help")]
