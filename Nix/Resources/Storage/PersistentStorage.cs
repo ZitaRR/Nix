@@ -30,23 +30,18 @@ namespace Nix.Resources
             PropertyInfo[] props = GetProperties(entity);
             var cols = string.Join(",", props.Select(x => x.Name));
             var values = string.Join(",", props.Select(x => $"@{x.Name}"));
-            var sql = $"INSERT INTO {entity.GetType().Name} " +
+            var sql = $"INSERT INTO {typeof(T).Name} " +
                 $"({cols})VALUES({values})";
 
             using(connection = new SqlConnection(connectionString))
             {
                 try
                 {
-                    connection.Open();
                     await connection.ExecuteAsync(sql, entity);
                 }
                 catch (Exception e)
                 {
                     logger.AppendLog(e.Message);
-                }
-                finally
-                {
-                    connection.Close();
                 }
             }
         }
@@ -66,16 +61,11 @@ namespace Nix.Resources
             {
                 try
                 {
-                    connection.Open();
                     await connection.ExecuteAsync(sql, entity);
                 }
                 catch (Exception e)
                 {
                     logger.AppendLog(e.Message);
-                }
-                finally
-                {
-                    connection.Close();
                 }
             }
         }
@@ -91,16 +81,11 @@ namespace Nix.Resources
             {
                 try
                 {
-                    connection.Open();
                     await connection.ExecuteAsync(sql, param);
                 }
                 catch (Exception e)
                 {
                     logger.AppendLog(e.Message);
-                }
-                finally
-                {
-                    connection.Close();
                 }
             }
         }
@@ -111,17 +96,12 @@ namespace Nix.Resources
             {
                 try
                 {
-                    connection.Open();
                     T result = (await FindAsync<T>(param)).FirstOrDefault();
                     return result;
                 }
                 catch (Exception e)
                 {
                     logger.AppendLog(e.Message);
-                }
-                finally
-                {
-                    connection.Close();
                 }
                 return default;
             }
@@ -138,17 +118,12 @@ namespace Nix.Resources
             {
                 try
                 {
-                    connection.Open();
                     IEnumerable<T> result = await connection.QueryAsync<T>(sql, param);
                     return result;
                 }
                 catch (Exception e)
                 {
                     logger.AppendLog(e.Message);
-                }
-                finally
-                {
-                    connection.Close();
                 }
                 return default;
             }
@@ -160,7 +135,6 @@ namespace Nix.Resources
             {
                 try
                 {
-                    connection.Open();
                     IEnumerable<T> result = await connection.QueryAsync<T>(
                         $"SELECT * FROM {typeof(T).Name}");
                     return result;
@@ -168,10 +142,6 @@ namespace Nix.Resources
                 catch (Exception e)
                 {
                     logger.AppendLog(e.Message);
-                }
-                finally
-                {
-                    connection.Close();
                 }
                 return default;
             }
@@ -186,7 +156,6 @@ namespace Nix.Resources
 
             using (connection = new SqlConnection(connectionString))
             {
-                connection.Open();
                 try
                 {
                     var result = await connection.QuerySingleOrDefaultAsync<T>(sql, param);
@@ -195,10 +164,6 @@ namespace Nix.Resources
                 catch (Exception e)
                 {
                     logger.AppendLog(e.Message);
-                }
-                finally
-                {
-                    connection.Close();
                 }
                 return false;
             }
