@@ -78,7 +78,7 @@ namespace Nix.Resources
                 {
                     await discord.Client.SetGameAsync($"{users} users | v{Utility.Version}", type: ActivityType.Listening);
                     await Task.Delay((1000 * 60) * 15);
-                    users = (await nixProvider.GetUsersCountAsync());
+                    users = await nixProvider.GetUsersCountAsync();
                 }
             });
 #endif
