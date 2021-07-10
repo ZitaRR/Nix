@@ -1,6 +1,7 @@
 ﻿using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Nix.MVC;
+using Nix.Resources.Discord;
 using System;
 
 namespace Nix.Resources
@@ -12,6 +13,7 @@ namespace Nix.Resources
             return collection.AddSingleton<HomeController>()
                 .AddSingleton<DiscordController>()
                 .AddSingleton<SettingsController>()
+                .AddSingleton<ServicesController>()
                 .AddSingleton<IDiscord, NixDiscord>()
                 .AddSingleton<NixClient>()
                 .AddSingleton<InputHandler>()
@@ -21,7 +23,10 @@ namespace Nix.Resources
                 .AddSingleton<INixUserProvider, NixUserProvider>()
                 .AddSingleton<INixChannelProvider, NixChannelProvider>()
                 .AddSingleton<INixGuildProvider, NixGuildProvider>()
-                .AddSingleton<INixProvider, NixProvider>();
+                .AddSingleton<INixProvider, NixProvider>()
+                .AddSingleton<ProcessService>()
+                .AddSingleton<LavalinkService>()
+                .AddSingleton<MinecraftService>();
         }
 
         public static ulong ToUlong(this string s)

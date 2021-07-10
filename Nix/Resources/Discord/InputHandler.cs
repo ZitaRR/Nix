@@ -22,7 +22,13 @@ namespace Nix.Resources
         private readonly LavaNode lava;
         private readonly AudioService audio;
 
-        public InputHandler(IDiscord discord, ILogger logger, INixProvider nixProvider)
+        public InputHandler(
+            IDiscord discord, 
+            ILogger logger, 
+            INixProvider nixProvider,
+            ProcessService process,
+            LavalinkService lavalink,
+            MinecraftService minecraft)
         {
             this.discord = discord;
             this.logger = logger;
@@ -33,11 +39,14 @@ namespace Nix.Resources
                 .AddSingleton(discord.Client)
                 .AddSingleton(commands)
                 .AddSingleton(logger)
+                .AddSingleton(process)
+                .AddSingleton(lavalink)
+                .AddSingleton(minecraft)
                 .AddSingleton<InteractiveService>()
+                .AddSingleton<ProcessService>()
                 .AddSingleton<AudioService>()
                 .AddSingleton<SpotifyService>()
                 .AddSingleton<EmbedService>()
-                .AddSingleton<ScriptService>()
                 .AddLavaNode(lava => lava.SelfDeaf = true)
                 .BuildServiceProvider();
 

@@ -1,0 +1,57 @@
+﻿using Nix.Resources;
+using Nix.Resources.Discord;
+using System.Collections.Generic;
+
+namespace Nix.MVC
+{
+    internal sealed class ServicesController : Controller
+    {
+        private readonly LavalinkService lavalink;
+        private readonly MinecraftService minecraft;
+        private LogView lavalinkView;
+        private LogView minecraftView;
+
+        public ServicesController(LavalinkService lavalink, MinecraftService minecraft)
+        {
+            this.lavalink = lavalink;
+            this.minecraft = minecraft;
+
+            Menu = new NavigationView(this)
+            {
+                Name = "Services",
+                Parent = CurrentView,
+                Options = new List<Option>
+                {
+                    new Option { Name = "Lavalink", View = Lavalink },
+                    new Option { Name = "Minecraft", View = Minecraft },
+                },
+            };
+        }
+
+        private IView Lavalink()
+        {
+            if (lavalinkView is null)
+            {
+                lavalinkView = new LogView(this, lavalink.Logger)
+                {
+                    Name = "Lavalink",
+                    Parent = Menu,
+                };
+            }
+            return lavalinkView;
+        }
+
+        private IView Minecraft()
+        {
+            if (minecraftView is null)
+            {
+                minecraftView = new LogView(this, minecraft.Logger)
+                {
+                    Name = "Minecraft",
+                    Parent = Menu
+                };
+            }
+            return minecraftView;
+        }
+    }
+}

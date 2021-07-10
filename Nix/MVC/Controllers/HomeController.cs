@@ -9,6 +9,7 @@ namespace Nix.MVC
     {
         private readonly DiscordController discord;
         private readonly SettingsController settings;
+        private readonly ServicesController services;
 
         public HomeController(IServiceProvider services)
         {
@@ -20,12 +21,14 @@ namespace Nix.MVC
                 {
                     new Option { Name = "Settings", View = SettingsController },
                     new Option { Name = "Discord", View = DiscordController },
+                    new Option { Name = "Services", View = ServiceController },
                     new Option { Name = "Exit", View = Exit }
                 },
             };
 
             discord = services.GetService<DiscordController>();
             settings = services.GetService<SettingsController>();
+            this.services = services.GetService<ServicesController>();
 
             Display();
         }
@@ -35,6 +38,11 @@ namespace Nix.MVC
 
         public IView DiscordController()
             => discord.Menu;
+
+        public IView ServiceController()
+        {
+            return services.Menu;
+        }
 
         public IView Exit()
         {

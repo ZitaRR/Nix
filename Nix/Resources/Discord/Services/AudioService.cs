@@ -30,11 +30,9 @@ namespace Nix.Resources.Discord
             LavaNode lavaNode,
             ILogger logger,
             EmbedService reply,
-            ScriptService script,
             SpotifyService spotify,
             IDiscord discord)
         {
-            _ = script.RunScript("run_lavalink.ps1");
             this.lavaNode = lavaNode;
             this.logger = logger;
             this.reply = reply;
