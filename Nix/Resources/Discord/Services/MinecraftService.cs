@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Nix.Resources.Discord
 {
-    public sealed class MinecraftService
+    public sealed class MinecraftService : ProcessService
     {
         public string Name { get; } = "Minecraft";
         public bool Interactive { get; } = true;
@@ -14,11 +14,11 @@ namespace Nix.Resources.Discord
         private readonly Process minecraft;
         private readonly string directory = Directory.GetParent(Assembly.GetEntryAssembly().Location).FullName;
 
-        public MinecraftService(ProcessService process)
+        public MinecraftService(ILogger logger) : base(logger)
         {
             Logger = new Logger();
 
-            minecraft = process.CreateProcess(
+            minecraft = CreateProcess(
                 Name,
                 "run.bat",
                 directory,

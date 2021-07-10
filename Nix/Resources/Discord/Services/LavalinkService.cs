@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Nix.Resources.Discord
 {
-    public sealed class LavalinkService
+    public sealed class LavalinkService : ProcessService
     {
         public string Name { get; } = "Lavalink";
         public bool Interactive { get; } = false;
@@ -14,11 +14,11 @@ namespace Nix.Resources.Discord
         private readonly Process lavalink;
         private readonly string directory = Directory.GetParent(Assembly.GetEntryAssembly().Location).FullName;
 
-        public LavalinkService(ProcessService process)
+        public LavalinkService(ILogger logger) : base(logger)
         {
             Logger = new Logger();
 
-            lavalink = process.CreateProcess(
+            lavalink = CreateProcess(
                 Name,
                 "run_lavalink.ps1",
                 directory);

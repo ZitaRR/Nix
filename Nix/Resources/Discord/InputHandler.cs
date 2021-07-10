@@ -26,7 +26,6 @@ namespace Nix.Resources
             IDiscord discord, 
             ILogger logger, 
             INixProvider nixProvider,
-            ProcessService process,
             LavalinkService lavalink,
             MinecraftService minecraft)
         {
@@ -39,11 +38,9 @@ namespace Nix.Resources
                 .AddSingleton(discord.Client)
                 .AddSingleton(commands)
                 .AddSingleton(logger)
-                .AddSingleton(process)
                 .AddSingleton(lavalink)
                 .AddSingleton(minecraft)
                 .AddSingleton<InteractiveService>()
-                .AddSingleton<ProcessService>()
                 .AddSingleton<AudioService>()
                 .AddSingleton<SpotifyService>()
                 .AddSingleton<EmbedService>()

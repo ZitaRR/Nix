@@ -11,7 +11,7 @@ namespace Nix.Resources.Discord
     {
         public NixClient NixClient { get; }
         public EmbedService Reply { get; }
-        public ProcessService Process { get; }
+        public ProcessServiceBase Process { get; }
 
         private readonly INixProvider nixProvider;
 
@@ -23,7 +23,7 @@ namespace Nix.Resources.Discord
         {
             NixClient = services.GetService<NixClient>();
             Reply = services.GetService<EmbedService>();
-            Process = services.GetService<ProcessService>();
+            Process = services.GetService<ProcessServiceBase>();
             nixProvider = services.GetService<INixProvider>();
         }
 
