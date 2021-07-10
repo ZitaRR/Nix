@@ -364,3 +364,4 @@ FodyWeavers.xsd
 *.json
 
 Connections.config
+Nix/Minecraft/
