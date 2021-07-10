@@ -10,12 +10,12 @@ namespace Nix.MVC
         public LogView(Controller controller, ILogger logger) : base(controller) 
         {
             this.logger = logger;
-            Logger.OnLog += Logger_OnLog;
+            this.logger.OnLog += Logger_OnLog;
         }
 
         private void Logger_OnLog(NixLogMessage log)
         {
-            if (Controller.CurrentView is LogView)
+            if (Controller.CurrentView == this)
                 logger.WriteLog(log);
         }
 

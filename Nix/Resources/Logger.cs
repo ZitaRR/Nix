@@ -6,10 +6,9 @@ namespace Nix.Resources
 {
     internal class Logger : ILogger
     {
-        public delegate void Log(NixLogMessage log);
-        public static event Log OnLog;
+        public event ILogger.Log OnLog;
 
-        public IList<NixLogMessage> Logs { get; private set; } = new List<NixLogMessage>();
+        public List<NixLogMessage> Logs { get; private set; } = new List<NixLogMessage>();
 
         public void AppendLog(string source, string message, ConsoleColor colour)
         {
