@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using System.Collections.Generic;
 using Discord.WebSocket;
-using Nix.Models;
+using Nix.MVC;
 
 namespace Nix.Resources.Discord
 {
@@ -31,9 +31,8 @@ namespace Nix.Resources.Discord
 
             return;
             await Context.Reply.MessageAsync(Context.Channel as ITextChannel,
-                $"**Running On** ``{Context.NixClient.OS.VersionString}``\n" +
                 $"**Uptime** ``{Context.NixClient.Watch.Elapsed:h\\:mm\\:ss}``\n" +
-                $"**Version** ``{Program.Version()}``");
+                $"**Version** ``{Utility.Version}``");
         }
 
         [Command("help")]

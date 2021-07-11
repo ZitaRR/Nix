@@ -4,8 +4,7 @@ namespace Nix.Resources
 {
     public interface IStorable
     {
-        public int Id { get; }
-        public string DiscordId { get; set; }
+        public string Id { get; }
         public DateTime StoredAt { get; set; }
     }
 }

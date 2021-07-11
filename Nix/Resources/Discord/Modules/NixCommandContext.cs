@@ -1,6 +1,8 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
-using Nix.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Nix.MVC;
+using System;
 using System.Threading.Tasks;
 
 namespace Nix.Resources.Discord
@@ -9,32 +11,30 @@ namespace Nix.Resources.Discord
     {
         public NixClient NixClient { get; }
         public EmbedService Reply { get; }
-        public ScriptService Script { get; }
+        public ProcessServiceBase Process { get; }
 
-        private readonly INixUserProvider userProvider;
+        private readonly INixProvider nixProvider;
 
-        public NixCommandContext(DiscordSocketClient client,
+        public NixCommandContext(
+            DiscordSocketClient client,
             SocketUserMessage message, 
-            NixClient nixClient,
-            EmbedService reply, 
-            ScriptService script,
-            INixUserProvider userProvider) 
+            IServiceProvider services) 
             : base(client, message)
         {
-            NixClient = nixClient;
-            Reply = reply;
-            Script = script;
-            this.userProvider = userProvider;
+            NixClient = services.GetService<NixClient>();
+            Reply = services.GetService<EmbedService>();
+            Process = services.GetService<ProcessServiceBase>();
+            nixProvider = services.GetService<INixProvider>();
         }
 
         public async Task<NixUser> GetNixUser()
         {
-            return await userProvider.GetUser(User.Id, Guild.Id);
+            return await nixProvider.Users.Get(User as SocketGuildUser);
         }
 
         public async Task<NixUser> GetNixUser(ulong id)
         {
-            return await userProvider.GetUser(id, Guild.Id);
+            return await nixProvider.Users.Get(id, Guild.Id);
         }
     }
 }

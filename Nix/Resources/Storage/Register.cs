@@ -5,21 +5,16 @@ namespace Nix.Resources
 {
     public class Register : IRegister
     {
-        private readonly IPersistentStorage storage;
+        private readonly INixProvider nixProvider;
 
-        public Register(IPersistentStorage storage)
+        public Register(INixProvider nixProvider)
         {
-            this.storage = storage;
+            this.nixProvider = nixProvider;
         }
 
         public async Task RegisterGuild(SocketGuild guild)
         {
-            var nixGuild = guild.GetNixGuild();
-
-            if (await storage.ExistsAsync(nixGuild))
-                return;
-
-            await storage.InsertAsync(nixGuild);
+            await nixProvider.Guilds.Store(guild.GetNixGuild());
 
             foreach (var channel in guild.Channels)
             {
@@ -34,32 +29,20 @@ namespace Nix.Resources
 
         public async Task RegisterChannel(SocketGuildChannel channel)
         {
-            var nixChannel = channel.GetNixChannel();
-
-            if (await storage.ExistsAsync(nixChannel))
+            if (channel is SocketCategoryChannel)
                 return;
 
-            await storage.InsertAsync(nixChannel);
+            await nixProvider.Channels.Store(channel.GetNixChannel());
         }
 
         public async Task RegisterUser(SocketGuildUser user)
         {
-            var nixUser = user.GetNixUser();
-
-            if (await storage.ExistsAsync(nixUser))
-                return;
-
-            await storage.InsertAsync(nixUser);
+            await nixProvider.Users.Store(user.GetNixUser());
         }
 
         public async Task UnregisterGuild(SocketGuild guild)
         {
-            var nixGuild = guild.GetNixGuild();
-
-            if (!await storage.ExistsAsync(nixGuild))
-                return;
-
-            await storage.DeleteAsync(nixGuild);
+            await nixProvider.Guilds.Remove(guild.GetNixGuild());
 
             foreach (var channel in guild.Channels)
             {
@@ -74,22 +57,12 @@ namespace Nix.Resources
 
         public async Task UnregisterChannel(SocketGuildChannel channel)
         {
-            var nixChannel = channel.GetNixChannel();
-
-            if (!await storage.ExistsAsync(nixChannel))
-                return;
-
-            await storage.DeleteAsync(nixChannel);
+            await nixProvider.Channels.Remove(channel.GetNixChannel());
         }
 
         public async Task UnregisterUser(SocketGuildUser user)
         {
-            var nixUser = user.GetNixUser();
-
-            if (!await storage.ExistsAsync(nixUser))
-                return;
-
-            await storage.DeleteAsync(nixUser);
+            await nixProvider.Users.Remove(user.GetNixUser());
         }
     }
 }

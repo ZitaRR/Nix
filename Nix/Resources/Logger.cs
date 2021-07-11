@@ -4,12 +4,11 @@ using System.Collections.Generic;
 
 namespace Nix.Resources
 {
-    internal class Logger : ILogger
+    public class Logger : ILogger
     {
-        public delegate void Log(NixLogMessage log);
-        public static event Log OnLog;
+        public event ILogger.Log OnLog;
 
-        public IList<NixLogMessage> Logs { get; private set; } = new List<NixLogMessage>();
+        public List<NixLogMessage> Logs { get; private set; } = new List<NixLogMessage>();
 
         public void AppendLog(string source, string message, ConsoleColor colour)
         {
@@ -60,11 +59,11 @@ namespace Nix.Resources
         public void WriteLogs()
         {
             Console.WriteLine();
-            foreach (var log in Logs)
+            int count = Logs.Count;
+            for (int i = 0; i <  count; i++)
             {
-                WriteLog(log);
+                WriteLog(Logs[i]);
             }
-            Console.ReadLine();
         }
     }
 }

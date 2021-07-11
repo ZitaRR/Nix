@@ -9,7 +9,7 @@ using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
 using Victoria.Responses.Rest;
-using Nix.Models;
+using Nix.MVC;
 
 namespace Nix.Resources.Discord
 {
@@ -30,11 +30,9 @@ namespace Nix.Resources.Discord
             LavaNode lavaNode,
             ILogger logger,
             EmbedService reply,
-            ScriptService script,
             SpotifyService spotify,
             IDiscord discord)
         {
-            Task.Run(async () => await script.RunScript("run_lavalink.ps1"));
             this.lavaNode = lavaNode;
             this.logger = logger;
             this.reply = reply;
