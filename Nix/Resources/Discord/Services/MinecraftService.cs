@@ -40,8 +40,6 @@ namespace Nix.Resources.Discord
 
         public void Write(string message)
         {
-            Logger.AppendLog(message);
-
             minecraft.StandardInput.WriteLine(message);
             minecraft.StandardInput.Flush();
         }

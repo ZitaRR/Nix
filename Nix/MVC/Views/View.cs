@@ -10,6 +10,7 @@ namespace Nix.MVC
 
         public Controller Controller { get; private set; }
         public string Name { get; set; }
+        public bool Active { get; set; }
         public IView Parent { get; set; }
         public IBehaviour Behaviour { get; set; }
 
@@ -28,7 +29,10 @@ namespace Nix.MVC
             Controller.CurrentView = this;
             Console.Clear();
             Console.WriteLine(asciiTitle + "    " + Name);
-            Behaviour?.Start(this);
+            Console.SetCursorPosition(0, OFFSET);
+
+            if (GetType() == typeof(View))
+                Behaviour?.Start(this);
         }
     }
 }

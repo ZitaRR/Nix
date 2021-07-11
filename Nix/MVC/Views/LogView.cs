@@ -15,16 +15,24 @@ namespace Nix.MVC
 
         private void Logger_OnLog(NixLogMessage log)
         {
-            if (Controller.CurrentView == this)
-                logger.WriteLog(log);
+            if (!Active)
+                return;
+
+            logger.WriteLog(log);
         }
 
         public override void Display()
         {
             base.Display();
-            Console.SetCursorPosition(0, OFFSET);
             logger.WriteLogs();
-            Console.ReadLine();
+
+            if (Behaviour is null)
+            {
+                Console.ReadLine();
+                return;
+            }
+
+            Behaviour.Start(this);
         }
     }
 }

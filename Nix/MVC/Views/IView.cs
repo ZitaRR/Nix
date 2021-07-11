@@ -6,6 +6,7 @@ namespace Nix.MVC
     {
         Controller Controller { get; }
         string Name { get; }
+        bool Active { get; set; }
         IView Parent { get; }
         IBehaviour Behaviour { get; }
         void Display();

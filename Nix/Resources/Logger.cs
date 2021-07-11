@@ -59,9 +59,10 @@ namespace Nix.Resources
         public void WriteLogs()
         {
             Console.WriteLine();
-            foreach (var log in Logs)
+            int count = Logs.Count;
+            for (int i = 0; i <  count; i++)
             {
-                WriteLog(log);
+                WriteLog(Logs[i]);
             }
         }
     }

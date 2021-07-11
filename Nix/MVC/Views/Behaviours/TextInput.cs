@@ -9,10 +9,12 @@ namespace Nix.MVC.Views
         public string Prompt { get; set; }
         public string UserInput { get; set; }
         public bool HideInput { get; set; }
+        public bool Repeat { get; set; }
+
+        private bool repeat;
 
         private void Input()
         {
-            Console.SetCursorPosition(0, MVC.View.OFFSET);
             Console.Write(Prompt + UserInput);
 
             do
@@ -42,8 +44,19 @@ namespace Nix.MVC.Views
         public void Start(IView view)
         {
             View = view;
-            Input();
-            Callback(this);
+            repeat = Repeat;
+
+            do
+            {
+                Input();
+                Console.WriteLine();
+                Callback(this);
+            } while (repeat);
+        }
+
+        public void Cancel()
+        {
+            repeat = false;
         }
     }
 }

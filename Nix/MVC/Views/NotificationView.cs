@@ -69,7 +69,5 @@ namespace Nix.MVC
             }
             Console.ReadLine();
         }
-
-
     }
 }

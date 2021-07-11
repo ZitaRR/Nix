@@ -52,7 +52,21 @@ namespace Nix.MVC
                 minecraftView = new LogView(this, minecraft.Logger)
                 {
                     Name = "Minecraft",
-                    Parent = Menu
+                    Parent = Menu,
+                    Behaviour = new TextInput
+                    {
+                        Repeat = true,
+                        Callback = input =>
+                        {
+                            if (string.IsNullOrWhiteSpace(input.UserInput))
+                            {
+                                input.Cancel();
+                                return;
+                            }
+                            minecraft.Write(input.UserInput);
+                            input.UserInput = "";
+                        }
+                    }
                 };
             }
             return minecraftView;
