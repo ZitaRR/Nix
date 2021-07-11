@@ -11,7 +11,7 @@
             Title = GetType().Name.Replace(nameof(Controller), "");
         }
 
-        internal void Display()
+        public void Display()
             => Menu.Display();
     }
 }
