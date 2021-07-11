@@ -1,32 +1,20 @@
 ﻿using System;
 
-namespace Nix.MVC
+namespace Nix.MVC.Views
 {
-    public sealed class InputView : View
+    public sealed class TextInput : IBehaviour
     {
-        public Action<InputView> Callback { get; set; }
-        public string Prompt { get; }
-        public string UserInput { get; private set; }
-        public bool HideInput { get; }
-
-        public InputView(Controller controller, string prompt, string oldInput = null, bool hide = false) : base(controller)
-        {
-            Prompt = prompt;
-            HideInput = hide;
-            UserInput = oldInput;
-        }
-
-        public override void Display()
-        {
-            base.Display();
-            Console.SetCursorPosition(0, OFFSET);
-            Input();
-            Callback(this);
-        }
+        public IView View { get; private set; }
+        public Action<TextInput> Callback { get; set; }
+        public string Prompt { get; set; }
+        public string UserInput { get; set; }
+        public bool HideInput { get; set; }
 
         private void Input()
         {
+            Console.SetCursorPosition(0, MVC.View.OFFSET);
             Console.Write(Prompt + UserInput);
+
             do
             {
                 var key = Console.ReadKey(true);
@@ -49,6 +37,13 @@ namespace Nix.MVC
                         break;
                 }
             } while (true);
+        }
+
+        public void Start(IView view)
+        {
+            View = view;
+            Input();
+            Callback(this);
         }
     }
 }

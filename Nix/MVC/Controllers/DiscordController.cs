@@ -1,4 +1,5 @@
-﻿using Nix.Resources;
+﻿using Nix.MVC.Views;
+using Nix.Resources;
 using System;
 using System.Collections.Generic;
 
@@ -10,10 +11,10 @@ namespace Nix.MVC
         private readonly ILogger logger;
         private readonly IPersistentStorage storage;
         private LogView log;
-        private NavigationView guilds;
-        private NavigationView guild;
-        private NavigationView channels;
-        private NavigationView users;
+        private View guilds;
+        private View guild;
+        private View channels;
+        private View users;
 
         public DiscordController(NixClient nix, ILogger logger, IPersistentStorage storage)
         {
@@ -21,15 +22,18 @@ namespace Nix.MVC
             this.logger = logger;
             this.storage = storage;
 
-            Menu = new NavigationView(this)
+            Menu = new View(this)
             {
                 Name = "Discord",
                 Parent = CurrentView,
-                Options = new List<Option>
+                Behaviour = new Navigation
                 {
-                    new Option { Name = "Logs", View = Logs },
-                    new Option { Name = "Guilds", View = Guilds }
-                }
+                    Options = new List<Option>
+                    {
+                        new Option { Name = "Logs", View = Logs },
+                        new Option { Name = "Guilds", View = Guilds },
+                    },
+                },
             };
 
             _ = this.nix.StartAsync();

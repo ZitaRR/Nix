@@ -2,15 +2,19 @@
 using System;
 using System.Collections.Generic;
 
-namespace Nix.MVC
+namespace Nix.MVC.Views
 {
-    public sealed class NavigationView : View
+    public sealed class Navigation : IBehaviour
     {
+        public IView View { get; private set; }
+
         public List<Option> Options { get; set; }
         public int Index { get; private set; } = 0;
 
-        public NavigationView(Controller controller, int index = 0) : base(controller)
-            => Index = index;
+        public Navigation(int index = 0)
+        {
+            Index = index;
+        }
 
         private void ListOptions()
         {
@@ -26,7 +30,7 @@ namespace Nix.MVC
 
         private void SetFocus(int index, bool value)
         {
-            Console.SetCursorPosition(0, index + OFFSET);
+            Console.SetCursorPosition(0, index + MVC.View.OFFSET);
             var option = Options[index];
 
             if (!value)
@@ -67,7 +71,7 @@ namespace Nix.MVC
                         break;
                     case ConsoleKey.Escape:
                     case ConsoleKey.Backspace:
-                        try { Parent.Display(); }
+                        try { View.Parent.Display(); }
                         catch { break; }
                         return;
                     case ConsoleKey.Enter:
@@ -78,9 +82,9 @@ namespace Nix.MVC
             } while (true);
         }
 
-        public override void Display()
+        public void Start(IView view)
         {
-            base.Display();
+            View = view;
             Input();
         }
     }

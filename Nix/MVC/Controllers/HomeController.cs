@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Nix.MVC.Views;
 using Nix.Resources;
 using System;
 using System.Collections.Generic;
@@ -13,16 +14,19 @@ namespace Nix.MVC
 
         public HomeController(IServiceProvider services)
         {
-            CurrentView = Menu = new NavigationView(this)
+            CurrentView = Menu = new View(this)
             {
                 Name = "Main Menu",
                 Parent = null,
-                Options = new List<Option>
+                Behaviour = new Navigation
                 {
-                    new Option { Name = "Settings", View = SettingsController },
-                    new Option { Name = "Discord", View = DiscordController },
-                    new Option { Name = "Services", View = ServiceController },
-                    new Option { Name = "Exit", View = Exit }
+                    Options = new List<Option>
+                    {
+                        new Option { Name = "Settings", View = SettingsController },
+                        new Option { Name = "Discord", View = DiscordController },
+                        new Option { Name = "Services", View = ServiceController },
+                        new Option { Name = "Exit", View = Exit },
+                    },
                 },
             };
 

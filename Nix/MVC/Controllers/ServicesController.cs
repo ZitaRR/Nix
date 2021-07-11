@@ -1,4 +1,5 @@
-﻿using Nix.Resources;
+﻿using Nix.MVC.Views;
+using Nix.Resources;
 using Nix.Resources.Discord;
 using System.Collections.Generic;
 
@@ -16,15 +17,18 @@ namespace Nix.MVC
             this.lavalink = lavalink;
             this.minecraft = minecraft;
 
-            Menu = new NavigationView(this)
+            Menu = new View(this)
             {
                 Name = "Services",
                 Parent = CurrentView,
-                Options = new List<Option>
+                Behaviour = new Navigation
                 {
-                    new Option { Name = "Lavalink", View = Lavalink },
-                    new Option { Name = "Minecraft", View = Minecraft },
-                },
+                    Options = new List<Option>
+                    {
+                        new Option { Name = "Lavalink", View = Lavalink },
+                        new Option { Name = "Minecraft", View = Minecraft },
+                    }
+                }
             };
         }
 

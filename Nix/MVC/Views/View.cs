@@ -1,15 +1,17 @@
 ﻿using Figgle;
+using Nix.MVC.Views;
 using System;
 
 namespace Nix.MVC
 {
-    public abstract class View : IView
+    public class View : IView
     {
         public const int OFFSET = 8;
 
         public Controller Controller { get; private set; }
         public string Name { get; set; }
         public IView Parent { get; set; }
+        public IBehaviour Behaviour { get; set; }
 
         private readonly string asciiTitle;
 
@@ -26,6 +28,7 @@ namespace Nix.MVC
             Controller.CurrentView = this;
             Console.Clear();
             Console.WriteLine(asciiTitle + "    " + Name);
+            Behaviour?.Start(this);
         }
     }
 }

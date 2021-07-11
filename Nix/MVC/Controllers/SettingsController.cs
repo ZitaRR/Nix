@@ -1,29 +1,33 @@
 ﻿using Nix.Resources;
 using System.Collections.Generic;
 using System;
+using Nix.MVC.Views;
 
 namespace Nix.MVC
 {
     public sealed class SettingsController : Controller
     {
-        private NavigationView fontColours;
-        private NavigationView backgroundColours;
-        private InputView markerInput;
+        private View fontColours;
+        private View backgroundColours;
+        private View markerInput;
         private readonly Array colours;
 
         public SettingsController()
         {
             colours = Enum.GetValues(typeof(ConsoleColor));
 
-            Menu = new NavigationView(this)
+            Menu = new View(this)
             {
                 Name = "Settings",
                 Parent = CurrentView,
-                Options = new List<Option>
+                Behaviour = new Navigation
                 {
-                    new Option { Name = "Change Font Colour", View = ChangeFontColour },
-                    new Option { Name = "Change Background Colour", View = ChangeBackgroundColour },
-                    new Option { Name = "Change Selection Marker", View = ChangeSelectionMarker }
+                    Options = new List<Option>
+                    {
+                        new Option { Name = "Change Font Colour", View = ChangeFontColour },
+                        new Option { Name = "Change Background Colour", View = ChangeBackgroundColour },
+                        new Option { Name = "Change Selection Marker", View = ChangeSelectionMarker }
+                    }
                 }
             };
         }
@@ -32,14 +36,19 @@ namespace Nix.MVC
         {
             if (markerInput is null)
             {
-                markerInput = new InputView(this, "Enter Selection Marker", Config.Data.SelectionMarker)
+                markerInput = new View(this)
                 {
                     Name = "Selection Marker",
                     Parent = CurrentView,
-                    Callback = (input) =>
+                    Behaviour = new TextInput
                     {
-                        Config.Data.SelectionMarker = input.UserInput;
-                        Config.Save();
+                        Prompt = "Enter Selection Marker",
+                        UserInput = Config.Data.SelectionMarker,
+                        Callback = input =>
+                        {
+                            Config.Data.SelectionMarker = input.UserInput;
+                            Config.Save();
+                        }
                     }
                 };
             }
@@ -65,11 +74,14 @@ namespace Nix.MVC
                     });
                 }
 
-                fontColours = new NavigationView(this)
+                fontColours = new View(this)
                 {
                     Name = "Change Font Colour",
                     Parent = Menu,
-                    Options = options
+                    Behaviour = new Navigation
+                    {
+                        Options = options,
+                    },
                 };
             }
             return fontColours;
@@ -94,11 +106,14 @@ namespace Nix.MVC
                     });
                 }
 
-                backgroundColours = new NavigationView(this)
+                backgroundColours = new View(this)
                 {
                     Name = "Change Background Colour",
                     Parent = CurrentView,
-                    Options = options
+                    Behaviour = new Navigation
+                    {
+                        Options = options
+                    }
                 };
             }
             return backgroundColours;
