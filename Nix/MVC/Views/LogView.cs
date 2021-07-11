@@ -1,10 +1,19 @@
-﻿using Nix.Resources;
+﻿using Nix.MVC.Views;
+using Nix.Resources;
 using System;
 
 namespace Nix.MVC
 {
     public sealed class LogView : View
     {
+        public bool Interactive
+        {
+            get
+            {
+                return Behaviour is TextInput || !(Behaviour is null);
+            }
+        }
+
         private readonly ILogger logger;
 
         public LogView(Controller controller, ILogger logger) : base(controller) 
@@ -26,7 +35,7 @@ namespace Nix.MVC
             base.Display();
             logger.WriteLogs();
 
-            if (Behaviour is null)
+            if (!Interactive)
             {
                 Console.ReadLine();
                 return;

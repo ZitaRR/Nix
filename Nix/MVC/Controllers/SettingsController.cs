@@ -44,7 +44,7 @@ namespace Nix.MVC
                     {
                         Prompt = "Enter Selection Marker",
                         UserInput = Config.Data.SelectionMarker,
-                        Callback = input =>
+                        Action = input =>
                         {
                             Config.Data.SelectionMarker = input.UserInput;
                             Config.Save();

@@ -5,7 +5,7 @@ namespace Nix.MVC.Views
     public sealed class TextInput : IBehaviour
     {
         public IView View { get; private set; }
-        public Action<TextInput> Callback { get; set; }
+        public Action<TextInput> Action { get; set; }
         public string Prompt { get; set; }
         public string UserInput { get; set; }
         public bool HideInput { get; set; }
@@ -50,7 +50,7 @@ namespace Nix.MVC.Views
             {
                 Input();
                 Console.WriteLine();
-                Callback(this);
+                Action(this);
             } while (repeat);
         }
 

@@ -56,7 +56,7 @@ namespace Nix.MVC
                     Behaviour = new TextInput
                     {
                         Repeat = true,
-                        Callback = input =>
+                        Action = input =>
                         {
                             if (string.IsNullOrWhiteSpace(input.UserInput))
                             {
