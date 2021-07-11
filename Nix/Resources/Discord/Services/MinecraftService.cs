@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Nix.Resources.Discord
 {
-    public sealed class MinecraftService : ProcessService
+    public sealed class MinecraftService : ProcessServiceBase
     {
         public string Name { get; } = "Minecraft";
         public bool Interactive { get; } = true;

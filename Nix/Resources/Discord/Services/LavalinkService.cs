@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Nix.Resources.Discord
 {
-    public sealed class LavalinkService : ProcessService
+    public sealed class LavalinkService : ProcessServiceBase
     {
         public string Name { get; } = "Lavalink";
         public bool Interactive { get; } = false;
