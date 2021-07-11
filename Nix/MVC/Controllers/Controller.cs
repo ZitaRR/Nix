@@ -1,6 +1,6 @@
 ﻿namespace Nix.MVC
 {
-    internal abstract class Controller
+    public abstract class Controller
     {
         public string Title { get; set; }
         public IView Menu { get; set; }

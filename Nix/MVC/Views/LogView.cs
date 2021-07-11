@@ -3,7 +3,7 @@ using System;
 
 namespace Nix.MVC
 {
-    internal sealed class LogView : View
+    public sealed class LogView : View
     {
         private readonly ILogger logger;
 

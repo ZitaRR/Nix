@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Nix.MVC
 {
-    internal sealed class ServicesController : Controller
+    public sealed class ServicesController : Controller
     {
         private readonly LavalinkService lavalink;
         private readonly MinecraftService minecraft;

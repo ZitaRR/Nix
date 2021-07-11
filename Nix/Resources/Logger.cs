@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Nix.Resources
 {
-    internal class Logger : ILogger
+    public class Logger : ILogger
     {
         public event ILogger.Log OnLog;
 

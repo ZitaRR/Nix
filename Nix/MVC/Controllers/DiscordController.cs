@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Nix.MVC
 {
-    internal sealed class DiscordController : Controller
+    public sealed class DiscordController : Controller
     {
         private readonly NixClient nix;
         private readonly ILogger logger;

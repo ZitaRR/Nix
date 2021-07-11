@@ -3,13 +3,13 @@ using System;
 
 namespace Nix.MVC
 {
-    internal abstract class View : IView
+    public abstract class View : IView
     {
         public const int OFFSET = 8;
 
         public Controller Controller { get; private set; }
-        public string Name { get; internal set; }
-        public IView Parent { get; internal set; }
+        public string Name { get; set; }
+        public IView Parent { get; set; }
 
         private readonly string asciiTitle;
 

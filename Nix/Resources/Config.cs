@@ -6,7 +6,7 @@ namespace Nix.Resources
 {
     public static class Config
     {
-        internal static ConfigData Data { get; set; } = new ConfigData();
+        public static ConfigData Data { get; private set; } = new ConfigData();
 
         private static readonly string directory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
         private static readonly string path;
@@ -59,7 +59,7 @@ namespace Nix.Resources
         private static bool ConfigExists()
             => File.Exists(path);
 
-        internal class ConfigData
+        public class ConfigData
         {
             public string Token { get; set; }
             public string Prefix { get; set; } = ".";

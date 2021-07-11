@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Nix.MVC
 {
-    internal sealed class HomeController : Controller
+    public sealed class HomeController : Controller
     {
         private readonly DiscordController discord;
         private readonly SettingsController settings;

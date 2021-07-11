@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace Nix.MVC
 {
-    internal sealed class NavigationView : View
+    public sealed class NavigationView : View
     {
-        public List<Option> Options { get; internal set; }
+        public List<Option> Options { get; set; }
         public int Index { get; private set; } = 0;
 
         public NavigationView(Controller controller, int index = 0) : base(controller)

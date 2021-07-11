@@ -10,7 +10,7 @@ using Nix.MVC;
 
 namespace Nix.Resources
 {
-    internal sealed class PersistentStorage : IPersistentStorage
+    public sealed class PersistentStorage : IPersistentStorage
     {
         private readonly ILogger logger;
         private readonly string connectionString;

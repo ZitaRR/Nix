@@ -2,7 +2,7 @@
 
 namespace Nix.MVC
 {
-    internal sealed class InputView : View
+    public sealed class InputView : View
     {
         public Action<InputView> Callback { get; set; }
         public string Prompt { get; }

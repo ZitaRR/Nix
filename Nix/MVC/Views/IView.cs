@@ -1,6 +1,6 @@
 ﻿namespace Nix.MVC
 {
-    interface IView
+    public interface IView
     {
         Controller Controller { get; }
         string Name { get; }

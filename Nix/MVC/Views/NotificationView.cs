@@ -2,7 +2,7 @@
 
 namespace Nix.MVC
 {
-    internal sealed class NotificationView : View
+    public sealed class NotificationView : View
     {
         public string Message { get; private set; }
 

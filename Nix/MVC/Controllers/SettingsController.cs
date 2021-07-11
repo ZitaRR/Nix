@@ -4,7 +4,7 @@ using System;
 
 namespace Nix.MVC
 {
-    internal sealed class SettingsController : Controller
+    public sealed class SettingsController : Controller
     {
         private NavigationView fontColours;
         private NavigationView backgroundColours;
