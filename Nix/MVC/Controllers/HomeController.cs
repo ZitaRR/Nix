@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Nix.MVC.Views;
-using Nix.Resources;
 using System;
 using System.Collections.Generic;
 

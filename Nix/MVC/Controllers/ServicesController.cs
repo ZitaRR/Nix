@@ -1,5 +1,4 @@
 ﻿using Nix.MVC.Views;
-using Nix.Resources;
 using Nix.Resources.Discord;
 using System.Collections.Generic;
 

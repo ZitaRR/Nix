@@ -1,7 +1,6 @@
 ﻿using System;
-using Nix.MVC;
 
-namespace Nix.Resources
+namespace Nix.MVC
 {
     public class Option
     {
