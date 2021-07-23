@@ -3,18 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Victoria;
-using Nix.MVC;
 
 namespace Nix.Resources
 {
     public struct LavalinkData
     {
         public LavaTrack CurrentTrack { get; }
-        public IList<LavaTrack> Queue { get; }
+        public List<LavaTrack> Queue { get; }
         public IVoiceChannel VoiceChannel { get; }
         public ITextChannel TextChannel { get; }
         public TimeSpan Position { get; }
-        public int Volume { get; }
+        public ushort Volume { get; }
         public bool OnRepeat { get; }
 
         public LavalinkData(NixPlayer player)
@@ -24,7 +23,7 @@ namespace Nix.Resources
             VoiceChannel = player.VoiceChannel;
             TextChannel = player.TextChannel;
             Position = CurrentTrack?.Position ?? TimeSpan.Zero;
-            Volume = player.Volume;
+            Volume = (ushort)player.Volume;
             OnRepeat = player.OnRepeat;
         }
     }

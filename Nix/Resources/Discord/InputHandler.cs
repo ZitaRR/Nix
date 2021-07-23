@@ -19,8 +19,6 @@ namespace Nix.Resources
         private readonly INixProvider nixProvider;
         private readonly IServiceProvider services;
         private readonly CommandService commands = new CommandService();
-        private readonly LavaNode lava;
-        private readonly AudioService audio;
 
         public InputHandler(
             IDiscord discord, 
@@ -46,42 +44,13 @@ namespace Nix.Resources
                 .AddSingleton<EmbedService>()
                 .AddLavaNode(lava => lava.SelfDeaf = true)
                 .BuildServiceProvider();
-
-            lava = services.GetService<LavaNode>();
-            audio = services.GetService<AudioService>();
         }
 
         public async Task InitialiseAsync()
         {
-            discord.Client.Ready += OnReady;
             discord.Client.MessageReceived += ProcessMessageAsync;
-            discord.Client.UserVoiceStateUpdated += OnUserVoiceStateUpdate;
 
             await commands.AddModulesAsync(Assembly.GetExecutingAssembly(), services);
-        }
-
-        private async Task OnReady()
-        {
-            if (!lava.IsConnected)
-                await lava.ConnectAsync();
-        }
-
-        private async Task OnUserVoiceStateUpdate(SocketUser user, SocketVoiceState origin, SocketVoiceState destination)
-        {
-            if (user.IsBot)
-                return;
-
-            var nix = origin.VoiceChannel?.GetUser(discord.Client.CurrentUser.Id) ??
-                destination.VoiceChannel?.GetUser(discord.Client.CurrentUser.Id);
-
-            if (nix is null)
-                return;
-
-            if (nix.VoiceChannel.Id == destination.VoiceChannel?.Id &&
-                nix.VoiceChannel.Users.Count == 2)
-                await audio.CancelDisconnect(nix.VoiceChannel.Guild);
-            else if (nix.VoiceChannel.Users.Count == 1)
-                _ = Task.Run(() => audio.InitiateDisconnectAsync(nix.VoiceChannel.Guild));
         }
 
         private async Task ProcessMessageAsync(SocketMessage socketMessage)

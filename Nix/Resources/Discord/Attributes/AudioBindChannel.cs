@@ -1,4 +1,5 @@
 ﻿using Discord.Commands;
+using Nix.MVC;
 using System;
 using System.Threading.Tasks;
 
@@ -12,12 +13,14 @@ namespace Nix.Resources.Discord
             IServiceProvider services)
         {
             var audio = services.GetService(typeof(AudioService)) as AudioService;
-            var nix = audio.GetPlayer(context.Guild.Id);
-
-            if (nix != null &&
-                nix?.TextChannel?.Id != context.Channel.Id)
+            if (audio.TryGetPlayer(context.Guild, out NixPlayer nix))
+            {
+                if (nix.TextChannel.Id == context.Channel.Id)
+                    return Task.FromResult(PreconditionResult.FromSuccess());
                 return Task.FromResult(PreconditionResult
-                        .FromError($"I'm bound to {nix.TextChannel.Name}"));
+                    .FromError($"I'm bound to {nix.TextChannel.Name}"));
+            }
+
             return Task.FromResult(PreconditionResult.FromSuccess());
         }
     }

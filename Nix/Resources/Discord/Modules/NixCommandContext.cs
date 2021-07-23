@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Nix.MVC;
@@ -12,6 +13,8 @@ namespace Nix.Resources.Discord
         public NixClient NixClient { get; }
         public EmbedService Reply { get; }
         public ProcessServiceBase Process { get; }
+        public IVoiceChannel VoiceChannel { get => (User as IVoiceState).VoiceChannel; }
+        public ITextChannel TextChannel { get => Channel as ITextChannel; }
 
         private readonly INixProvider nixProvider;
 
