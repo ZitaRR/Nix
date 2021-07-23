@@ -30,7 +30,6 @@ namespace Nix.Resources
         {
             await Client.LogoutAsync();
             await Client.StopAsync();
-            Client = null;
         }
     }
 }
