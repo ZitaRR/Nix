@@ -10,9 +10,7 @@ namespace Nix.Resources.Discord
 {
     public class NixCommandContext : SocketCommandContext
     {
-        public NixClient NixClient { get; }
         public EmbedService Reply { get; }
-        public ProcessServiceBase Process { get; }
         public IVoiceChannel VoiceChannel { get => (User as IVoiceState).VoiceChannel; }
         public ITextChannel TextChannel { get => Channel as ITextChannel; }
 
@@ -24,9 +22,7 @@ namespace Nix.Resources.Discord
             IServiceProvider services) 
             : base(client, message)
         {
-            NixClient = services.GetService<NixClient>();
             Reply = services.GetService<EmbedService>();
-            Process = services.GetService<ProcessServiceBase>();
             nixProvider = services.GetService<INixProvider>();
         }
 

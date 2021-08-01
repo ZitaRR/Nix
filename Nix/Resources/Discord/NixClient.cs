@@ -8,8 +8,6 @@ namespace Nix.Resources
 {
     public class NixClient 
     {
-        public Stopwatch Watch { get; private set; } = new Stopwatch();
-
         private readonly IDiscord discord;
         private readonly ILogger logger;
         private readonly INixProvider nixProvider;
@@ -59,7 +57,6 @@ namespace Nix.Resources
 
         private Task OnDisconnection(Exception e)
         {
-            Watch.Stop();
             return Task.CompletedTask;
         }
 
@@ -84,7 +81,6 @@ namespace Nix.Resources
 #endif
 
             logger.AppendLog("Discord initialized");
-            Watch.Start();
         }
     }
 }
