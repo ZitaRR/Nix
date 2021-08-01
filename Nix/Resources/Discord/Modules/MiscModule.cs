@@ -28,11 +28,6 @@ namespace Nix.Resources.Discord
             }
             nixUser = await Context.GetNixUser();
             await ReplyAsync(nixUser.ToString());
-
-            return;
-            await Context.Reply.MessageAsync(Context.Channel as ITextChannel,
-                $"**Uptime** ``{Context.NixClient.Watch.Elapsed:h\\:mm\\:ss}``\n" +
-                $"**Version** ``{Utility.Version}``");
         }
 
         [Command("help")]

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Reflection;
 using Newtonsoft.Json;
 using Nix.MVC;
 
@@ -8,12 +9,14 @@ namespace Nix.Resources
     {
         public static ConfigData Data { get; private set; } = new ConfigData();
 
-        private static readonly string directory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName;
+        private static readonly string directory;
         private static readonly string path;
         private static bool initialized = false;
 
         static Config()
         {
+            string assembly = Assembly.GetExecutingAssembly().Location;
+            directory = assembly.Replace("\\Debug\\netcoreapp3.1\\Nix.dll", "");
 #if DEBUG
             path = $"{directory}/devconfig.json";
 #else 
