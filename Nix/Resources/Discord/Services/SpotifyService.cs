@@ -8,10 +8,8 @@ namespace Nix.Resources.Discord
 {
     public sealed class SpotifyService
     {
-        private readonly Regex UrlRegex 
-            = new Regex(@"(?<=(playlist|track)\/).*?(?=\?)");
-        private readonly Regex UriRegex
-            = new Regex("(?<=(playlist|track):).*");
+        private readonly Regex UrlRegex = new Regex(@"(?<=(playlist|track)\/).*?(?=\?)");
+        private readonly Regex UriRegex = new Regex("(?<=(playlist|track):).*");
         private SpotifyClient client;
 
         public SpotifyService()
@@ -27,12 +25,14 @@ namespace Nix.Resources.Discord
         {
             string id = GetId(url);
             if (id == "")
+            {
                 return null;
+            }
 
             FullPlaylist playlist = await client.Playlists.Get(id);
-            var tracks = new List<FullTrack>();
+            List<FullTrack> tracks = new();
 
-            foreach (var item in playlist.Tracks.Items)
+            foreach (PlaylistTrack<IPlayableItem> item in playlist.Tracks.Items)
             {
                 tracks.Add(item.Track as FullTrack);
             }
@@ -43,7 +43,9 @@ namespace Nix.Resources.Discord
         {
             string id = GetId(url);
             if (id == "")
+            {
                 return null;
+            }
 
             FullTrack track = await client.Tracks.Get(id);
             return track;
@@ -52,21 +54,27 @@ namespace Nix.Resources.Discord
         public bool IsSpotifyUri(string url)
         {
             if (url.Contains("spotify"))
+            {
                 return true;
+            }
             return false;
         }
 
         public bool IsPlaylist(string url)
         {
             if (url.Contains("playlist"))
+            {
                 return true;
+            }
             return false;
         }
 
         public bool IsTrack(string url)
         {
             if (url.Contains("track"))
+            {
                 return true;
+            }
             return false;
         }
 
@@ -74,7 +82,9 @@ namespace Nix.Resources.Discord
         {
             string id = UrlRegex.Match(url).Value;
             if (id == "")
+            {
                 id = UriRegex.Match(url).Value;
+            }
 
             return id;
         }

@@ -16,12 +16,12 @@ namespace Nix.Resources
         {
             await nixProvider.Guilds.Store(guild.GetNixGuild());
 
-            foreach (var channel in guild.Channels)
+            foreach (SocketGuildChannel channel in guild.Channels)
             {
                 await RegisterChannel(channel);
             }
 
-            foreach (var user in guild.Users)
+            foreach (SocketGuildUser user in guild.Users)
             {
                 await RegisterUser(user);
             }
@@ -30,7 +30,9 @@ namespace Nix.Resources
         public async Task RegisterChannel(SocketGuildChannel channel)
         {
             if (channel is SocketCategoryChannel)
+            {
                 return;
+            }
 
             await nixProvider.Channels.Store(channel.GetNixChannel());
         }
@@ -44,12 +46,12 @@ namespace Nix.Resources
         {
             await nixProvider.Guilds.Remove(guild.GetNixGuild());
 
-            foreach (var channel in guild.Channels)
+            foreach (SocketGuildChannel channel in guild.Channels)
             {
                 await UnregisterChannel(channel);
             }
 
-            foreach (var user in guild.Users)
+            foreach (SocketGuildUser user in guild.Users)
             {
                 await UnregisterUser(user);
             }

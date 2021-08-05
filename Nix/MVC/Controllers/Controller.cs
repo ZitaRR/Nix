@@ -9,7 +9,10 @@
             set
             {
                 if (view != null)
+                {
                     view.Active = false;
+                }
+
                 view = value;
                 view.Active = true;
             }
@@ -24,6 +27,8 @@
         }
 
         public void Display()
-            => Menu.Display();
+        {
+            Menu.Display();
+        }
     }
 }

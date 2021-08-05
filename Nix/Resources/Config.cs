@@ -27,7 +27,9 @@ namespace Nix.Resources
         public static void Initialize()
         {
             if (initialized)
+            {
                 return;
+            }
 
             if (!File.Exists(path))
             {
@@ -54,13 +56,18 @@ namespace Nix.Resources
         public static void Load()
         {
             if (!ConfigExists())
+            {
                 Save();
-            var json = File.ReadAllText(path);
+            }
+
+            string json = File.ReadAllText(path);
             Data = JsonConvert.DeserializeObject<ConfigData>(json);
         }
 
         private static bool ConfigExists()
-            => File.Exists(path);
+        {
+            return File.Exists(path);
+        }
 
         public class ConfigData
         {

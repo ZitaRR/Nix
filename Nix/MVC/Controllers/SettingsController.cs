@@ -22,11 +22,11 @@ namespace Nix.MVC
                 Parent = CurrentView,
                 Behaviour = new Navigation
                 {
-                    Options = new List<Option>
+                    Options = new()
                     {
-                        new Option { Name = "Change Font Colour", View = ChangeFontColour },
-                        new Option { Name = "Change Background Colour", View = ChangeBackgroundColour },
-                        new Option { Name = "Change Selection Marker", View = ChangeSelectionMarker }
+                        new() { Name = "Change Font Colour", View = ChangeFontColour },
+                        new() { Name = "Change Background Colour", View = ChangeBackgroundColour },
+                        new() { Name = "Change Selection Marker", View = ChangeSelectionMarker }
                     }
                 }
             };
@@ -36,7 +36,7 @@ namespace Nix.MVC
         {
             if (markerInput is null)
             {
-                markerInput = new View(this)
+                markerInput = new(this)
                 {
                     Name = "Selection Marker",
                     Parent = CurrentView,
@@ -59,10 +59,10 @@ namespace Nix.MVC
         {
             if (fontColours is null)
             {
-                var options = new List<Option>();
-                foreach (var colour in colours)
+                List<Option> options = new();
+                foreach (ConsoleColor colour in colours)
                 {
-                    options.Add(new Option
+                    options.Add(new()
                     {
                         Name = colour.ToString(),
                         View = () =>
@@ -74,7 +74,7 @@ namespace Nix.MVC
                     });
                 }
 
-                fontColours = new View(this)
+                fontColours = new(this)
                 {
                     Name = "Change Font Colour",
                     Parent = Menu,
@@ -91,10 +91,10 @@ namespace Nix.MVC
         {
             if (backgroundColours is null)
             {
-                var options = new List<Option>();
-                foreach (var colour in colours)
+                List<Option> options = new();
+                foreach (ConsoleColor colour in colours)
                 {
-                    options.Add(new Option
+                    options.Add(new()
                     {
                         Name = colour.ToString(),
                         View = () =>
@@ -106,7 +106,7 @@ namespace Nix.MVC
                     });
                 }
 
-                backgroundColours = new View(this)
+                backgroundColours = new(this)
                 {
                     Name = "Change Background Colour",
                     Parent = CurrentView,

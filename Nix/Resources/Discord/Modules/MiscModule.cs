@@ -33,7 +33,7 @@ namespace Nix.Resources.Discord
         [Command("help")]
         public async Task Help()
         {
-            var pages = new List<string>();
+            List<string> pages = new();
             foreach (var module in commands.Modules)
             {
                 var content = $"**{module.Name.Replace("Module", "")}**\n\n";

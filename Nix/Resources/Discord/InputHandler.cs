@@ -55,9 +55,11 @@ namespace Nix.Resources
 
         private async Task ProcessMessageAsync(SocketMessage socketMessage)
         {
-            var message = socketMessage as SocketUserMessage;
+            var message = (SocketUserMessage)socketMessage;
             if (message is null || message.Author.IsBot)
+            {
                 return;
+            }
 
             logger.AppendLog($"{message.Author.Username} >> {message.Content}");
 
@@ -67,7 +69,7 @@ namespace Nix.Resources
             if (message.HasStringPrefix(Config.Data.Prefix, ref argPos) ||
                 message.HasMentionPrefix(discord.Client.CurrentUser, ref argPos))
             {
-                var context = new NixCommandContext(discord.Client, message, services);
+                NixCommandContext context = new(discord.Client, message, services);
                 result = await commands.ExecuteAsync(context, argPos, services);
 
                 if (!result.IsSuccess)
@@ -85,7 +87,9 @@ namespace Nix.Resources
             NixUser nixUser = await nixProvider.Users.Get(user);
 
             if (usedCommand)
+            {
                 nixUser.CommandsIssued++;
+            }
 
             nixUser.Messages++;
             await nixProvider.Users.Update(nixUser);

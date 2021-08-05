@@ -1,8 +1,8 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Victoria;
 
 namespace Nix.Resources.Discord
 {
@@ -16,7 +16,9 @@ namespace Nix.Resources.Discord
             get
             {
                 if (!Audio.TryGetPlayer(Context.Guild, out NixPlayer player))
+                {
                     return null;
+                }
                 return player;
             }
         }
@@ -24,7 +26,7 @@ namespace Nix.Resources.Discord
         [Command("join")]
         public async Task JoinAsync()
         {
-            var player = await Audio.CreatePlayerForGuildAsync(
+            NixPlayer player = await Audio.CreatePlayerForGuildAsync(
                 Context.Guild, 
                 Context.VoiceChannel, 
                 Context.TextChannel);
@@ -94,13 +96,13 @@ namespace Nix.Resources.Discord
         [EnsurePlayerConnection]
         public async Task QueueAsync()
         {
-            var content = "";
-            var tracks = Player.Queue;
-            var pages = new List<string>();
+            string content = "";
+            LavaTrack[] tracks = Player.Queue;
+            List<string> pages = new();
 
             for (int i = 0; i < tracks.Length;)
             {
-                var track = tracks[i];
+                LavaTrack track = tracks[i];
                 content += $"**{++i}** {await Player.GetTitleAsUrlAsync(track)} **|** ``{track.Duration:m\\:ss}``\n";
                 if (i % 10 == 0)
                 {

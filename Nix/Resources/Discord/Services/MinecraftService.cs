@@ -9,7 +9,7 @@ namespace Nix.Resources.Discord
 
         public MinecraftService(ILogger logger) : base(logger) 
         {
-            CreateProcess("run.bat", directory);
+            //CreateProcess("run.bat", directory);
         }
     }
 }

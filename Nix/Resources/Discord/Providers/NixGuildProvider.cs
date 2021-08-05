@@ -16,7 +16,7 @@ namespace Nix.Resources
 
         public async Task<NixGuild> Get(SocketGuild guild)
         {
-            var nixGuild = await Get(guild.Id);
+            NixGuild nixGuild = await Get(guild.Id);
 
             if (nixGuild is null)
             {
@@ -36,7 +36,9 @@ namespace Nix.Resources
         public async Task<bool> Store(NixGuild guild)
         {
             if (await storage.ExistsAsync<NixGuild>(CreateProperties(guild)))
+            {
                 return false;
+            }
 
             await storage.InsertAsync(guild);
             return true;
@@ -45,7 +47,9 @@ namespace Nix.Resources
         public async Task<bool> Remove(NixGuild guild)
         {
             if (!await storage.ExistsAsync<NixGuild>(CreateProperties(guild)))
+            {
                 return false;
+            }
 
             await storage.DeleteAsync<NixGuild>(CreateProperties(guild));
             return true;
@@ -54,7 +58,9 @@ namespace Nix.Resources
         public async Task Update(NixGuild guild)
         {
             if (await Store(guild))
+            {
                 return;
+            }
 
             await storage.UpdateAsync(guild);
         }

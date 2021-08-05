@@ -28,9 +28,9 @@ namespace Nix.Resources
         {
             entity.StoredAt = DateTime.UtcNow;
             PropertyInfo[] props = GetProperties(entity);
-            var cols = string.Join(",", props.Select(x => x.Name));
-            var values = string.Join(",", props.Select(x => $"@{x.Name}"));
-            var sql = $"INSERT INTO {typeof(T).Name} " +
+            string cols = string.Join(",", props.Select(x => x.Name));
+            string values = string.Join(",", props.Select(x => $"@{x.Name}"));
+            string sql = $"INSERT INTO {typeof(T).Name} " +
                 $"({cols})VALUES({values})";
 
             using(connection = new SqlConnection(connectionString))
@@ -49,13 +49,15 @@ namespace Nix.Resources
         public async Task UpdateAsync<T>(T entity) where T : IStorable
         {
             PropertyInfo[] props = GetProperties(entity);
-            var expressions = string.Join(",", props.Select(x => $"{x.Name} = @{x.Name}"));
-            var sql = $"UPDATE {typeof(T).Name} " +
+            string expressions = string.Join(",", props.Select(x => $"{x.Name} = @{x.Name}"));
+            string sql = $"UPDATE {typeof(T).Name} " +
                 $"SET {expressions} " +
                 $"WHERE Id = @Id";
 
             if (!(entity is NixGuild))
+            {
                 sql += " AND GuildId = @GuildId";
+            }
 
             using (connection = new SqlConnection(connectionString))
             {
@@ -73,8 +75,8 @@ namespace Nix.Resources
         public async Task DeleteAsync<T>(object param) where T : IStorable
         {
             PropertyInfo[] props = GetProperties(param);
-            var conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
-            var sql = $"DELETE * FROM {typeof(T).Name} " +
+            string conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
+            string sql = $"DELETE * FROM {typeof(T).Name} " +
                 $"WHERE {conditions}";
 
             using (connection = new SqlConnection(connectionString))
@@ -110,8 +112,8 @@ namespace Nix.Resources
         public async Task<IEnumerable<T>> FindAsync<T>(object param) where T : IStorable
         {
             PropertyInfo[] props = GetProperties(param);
-            var conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
-            var sql = $"SELECT * FROM {typeof(T).Name} " +
+            string conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
+            string sql = $"SELECT * FROM {typeof(T).Name} " +
                 $"WHERE {conditions}";
 
             using(connection = new SqlConnection(connectionString))
@@ -150,8 +152,8 @@ namespace Nix.Resources
         public async Task<bool> ExistsAsync<T>(object param) where T : IStorable
         {
             PropertyInfo[] props = GetProperties(param);
-            var conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
-            var sql = $"SELECT * FROM {typeof(T).Name} " +
+            string conditions = string.Join(" AND ", props.Select(x => $"{x.Name} = @{x.Name}"));
+            string sql = $"SELECT * FROM {typeof(T).Name} " +
                 $"WHERE {conditions}";
 
             using (connection = new SqlConnection(connectionString))

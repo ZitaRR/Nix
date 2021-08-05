@@ -32,7 +32,9 @@ namespace Nix.MVC
             Console.SetCursorPosition(0, OFFSET);
 
             if (GetType() == typeof(View))
+            {
                 Behaviour?.Start(this);
+            }
         }
     }
 }

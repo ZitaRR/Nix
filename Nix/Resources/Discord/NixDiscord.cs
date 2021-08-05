@@ -20,7 +20,9 @@ namespace Nix.Resources
         public async Task StartAsync()
         {
             if (string.IsNullOrEmpty(Config.Data.Token))
+            {
                 throw new NullReferenceException(nameof(Config.Data.Token));
+            }
 
             await Client.LoginAsync(TokenType.Bot, Config.Data.Token);
             await Client.StartAsync();

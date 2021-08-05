@@ -25,7 +25,9 @@ namespace Nix.MVC
         private void Logger_OnLog(NixLogMessage log)
         {
             if (!Active)
+            {
                 return;
+            }
 
             logger.WriteLog(log);
         }

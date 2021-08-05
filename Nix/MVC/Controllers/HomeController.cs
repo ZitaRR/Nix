@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Nix.MVC.Views;
 using System;
-using System.Collections.Generic;
 
 namespace Nix.MVC
 {
@@ -19,12 +18,12 @@ namespace Nix.MVC
                 Parent = null,
                 Behaviour = new Navigation
                 {
-                    Options = new List<Option>
+                    Options = new()
                     {
-                        new Option { Name = "Settings", View = SettingsController },
-                        new Option { Name = "Discord", View = DiscordController },
-                        new Option { Name = "Services", View = ServiceController },
-                        new Option { Name = "Exit", View = Exit },
+                        new() { Name = "Settings", View = SettingsController },
+                        new() { Name = "Discord", View = DiscordController },
+                        new() { Name = "Services", View = ServiceController },
+                        new() { Name = "Exit", View = Exit },
                     },
                 },
             };
@@ -37,10 +36,14 @@ namespace Nix.MVC
         }
 
         public IView SettingsController()
-            => settings.Menu;
+        {
+            return settings.Menu;
+        }
 
         public IView DiscordController()
-            => discord.Menu;
+        {
+            return discord.Menu;
+        }
 
         public IView ServiceController()
         {

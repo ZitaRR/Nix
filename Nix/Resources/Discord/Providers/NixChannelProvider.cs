@@ -37,7 +37,9 @@ namespace Nix.Resources
         public async Task<bool> Store(NixChannel channel)
         {
             if (await storage.ExistsAsync<NixChannel>(CreateProperties(channel)))
+            {
                 return false;
+            }
 
             await storage.InsertAsync(channel);
             return true;
@@ -46,7 +48,9 @@ namespace Nix.Resources
         public async Task<bool> Remove(NixChannel channel)
         {
             if (!await storage.ExistsAsync<NixChannel>(CreateProperties(channel)))
+            {
                 return false;
+            }
 
             await storage.DeleteAsync<NixChannel>(CreateProperties(channel));
             return true;
@@ -55,7 +59,9 @@ namespace Nix.Resources
         public async Task Update(NixChannel channel)
         {
             if (await Store(channel))
+            {
                 return;
+            }
 
             await storage.UpdateAsync(channel);
         }

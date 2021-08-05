@@ -19,13 +19,15 @@ namespace Nix.MVC
         public override void Display()
         {
             int height = Message.Split('\n').Length + 1;
-            var lines = Message.Split('\n');
+            string[] lines = Message.Split('\n');
             int width = 0;
             for (int i = 0; i < lines.Length; i++)
             {
                 int length = lines[i].Length;
                 if (length > width)
+                {
                     width = length + 1;
+                }
             }
 
             Console.Clear();

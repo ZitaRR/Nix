@@ -1,7 +1,6 @@
 ﻿using Nix.MVC.Views;
 using Nix.Resources;
 using System;
-using System.Collections.Generic;
 
 namespace Nix.MVC
 {
@@ -28,10 +27,10 @@ namespace Nix.MVC
                 Parent = CurrentView,
                 Behaviour = new Navigation
                 {
-                    Options = new List<Option>
+                    Options = new()
                     {
-                        new Option { Name = "Logs", View = Logs },
-                        new Option { Name = "Guilds", View = Guilds },
+                        new() { Name = "Logs", View = Logs },
+                        new() { Name = "Guilds", View = Guilds },
                     },
                 },
             };
@@ -43,7 +42,7 @@ namespace Nix.MVC
         {
             if (log is null)
             {
-                log = new LogView(this, logger)
+                log = new(this, logger)
                 {
                     Name = "Logs",
                     Parent = CurrentView,

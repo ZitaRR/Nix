@@ -69,9 +69,13 @@ namespace Nix.Resources
         public async Task<LavaTrack[]> PlayAsync(string query)
         {
             if (string.IsNullOrEmpty(query))
+            {
                 return new LavaTrack[] { };
+            }
             if (spotify.IsSpotifyUri(query))
+            {
                 return await PlaySpotifyAsync(query);
+            }
 
             SearchResponse response;
             if (Uri.IsWellFormedUriString(query, UriKind.Absolute))
@@ -85,12 +89,14 @@ namespace Nix.Resources
 
             if (response.LoadStatus is LoadStatus.LoadFailed ||
                 response.LoadStatus is LoadStatus.NoMatches)
+            {
                 return new LavaTrack[] { };
+            }
 
             int index = Queue.Length;
             if (!string.IsNullOrEmpty(response.Playlist.Name))
             {
-                foreach (var track in response.Tracks)
+                foreach (LavaTrack track in response.Tracks)
                 {
                     if (IsPlaying || IsPaused)
                     {
@@ -103,7 +109,7 @@ namespace Nix.Resources
             }
             else
             {
-                var track = response.Tracks[0];
+                LavaTrack track = response.Tracks[0];
                 if (IsPlaying || IsPaused)
                 {
                     player.Queue.Enqueue(track);
@@ -127,7 +133,7 @@ namespace Nix.Resources
             await player.PlayAsync(data.CurrentTrack);
             await SeekAsync(data.Position);
 
-            foreach (var track in data.Queue)
+            foreach (LavaTrack track in data.Queue)
             {
                 player.Queue.Enqueue(track);
             }
@@ -175,7 +181,9 @@ namespace Nix.Resources
         public async Task<bool> PauseAsync()
         {
             if (IsPaused)
+            {
                 return false;
+            }
 
             await player.PauseAsync();
             return true;
@@ -184,7 +192,9 @@ namespace Nix.Resources
         public async Task<bool> ResumeAsync()
         {
             if (IsPlaying)
+            {
                 return false;
+            }
 
             await player.ResumeAsync();
             return true;
@@ -239,7 +249,9 @@ namespace Nix.Resources
         {
             int index = title.IndexOfAny(new char[] { '(', '[' });
             if (index != -1)
+            {
                 title = title.Substring(0, index);
+            }
 
             if (title.Length > titleLength)
             {

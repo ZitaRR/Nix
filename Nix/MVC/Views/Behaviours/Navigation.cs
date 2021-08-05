@@ -24,14 +24,17 @@ namespace Nix.MVC.Views
                 {
                     SetFocus(i, true);
                 }
-                else SetFocus(i, false);
+                else
+                {
+                    SetFocus(i, false);
+                }
             }
         }
 
         private void SetFocus(int index, bool value)
         {
             Console.SetCursorPosition(0, index + MVC.View.OFFSET);
-            var option = Options[index];
+            Option option = Options[index];
 
             if (!value)
             {
@@ -58,7 +61,7 @@ namespace Nix.MVC.Views
             do
             {
                 ListOptions();
-                var key = Console.ReadKey(true).Key;
+                ConsoleKey key = Console.ReadKey(true).Key;
                 switch (key)
                 {
                     case ConsoleKey.UpArrow:

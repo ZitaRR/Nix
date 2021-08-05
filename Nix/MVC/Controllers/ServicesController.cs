@@ -1,6 +1,5 @@
 ﻿using Nix.MVC.Views;
 using Nix.Resources.Discord;
-using System.Collections.Generic;
 
 namespace Nix.MVC
 {
@@ -22,10 +21,10 @@ namespace Nix.MVC
                 Parent = CurrentView,
                 Behaviour = new Navigation
                 {
-                    Options = new List<Option>
+                    Options = new()
                     {
-                        new Option { Name = "Lavalink", View = Lavalink },
-                        new Option { Name = "Minecraft", View = Minecraft },
+                        new() { Name = "Lavalink", View = Lavalink },
+                        new() { Name = "Minecraft", View = Minecraft },
                     }
                 }
             };
@@ -35,7 +34,7 @@ namespace Nix.MVC
         {
             if (lavalinkView is null)
             {
-                lavalinkView = new LogView(this, lavalink.Logger)
+                lavalinkView = new(this, lavalink.Logger)
                 {
                     Name = "Lavalink",
                     Parent = Menu,
@@ -48,7 +47,7 @@ namespace Nix.MVC
         {
             if (minecraftView is null)
             {
-                minecraftView = new LogView(this, minecraft.Logger)
+                minecraftView = new(this, minecraft.Logger)
                 {
                     Name = "Minecraft",
                     Parent = Menu,

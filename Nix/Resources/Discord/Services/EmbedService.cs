@@ -24,7 +24,7 @@ namespace Nix.Resources.Discord
 
         public async Task ErrorAsync(ITextChannel channel, string message)
         {
-            embed = new EmbedBuilder
+            embed = new()
             {
                 Description = message,
                 Color = errorColor,
@@ -35,7 +35,7 @@ namespace Nix.Resources.Discord
 
         public async Task ExceptionAsync(ITextChannel channel, Exception e)
         {
-            embed = new EmbedBuilder
+            embed = new()
             {
                 Description = $"**ERROR** ``{e.HResult}``\n{e.StackTrace}",
                 Color = errorColor,
@@ -46,7 +46,7 @@ namespace Nix.Resources.Discord
 
         public async Task MessageAsync(ITextChannel channel, string message)
         {
-            embed = new EmbedBuilder
+            embed = new()
             {
                 Description = message,
                 Color = NormalColor,
@@ -57,12 +57,12 @@ namespace Nix.Resources.Discord
 
         public async Task PaginatedMessageAsync(NixCommandContext context, List<string> pages, string title = null)
         {
-            var pager = new PaginatedMessage
+            PaginatedMessage pager = new()
             {
                 Title = title,
                 Pages = pages,
                 Color = NormalColor,
-                Options = new PaginatedAppearanceOptions
+                Options = new()
                 {
                     JumpDisplayOptions = JumpDisplayOptions.Never,
                     DisplayInformationIcon = false

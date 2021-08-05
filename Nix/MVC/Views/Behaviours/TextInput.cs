@@ -19,7 +19,7 @@ namespace Nix.MVC.Views
 
             do
             {
-                var key = Console.ReadKey(true);
+                ConsoleKeyInfo key = Console.ReadKey(true);
                 switch (key.Key)
                 {
                     case ConsoleKey.Enter:

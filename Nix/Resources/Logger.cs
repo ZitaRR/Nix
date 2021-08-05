@@ -12,7 +12,7 @@ namespace Nix.Resources
 
         public void AppendLog(string source, string message, ConsoleColor colour)
         {
-            var log = new NixLogMessage(source, message, colour);
+            NixLogMessage log = new(source, message, colour);
             Logs.Add(log);
             OnLog?.Invoke(log);
         }
@@ -36,7 +36,9 @@ namespace Nix.Resources
         }
 
         public void AppendLog(Exception exception)
-            => AppendLog("CLIENT", exception.Message, ConsoleColor.DarkRed);
+        {
+            AppendLog("CLIENT", exception.Message, ConsoleColor.DarkRed);
+        }
 
         public void WriteLog(NixLogMessage log)
         {

@@ -14,8 +14,10 @@ namespace Nix.Resources.Discord
         {
             if (context.User is SocketGuildUser user &&
                 user.VoiceState is null)
+            {
                 return Task.FromResult(PreconditionResult
                     .FromError("You must be connected to a voice-channel"));
+            }
 
             return Task.FromResult(PreconditionResult.FromSuccess());
         }

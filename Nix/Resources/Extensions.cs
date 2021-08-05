@@ -37,9 +37,11 @@ namespace Nix.Resources
         public static NixUser GetNixUser(this SocketGuildUser user)
         {
             if (user is null)
+            {
                 throw new ArgumentNullException(nameof(user));
+            }
 
-            return new NixUser
+            return new()
             {
                 Name = user.Username,
                 Id = user.Id.ToString(),
@@ -54,9 +56,11 @@ namespace Nix.Resources
         public static NixGuild GetNixGuild(this SocketGuild guild)
         {
             if (guild is null)
+            {
                 throw new ArgumentNullException(nameof(guild));
+            }
 
-            return new NixGuild
+            return new()
             {
                 Name = guild.Name,
                 Id = guild.Id.ToString(),
@@ -67,11 +71,15 @@ namespace Nix.Resources
         public static NixChannel GetNixChannel(this SocketGuildChannel channel)
         {
             if (channel is null)
+            {
                 throw new ArgumentNullException(nameof(channel));
+            }
             else if (channel is SocketCategoryChannel)
+            {
                 return null;
+            }
 
-            return new NixChannel
+            return new()
             {
                 Name = channel.Name,
                 Id = channel.Id.ToString(),
