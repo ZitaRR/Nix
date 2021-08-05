@@ -35,9 +35,9 @@ namespace Nix.Resources.Discord
             data = new ConcurrentDictionary<ulong, LavalinkData>();
         }
 
-        public async Task<NixPlayer> CreatePlayerForGuildAsync(IGuild guild, IVoiceChannel voice, ITextChannel text)
+        public async Task<NixPlayer> CreatePlayerForGuildAsync(IGuild guild, IVoiceChannel voice, ITextChannel text = null)
         {
-            if (voice is null || text is null)
+            if (voice is null)
                 return null;
             if (TryGetPlayer(guild, out NixPlayer player))
                 return null;
@@ -49,14 +49,13 @@ namespace Nix.Resources.Discord
             return player;
         }
 
-        public async Task<bool> RemovePlayerFromGuildAsync(IGuild guild)
+        public Task<bool> RemovePlayerFromGuildAsync(IGuild guild)
         {
-            if (!players.TryRemove(guild.Id, out NixPlayer player))
-                return false;
+            if (!players.TryRemove(guild.Id, out _))
+                return Task.FromResult(false);
 
-            await player.LeaveAsync();
             logger.AppendLog("AUDIO", $"Player removed from {guild.Name}");
-            return true;
+            return Task.FromResult(true);
         }
 
         public bool TryGetPlayer(IGuild guild, out NixPlayer player)

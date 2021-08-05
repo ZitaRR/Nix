@@ -17,6 +17,11 @@ namespace Nix.Resources.Discord
             {
                 if (!Audio.TryGetPlayer(Context.Guild, out NixPlayer player))
                     return null;
+
+                if (player.TextChannel is null)
+                {
+                    player.TextChannel = Context.TextChannel;
+                }
                 return player;
             }
         }
@@ -147,7 +152,7 @@ namespace Nix.Resources.Discord
         public async Task TimeAsync(int seconds)
         {
             await Player.SeekAsync(TimeSpan.FromSeconds(seconds));
-            await Player.TextChannel.SendMessageAsync($"**Position** {Player.CurrentTrack.Position:m\\:ss}");
+            await Player.TextChannel.SendMessageAsync($"**Position** {Player.CurrentTrack.Position}");
         }
 
         [Command("pause")]

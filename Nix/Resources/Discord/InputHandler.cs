@@ -3,6 +3,7 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Nix.API;
 using Nix.MVC;
 using Nix.Resources.Discord;
 using System;
@@ -36,14 +37,22 @@ namespace Nix.Resources
                 .AddSingleton(discord.Client)
                 .AddSingleton(commands)
                 .AddSingleton(logger)
+                .AddSingleton(nixProvider)
                 .AddSingleton(lavalink)
                 .AddSingleton(minecraft)
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<AudioService>()
                 .AddSingleton<SpotifyService>()
                 .AddSingleton<EmbedService>()
+                .AddSingleton<NixAPI>()
                 .AddLavaNode(lava => lava.SelfDeaf = true)
                 .BuildServiceProvider();
+
+            Task.Run(async () =>
+            {
+                await services.GetService<NixAPI>().StartAsync();
+            });
+            Console.ReadLine();
         }
 
         public async Task InitialiseAsync()

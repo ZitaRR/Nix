@@ -16,7 +16,7 @@ namespace Nix.Resources
         public LavaTrack[] Queue { get => player.Queue.ToArray(); }
         public LavaTrack CurrentTrack { get => player.Track; }
         public IVoiceChannel VoiceChannel { get => player.VoiceChannel; }
-        public ITextChannel TextChannel { get => player.TextChannel; }
+        public ITextChannel TextChannel { get; set; }
         public int Volume { get => player.Volume; }
         public bool IsPlaying { get => player.PlayerState is PlayerState.Playing; }
         public bool IsPaused { get => player.PlayerState is PlayerState.Paused; }
@@ -50,11 +50,12 @@ namespace Nix.Resources
                 text = TextChannel;
             }
 
-            await lavaNode.JoinAsync(voice, text)
+            await lavaNode.JoinAsync(voice)
                 .ContinueWith(async (_player) =>
                 {
                     player = await _player;
                     await SetVolumeAsync(defaultVolume);
+                    TextChannel = text;
                 });
 
             return true;
