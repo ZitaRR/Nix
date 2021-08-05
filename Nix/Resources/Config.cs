@@ -16,7 +16,7 @@ namespace Nix.Resources
         static Config()
         {
             string assembly = Assembly.GetExecutingAssembly().Location;
-            directory = assembly.Replace("\\Debug\\netcoreapp3.1\\Nix.dll", "");
+            directory = Directory.GetParent(assembly).Parent.Parent.FullName;
 #if DEBUG
             path = $"{directory}/devconfig.json";
 #else 
