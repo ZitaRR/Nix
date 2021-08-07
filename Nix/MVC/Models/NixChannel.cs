@@ -5,7 +5,8 @@ namespace Nix.MVC
 {
     public class NixChannel : IStorable
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
+        public string DiscordId { get; set; }
         public string GuildId { get; set; }
         public string Name { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -14,6 +15,7 @@ namespace Nix.MVC
         public override string ToString()
             => $"Name: {Name}\n" +
             $"ID: {Id}\n" +
+            $"Discord ID: {DiscordId}" +
             $"Guild ID: {GuildId}\n" +
             $"Created At: {CreatedAt}\n" +
             $"Stored At: {StoredAt}";

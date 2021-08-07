@@ -5,7 +5,8 @@ namespace Nix.MVC
 {
     public class NixUser : IStorable
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
+        public string DiscordId { get; set; }
         public string GuildId { get; set; }
         public string Name { get; set; }
         public string AvatarUrl { get; set; }
@@ -19,6 +20,7 @@ namespace Nix.MVC
         {
             return $"Name: {Name}\n" + 
                 $"ID: {Id}\n" +
+                $"Discord ID: {DiscordId}\n" +
                 $"Guild ID: {GuildId}\n" +
                 $"Avatar URL: {AvatarUrl}\n" +
                 $"Messages: {Messages}\n" +

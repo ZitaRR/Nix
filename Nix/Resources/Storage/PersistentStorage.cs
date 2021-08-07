@@ -174,7 +174,7 @@ namespace Nix.Resources
         private PropertyInfo[] GetProperties(object obj)
         {
             Type type = obj.GetType();
-            return type.GetProperties();
+            return type.GetProperties().Where(p => p.Name != "Id").ToArray();
         }
     }
 }

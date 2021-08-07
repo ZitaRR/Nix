@@ -6,7 +6,7 @@ namespace Nix.MVC
 {
     public class NixEvent : IStorable
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string DiscordId { get; set; }
         public long GuildID { get; set; }
         public long MessageID { get; set; }

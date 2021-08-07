@@ -44,7 +44,7 @@ namespace Nix.Resources
             return new()
             {
                 Name = user.Username,
-                Id = user.Id.ToString(),
+                DiscordId = user.Id.ToString(),
                 GuildId = user.Guild.Id.ToString(),
                 AvatarUrl = user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl(),
                 CreatedAt = user.CreatedAt.DateTime,
@@ -63,7 +63,7 @@ namespace Nix.Resources
             return new()
             {
                 Name = guild.Name,
-                Id = guild.Id.ToString(),
+                DiscordId = guild.Id.ToString(),
                 CreatedAt = guild.CreatedAt.DateTime
             };
         }
@@ -82,7 +82,7 @@ namespace Nix.Resources
             return new()
             {
                 Name = channel.Name,
-                Id = channel.Id.ToString(),
+                DiscordId = channel.Id.ToString(),
                 GuildId = channel.Guild.Id.ToString(),
                 CreatedAt = channel.CreatedAt.DateTime
             };
