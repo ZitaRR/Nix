@@ -1,7 +1,7 @@
 ﻿using Nix.Resources;
 using System;
 
-namespace Nix.MVC.Models
+namespace Nix.MVC
 {
     public class NixTrack : IStorable
     {
