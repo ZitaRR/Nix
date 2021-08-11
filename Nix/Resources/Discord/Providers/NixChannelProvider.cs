@@ -73,7 +73,7 @@ namespace Nix.Resources
 
         private object CreateProperties(NixChannel channel)
         {
-            return new { DiscordId = channel.Id.ToString(), GuildId = channel.GuildId.ToString() };
+            return new { DiscordId = channel.DiscordId.ToString(), GuildId = channel.GuildId.ToString() };
         }
     }
 }

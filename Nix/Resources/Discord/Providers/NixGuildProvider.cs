@@ -72,7 +72,7 @@ namespace Nix.Resources
 
         private object CreateProperties(NixGuild guild)
         {
-            return new { DiscordId = guild.Id.ToString() };
+            return new { DiscordId = guild.DiscordId.ToString() };
         }
     }
 }
