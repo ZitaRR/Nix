@@ -184,18 +184,5 @@ namespace Nix.Resources.Discord
         {
             await Player.TextChannel.SendMessageAsync(await Player.GetLyricsAsync());
         }
-
-        [Command("ids")]
-        [EnsurePlayerConnection]
-        public async Task IdsAsync()
-        {
-            string content = "";
-            foreach (LavaTrack track in Player.Queue)
-            {
-                content += $"\n[{track.Id}] {await Player.FormatTitleAsync(track.Title)}";
-            }
-
-            await Player.TextChannel.SendMessageAsync(content);
-        }
     }
 }
