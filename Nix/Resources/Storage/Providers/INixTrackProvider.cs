@@ -8,9 +8,9 @@ namespace Nix.Resources
     {
         Task<IEnumerable<NixTrack>> Get(NixUser user);
         Task<IEnumerable<NixTrack>> Get(ulong id);
-        Task<bool> Store(NixTrack guild);
-        Task<bool> Remove(NixTrack guild);
-        Task Update(NixTrack guild);
+        Task<bool> Store(NixTrack track);
+        Task<bool> Remove(NixTrack track);
+        Task Update(NixTrack track);
         Task<IEnumerable<NixTrack>> GetAll();
     }
 }

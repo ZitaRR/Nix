@@ -27,17 +27,17 @@ namespace Nix.Resources
                 new { DiscordId = id.ToString() });
         }
 
-        public Task<bool> Store(NixTrack guild)
+        public Task<bool> Store(NixTrack track)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> Remove(NixTrack guild)
+        public Task<bool> Remove(NixTrack track)
         {
             throw new NotImplementedException();
         }
 
-        public Task Update(NixTrack guild)
+        public Task Update(NixTrack track)
         {
             throw new NotImplementedException();
         }
