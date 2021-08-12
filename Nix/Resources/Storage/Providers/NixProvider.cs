@@ -8,12 +8,18 @@ namespace Nix.Resources
         public INixGuildProvider Guilds { get; }
         public INixChannelProvider Channels { get; }
         public INixUserProvider Users { get; }
+        public INixTrackProvider Tracks { get; }
 
-        public NixProvider(INixGuildProvider guilds, INixChannelProvider channels, INixUserProvider users)
+        public NixProvider(
+            INixGuildProvider guilds, 
+            INixChannelProvider channels, 
+            INixUserProvider users,
+            INixTrackProvider tracks)
         {
             Guilds = guilds;
             Channels = channels;
             Users = users;
+            Tracks = tracks;
         }
 
         public async Task<int> GetGuildsCountAsync()

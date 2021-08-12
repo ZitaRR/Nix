@@ -38,6 +38,7 @@ namespace Nix.Resources
                 .AddSingleton(logger)
                 .AddSingleton(lavalink)
                 .AddSingleton(minecraft)
+                .AddSingleton(nixProvider)
                 .AddSingleton<InteractiveService>()
                 .AddSingleton<AudioService>()
                 .AddSingleton<SpotifyService>()

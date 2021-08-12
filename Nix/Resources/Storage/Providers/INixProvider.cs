@@ -7,6 +7,7 @@ namespace Nix.Resources
         public INixGuildProvider Guilds { get; }
         public INixChannelProvider Channels { get; }
         public INixUserProvider Users { get; }
+        public INixTrackProvider Tracks { get; }
         Task<int> GetGuildsCountAsync();
         Task<int> GetChannelsCountAsync();
         Task<int> GetUsersCountAsync();

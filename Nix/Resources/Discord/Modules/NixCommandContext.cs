@@ -13,8 +13,7 @@ namespace Nix.Resources.Discord
         public EmbedService Reply { get; }
         public IVoiceChannel VoiceChannel { get => (User as IVoiceState).VoiceChannel; }
         public ITextChannel TextChannel { get => Channel as ITextChannel; }
-
-        private readonly INixProvider nixProvider;
+        public INixProvider NixProvider { get; }
 
         public NixCommandContext(
             DiscordSocketClient client,
@@ -23,17 +22,17 @@ namespace Nix.Resources.Discord
             : base(client, message)
         {
             Reply = services.GetService<EmbedService>();
-            nixProvider = services.GetService<INixProvider>();
+            NixProvider = services.GetService<INixProvider>();
         }
 
         public async Task<NixUser> GetNixUser()
         {
-            return await nixProvider.Users.Get(User as SocketGuildUser);
+            return await NixProvider.Users.Get(User as SocketGuildUser);
         }
 
         public async Task<NixUser> GetNixUser(ulong id)
         {
-            return await nixProvider.Users.Get(id, Guild.Id);
+            return await NixProvider.Users.Get(id, Guild.Id);
         }
     }
 }

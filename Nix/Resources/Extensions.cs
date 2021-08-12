@@ -23,6 +23,7 @@ namespace Nix.Resources
                 .AddSingleton<INixUserProvider, NixUserProvider>()
                 .AddSingleton<INixChannelProvider, NixChannelProvider>()
                 .AddSingleton<INixGuildProvider, NixGuildProvider>()
+                .AddSingleton<INixTrackProvider, NixTrackProvider>()
                 .AddSingleton<INixProvider, NixProvider>()
                 .AddSingleton<LavalinkService>()
                 .AddSingleton<MinecraftService>();
