@@ -1,4 +1,6 @@
-﻿namespace Nix;
+﻿using System;
+
+namespace Nix;
 
 class Program
 {
