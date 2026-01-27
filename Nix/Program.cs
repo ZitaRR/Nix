@@ -1,23 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Nix.MVC;
-using Nix.Resources;
-using System;
+﻿namespace Nix;
 
-namespace Nix
+class Program
 {
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            Console.CursorVisible = false;
-            Console.Title = $"{Utility.Name} v{Utility.Version}";
 
-            Config.Initialize();
-
-            new ServiceCollection()
-                .AddNixServices()
-                .BuildServiceProvider()
-                .GetService<HomeController>();
-        }
     }
 }
