@@ -1,4 +1,4 @@
-FROM --platform=linux/arm/v7 mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ COPY Nix/. ./src/
 
 RUN dotnet publish ./src/Nix.csproj -c Release -o /app/publish
 
-FROM --platform=linux/arm/v7 mcr.microsoft.com/dotnet/runtime:10.0
+FROM mcr.microsoft.com/dotnet/runtime:10.0
 
 WORKDIR /app
 
