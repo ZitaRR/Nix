@@ -7,10 +7,10 @@ permissions:
 on:
   pull_request:
     branches:
-      - v2
+      - master
   push:
     branches:
-      - v2
+      - master
   workflow_dispatch:
 
 jobs:
