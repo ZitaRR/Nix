@@ -9,9 +9,11 @@ docker pull "$IMAGE_NAME"
 
 docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
 
-echo "Starting Nix container..."
-docker run -it --rm \
+echo "Starting Nix..."
+docker run \
+    -e DISCORD_TOKEN \
     --name "$CONTAINER_NAME" \
-    "$IMAGE_NAME"
+    "$IMAGE_NAME" \
+    env
 
 echo "Nix exited."
