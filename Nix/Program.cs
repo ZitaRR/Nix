@@ -6,11 +6,13 @@ class Program
 {
     static void Main(string[] args)
     {
-        while (true)
+        var token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
+        if (string.IsNullOrEmpty(token))
         {
-            Console.Write("Input: ");
-            string input = Console.ReadLine();
-            Console.WriteLine($"You wrote: {input}");
+            Console.WriteLine("DISCORD_TOKEN environment variable not found.");
+            return;
         }
+
+        Console.WriteLine("DISCORD_TOKEN: " + token);
     }
 }
