@@ -1,18 +1,18 @@
-﻿using Discord.WebSocket;
-using Microsoft.Extensions.Hosting;
+﻿using Discord;
+using Discord.WebSocket;
 using Microsoft.Extensions.Logging;
-using System;
+using Nix.Infrastructure;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Nix;
+namespace Nix.Core.Discord.Private;
 
 internal class NixClient(
     ILogger<NixClient> logger, 
     NixConfig config,
     DiscordSocketClient client,
     CommandHandler commandHandler) 
-    : IHostedService, IAsyncDisposable
+    : INixClient
 {
     public async Task StartAsync(CancellationToken ct)
     {
@@ -21,7 +21,7 @@ internal class NixClient(
         client.Ready += OnReady;
 
         await commandHandler.InitializeAsync();
-        await client.LoginAsync(Discord.TokenType.Bot, config.DiscordToken);
+        await client.LoginAsync(TokenType.Bot, config.DiscordToken);
         await client.StartAsync();
     }
 
