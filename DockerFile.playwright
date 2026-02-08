@@ -1,0 +1,59 @@
+# -----------------------
+# Stage 1: Build
+# -----------------------
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+WORKDIR /app
+
+# Copy csproj and restore
+COPY Nix/Nix.csproj ./src/
+RUN dotnet restore ./src/Nix.csproj
+
+# Copy rest of the project
+COPY Nix/. ./src/
+
+# Install Playwright CLI globally
+RUN dotnet tool install --global Microsoft.Playwright.CLI
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Build the project (needed for playwright install)
+WORKDIR /app/src
+RUN dotnet build ./Nix.csproj
+
+# Install Chromium
+RUN playwright install chromium
+
+# Publish app
+RUN dotnet publish ./Nix.csproj -c Release -o /app/publish
+
+# -----------------------
+# Stage 2: Runtime
+# -----------------------
+FROM mcr.microsoft.com/dotnet/runtime:8.0
+
+WORKDIR /app
+
+# Copy published app
+COPY --from=build /app/publish .
+
+# Copy Playwright browser binaries
+COPY --from=build /root/.cache/ms-playwright /root/.cache/ms-playwright
+ENV PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright
+
+# Install Linux dependencies for Chromium
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        fonts-liberation \
+        libnss3 \
+        libatk-bridge2.0-0 \
+        libxss1 \
+        libasound2 \
+        libgtk-3-0 \
+        libgbm1 \
+        libx11-xcb1 \
+        wget \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Entry point
+ENTRYPOINT ["dotnet", "Nix.dll"]
