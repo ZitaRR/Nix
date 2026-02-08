@@ -1,13 +1,12 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Nix;
+namespace Nix.Core.Discord.Private;
 
-internal class CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider services, ILogger<CommandHandler> logger)
+internal class CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider services)
 {
     public async Task InitializeAsync()
     {

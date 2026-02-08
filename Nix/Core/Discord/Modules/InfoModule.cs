@@ -1,12 +1,14 @@
 ﻿using Discord.Commands;
+using Nix.Infrastructure;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace Nix;
+namespace Nix.Core.Discord.Modules;
 
 public class InfoModule : ModuleBase<SocketCommandContext>
 {
+
     [Command("info")]
     [Summary($"Provides info about {NixConstants.NIX}.")]
     public async Task InfoAsync()
