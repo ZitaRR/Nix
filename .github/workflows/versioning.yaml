@@ -1,0 +1,111 @@
+name: Versioning
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    types: [opened, synchronize, reopened]
+
+jobs:
+  versioning:
+    if: ${{ !contains(github.event.head_commit.message, 'semver:') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Get latest tag
+        id: tag
+        run: |
+          git fetch --tags
+          tag=$(git describe --tags --abbrev=0 2>/dev/null)
+          echo "tag=$tag"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+
+      - name: Get commits
+        id: commits
+        run: |
+          commits=$(git log ${{ steps.tag.outputs.tag }}..HEAD --pretty=%B)
+          echo "commits<<EOF"
+          echo "$commits"
+          echo "EOF"
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          echo "$commits" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        
+      - name: Determine bump
+        id: bump
+        run: |
+          bump="patch"
+          if echo "${{ steps.commits.outputs.commits }}" | grep -q "feat(major):"; then
+            bump="major"
+          elif echo "${{ steps.commits.outputs.commits }}" | grep -q "feat(minor):"; then
+            bump="minor"
+          fi
+
+          echo "bump=$bump"
+          echo "bump=$bump" >> $GITHUB_OUTPUT
+
+      - name: Determine version
+        id: version
+        run: |
+          tag=${{ steps.tag.outputs.tag }}
+          version=${tag#v}
+          
+          IFS='.' read -r major minor patch <<< "$version"
+
+          case "${{ steps.bump.outputs.bump }}" in 
+            major)
+              major=$((major+1)); minor=0; patch=0;;
+            minor)
+              minor=$((minor+1)); patch=0;;
+            patch)
+              patch=$((patch+1));;
+          esac
+
+          new_version="$major.$minor.$patch"
+          echo "version=$new_version"
+          echo "version=$new_version" >> $GITHUB_OUTPUT
+
+      - name: Get commit hash
+        id: hash
+        run: |
+          hash=$(git rev-parse --short HEAD)
+          echo "hash=$hash"
+          echo "hash=$hash" >> $GITHUB_OUTPUT
+
+      - name: Update version
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          HASH=${{ steps.hash.outputs.hash }}
+          FULL="$VERSION+$HASH"
+          FILE=$(find . -name "*.csproj" | head -n 1)
+
+          echo "$FILE updating version to $VERSION"
+
+          sed -i "s|<Version>.*</Version>|<Version>$VERSION</Version>|" "$FILE"
+          sed -i "s|<InformationalVersion>.*</InformationalVersion>|<InformationalVersion>$FULL</InformationalVersion>|" "$FILE"
+
+      - name: Commit version
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+        
+          git add *.csproj
+          git commit -m "semver: version ${{ steps.version.outputs.version }}"
+          git push origin HEAD:${{ github.head_ref }}
+
+      - name: Tag version
+        run: |
+          git tag v$${{ steps.version.outputs.version }}
+          git push origin v${{ steps.version.outputs.version }}
+
+      - name: Build
+        run: dotnet build -c Release
