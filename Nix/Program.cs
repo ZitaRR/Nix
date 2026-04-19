@@ -3,6 +3,8 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Nix;
@@ -11,6 +13,15 @@ class Program
 {
     static async Task Main(string[] args)
     {
+        var version = Assembly
+            .GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
+
+        Console.WriteLine(version);
+
+        return;
+
         var config = new ConfigurationBuilder()
             .CreateNixConfig();
 
