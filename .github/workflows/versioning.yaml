@@ -104,7 +104,7 @@ jobs:
 
       - name: Tag version
         run: |
-          git tag v$${{ steps.version.outputs.version }}
+          git tag v${{ steps.version.outputs.version }}
           git push origin v${{ steps.version.outputs.version }}
 
       - name: Build
