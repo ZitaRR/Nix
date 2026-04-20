@@ -35,7 +35,7 @@ jobs:
         id: version
         run: |
           git fetch --tags
-          tag=$(git describe --tags --abbrev=0 --always)
+          tag=$(git tag -l "v*.*.*" --sort=-version:refname | head -n 1)
           version=${tag#v}
           echo "VERSION=$version" >> $GITHUB_ENV
 
