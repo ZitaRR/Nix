@@ -22,6 +22,7 @@ internal class NixClient(
 
         await commandHandler.InitializeAsync();
         await client.LoginAsync(Discord.TokenType.Bot, config.DiscordToken);
+        await client.SetCustomStatusAsync(Program.Version);
         await client.StartAsync();
     }
 

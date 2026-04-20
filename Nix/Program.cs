@@ -11,16 +11,11 @@ namespace Nix;
 
 class Program
 {
+    internal readonly static string Version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
     static async Task Main(string[] args)
     {
-        var version = Assembly
-            .GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            ?.InformationalVersion;
-
-        Console.WriteLine(version);
-
-        return;
+        Console.Title = $"Nix ({Version})";
 
         var config = new ConfigurationBuilder()
             .CreateNixConfig();
