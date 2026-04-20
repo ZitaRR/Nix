@@ -19,7 +19,7 @@ jobs:
         id: tag
         run: |
           git fetch --tags
-          tag=$(git describe --tags --abbrev=0)
+          tag=$(git tag -l "v*.*.*" --sort=-version:refname | head -n 1)
           echo "tag=$tag"
           echo "tag=$tag" >> $GITHUB_OUTPUT
 
