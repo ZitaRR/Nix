@@ -16,12 +16,14 @@ internal class NixClient(
 {
     public async Task StartAsync(CancellationToken ct)
     {
+        logger.LogInformation("Nix ({Version}) started.", Program.Version);
         logger.LogInformation("Establishing connection with Discord...");
 
         client.Ready += OnReady;
 
         await commandHandler.InitializeAsync();
         await client.LoginAsync(TokenType.Bot, config.DiscordToken);
+        await client.SetCustomStatusAsync(Program.Version);
         await client.StartAsync();
     }
 
