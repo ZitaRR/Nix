@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Nix;
+namespace Nix.Infrastructure;
 
 internal readonly record struct NixConfig
 {
