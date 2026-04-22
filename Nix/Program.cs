@@ -15,14 +15,22 @@ using Nix.Core.Shl.Teams;
 using Nix.Core.Shl.Teams.Private;
 using Nix.Infrastructure;
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Nix;
 
 class Program
 {
+    public static string Version { get; private set; }
+
     static async Task Main(string[] args)
     {
+        Version = Assembly
+            .GetExecutingAssembly()
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion;
+
         var config = new ConfigurationBuilder()
             .CreateNixConfig();
 
