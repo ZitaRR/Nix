@@ -5,7 +5,7 @@ VisualStudioVersion = 18.5.11626.173 insiders
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nix", "Nix\Nix.csproj", "{E58D4D95-4E37-403D-BF35-1A26B577A0C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nix.Infrastructure", "Infrastructure\Nix.Infrastructure.csproj", "{2A539F67-48E3-46AE-B220-C7B9E74BAFBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nix.Infrastructure", "Nix.Infrastructure\Nix.Infrastructure.csproj", "{2A539F67-48E3-46AE-B220-C7B9E74BAFBD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nix.Domain", "Nix.Domain\Nix.Domain.csproj", "{87A95C4C-ED73-46A8-954F-AA3FD656B266}"
 EndProject

@@ -37,8 +37,8 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\Infrastructure\Nix.Infrastructure.csproj" />
     <ProjectReference Include="..\Nix.Domain\Nix.Domain.csproj" />
+    <ProjectReference Include="..\Nix.Infrastructure\Nix.Infrastructure.csproj" />
     <ProjectReference Include="..\Nix.Shared\Nix.Shared.csproj" />
   </ItemGroup>
 

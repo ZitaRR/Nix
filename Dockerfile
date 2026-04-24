@@ -7,13 +7,18 @@ WORKDIR /app
 
 RUN echo "Version=$VERSION"
 
-COPY Nix/Nix.csproj ./src/
-RUN dotnet restore ./src/Nix.csproj
+COPY *.sln .
+COPY Nix/Nix.csproj ./Nix/
+COPY Nix.Infrastructure/Nix.Infrastructure.csproj ./Nix.Infrastructure/
+COPY Nix.Domain/Nix.Domain.csproj ./Nix.Domain/
+COPY Nix.Shared/Nix.Shared.csproj ./Nix.Shared/
 
-COPY Nix/. ./src/
+RUN dotnet restore ./Nix/Nix.csproj
+
+COPY . .
 
 RUN VERSION=$(echo $VERSION | sed 's/^v//') && \
-    dotnet publish ./src/Nix.csproj \
+    dotnet publish ./Nix/Nix.csproj \
     -c Release \
     -o /app/publish \
     -p:Version=$VERSION \
