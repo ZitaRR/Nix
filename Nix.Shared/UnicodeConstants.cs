@@ -7,4 +7,6 @@ public static class UnicodeConstants
     public const string GOAL_NET = "🥅";
     public const string LIGHTNING = "⚡️";
     public const string X = "❌";
+    public const string LAPTOP = "💻";
+    public const string BOX = "📦";
 }

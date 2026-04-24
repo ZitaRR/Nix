@@ -6,14 +6,14 @@ namespace Nix.Bot;
 
 internal static class NixEmbed
 {
-    internal static EmbedBuilder CreateNixBuilder(NixCommandContext context)
+    internal static EmbedBuilder CreateNixBuilder()
     {
         return new EmbedBuilder()
-            .WithColor(new Color(255, 38, 176))
-            .WithFooter(CreateNixFooter(context));
+            .WithColor(new Color(255, 38, 176));
     }
 
-    internal static EmbedFooterBuilder CreateNixFooter(NixCommandContext context) =>
-        new EmbedFooterBuilder()
-        .WithText($"{AppInfo.Version} {UnicodeConstants.LIGHTNING} {context.Latency()}ms");
+    internal static EmbedBuilder WithNixFooter(this EmbedBuilder builder, NixCommandContext context) =>
+        builder.WithFooter(
+            new EmbedFooterBuilder()
+            .WithText($"{AppInfo.CompleteVersion} {UnicodeConstants.LIGHTNING} {context.Latency()}ms"));
 }
