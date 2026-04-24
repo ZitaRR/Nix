@@ -33,12 +33,13 @@ public class ShlModule(IShlOrchestrator shlOrchestrator) : ModuleBase<NixCommand
         var defensemen = team.Players.Where(p => p.Position is Position.Defense);
         var goalies = team.Players.Where(p => p.Position is Position.Goalie);
 
-        var embed = NixEmbed.CreateNixBuilder(Context)
+        var embed = NixEmbed.CreateNixBuilder()
             .WithTitle(team.Name)
             .WithFields(
             new EmbedFieldBuilder().WithIsInline(true).WithName($"{UnicodeConstants.HOCKEY_CLUB} Forwards").WithValue(forwards.ListPlayers()),
             new EmbedFieldBuilder().WithIsInline(true).WithName($"{UnicodeConstants.SHIELD} Defensemen").WithValue(defensemen.ListPlayers()),
             new EmbedFieldBuilder().WithIsInline(true).WithName($"{UnicodeConstants.GOAL_NET} Goalies").WithValue(goalies.ListPlayers()))
+            .WithNixFooter(Context)
             .Build();
 
         await ReplyAsync(embed: embed);
@@ -69,8 +70,9 @@ public class ShlModule(IShlOrchestrator shlOrchestrator) : ModuleBase<NixCommand
         }
 
         var fields = matches.Select(m => new EmbedFieldBuilder().WithName($"{m.HomeTeam.Name} ({m.HomeTeam.Code}) vs {m.AwayTeam.Name} ({m.AwayTeam.Code})").WithValue(m.StartDateTime));
-        var embed = NixEmbed.CreateNixBuilder(Context)
+        var embed = NixEmbed.CreateNixBuilder()
             .WithFields(fields)
+            .WithNixFooter(Context)
             .Build();
 
         await ReplyAsync(embed: embed);
@@ -84,8 +86,9 @@ public class ShlModule(IShlOrchestrator shlOrchestrator) : ModuleBase<NixCommand
         var season = await shlOrchestrator.GetSeasonAsync();
 
         var standings = string.Join("\n", season.Teams.Select(t => $"**{t.Standing.Rank}** {t.Name} ({t.Code}) | {t.Standing.Points}"));
-        var embed = NixEmbed.CreateNixBuilder(Context)
+        var embed = NixEmbed.CreateNixBuilder()
             .WithDescription(standings)
+            .WithNixFooter(Context)
             .Build();
         await ReplyAsync(embed: embed);
     }

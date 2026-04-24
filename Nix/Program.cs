@@ -11,6 +11,13 @@ namespace Nix;
 
 class Program
 {
+    private static readonly bool debug =
+#if DEBUG
+        true;
+#else
+        false;
+#endif
+
     static async Task Main(string[] args)
     {
         var config = new ConfigurationBuilder()
@@ -19,9 +26,15 @@ class Program
 
         var version = Assembly
             .GetExecutingAssembly()
+            .GetName()
+            .Version;
+
+        var hash = Assembly
+            .GetExecutingAssembly()
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
             ?.InformationalVersion;
-        _ = new AppInfo(version);
+
+        _ = new AppInfo(debug, $"{version.Major}.{version.Minor}.{version.Build}", hash);
 
         var builder = Host.CreateDefaultBuilder()
             .ConfigureServices(services =>

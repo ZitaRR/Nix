@@ -22,7 +22,7 @@ RUN VERSION=$(echo $VERSION | sed 's/^v//') && \
     -c Release \
     -o /app/publish \
     -p:Version=$VERSION \
-    -p:InformationalVersion=$VERSION-$INFO
+    -p:InformationalVersion=$INFO
 
 FROM mcr.microsoft.com/dotnet/runtime:10.0
 
