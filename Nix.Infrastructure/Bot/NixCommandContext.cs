@@ -1,7 +1,10 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
+using Nix.Domain.Core.Shl;
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Nix.Infrastructure.Bot;
 

@@ -4,12 +4,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nix.Infrastructure.Bot;
 using Nix.Infrastructure.Bot.Internal;
+using Nix.Infrastructure.Graphics;
+using Nix.Infrastructure.Graphics.Internal;
 using Nix.Infrastructure.Shl.Orchestrator;
 using Nix.Infrastructure.Shl.Orchestrator.Internal;
 using Nix.Infrastructure.Shl.Overview.Internal;
 using Nix.Infrastructure.Shl.Overview.Internal.Private;
 using Nix.Infrastructure.Shl.Seasons.Internal;
 using Nix.Infrastructure.Shl.Seasons.Internal.Private;
+using Nix.Infrastructure.Shl.Settings.Internal;
+using Nix.Infrastructure.Shl.Settings.Internal.Private;
 using Nix.Infrastructure.Shl.Standings.Internal;
 using Nix.Infrastructure.Shl.Standings.Internal.Private;
 using Nix.Infrastructure.Shl.Teams.Internal;
@@ -33,6 +37,7 @@ public static class ServiceExtensions
             GatewayIntents = Discord.GatewayIntents.All
         }));
 
+        services.AddSingleton<ISvgConverter, SvgConverter>();
         services.AddShlIntegration();
 
         return services;
@@ -41,9 +46,9 @@ public static class ServiceExtensions
     private static IServiceCollection AddShlIntegration(this IServiceCollection services)
     {
         services.AddHttpClient(ShlConstants.CLIENT, client => client.BaseAddress = new Uri(ShlConstants.BASE_URL));
-        services.AddHttpClient(ShlConstants.LOGO_CLIENT, client => client.BaseAddress = new Uri(ShlConstants.LOGO_URL));
         return services
             .AddSingleton<IShlOrchestrator, ShlOrchestrator>()
+            .AddSingleton<ISettingsService, SettingsService>()
             .AddSingleton<IOverviewService, OverviewService>()
             .AddSingleton<ISeasonService, SeasonService>()
             .AddSingleton<IStandingService, StandingService>()
