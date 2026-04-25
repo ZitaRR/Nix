@@ -6,6 +6,7 @@ using Nix.Infrastructure.Shl.Orchestrator;
 using Nix.Shared;
 using System;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -28,21 +29,22 @@ public class ShlModule(IShlOrchestrator shlOrchestrator) : ModuleBase<NixCommand
             await ReplyAsync($"{UnicodeConstants.X} No team found");
             return;
         }
-
+        
         var forwards = team.Players.Where(p => p.Position is Position.Forward);
         var defensemen = team.Players.Where(p => p.Position is Position.Defense);
         var goalies = team.Players.Where(p => p.Position is Position.Goalie);
 
         var embed = NixEmbed.CreateNixBuilder()
             .WithTitle(team.Name)
+            .WithThumbnailUrl($"attachment://team.png")
             .WithFields(
+            new EmbedFieldBuilder().WithIsInline(false).WithName($"{UnicodeConstants.GOAL_NET} Goalies").WithValue(goalies.ListPlayers()),
             new EmbedFieldBuilder().WithIsInline(true).WithName($"{UnicodeConstants.HOCKEY_CLUB} Forwards").WithValue(forwards.ListPlayers()),
-            new EmbedFieldBuilder().WithIsInline(true).WithName($"{UnicodeConstants.SHIELD} Defensemen").WithValue(defensemen.ListPlayers()),
-            new EmbedFieldBuilder().WithIsInline(true).WithName($"{UnicodeConstants.GOAL_NET} Goalies").WithValue(goalies.ListPlayers()))
+            new EmbedFieldBuilder().WithIsInline(true).WithName($"{UnicodeConstants.SHIELD} Defensemen").WithValue(defensemen.ListPlayers()))
             .WithNixFooter(Context)
             .Build();
 
-        await ReplyAsync(embed: embed);
+        await Context.Channel.SendFileAsync(new MemoryStream(team.IconBytes), "team.png", embed: embed);
     }
 
     [Command("upcoming")]
@@ -75,7 +77,7 @@ public class ShlModule(IShlOrchestrator shlOrchestrator) : ModuleBase<NixCommand
             .WithNixFooter(Context)
             .Build();
 
-        await ReplyAsync(embed: embed);
+        await Context.Channel.SendMessageAsync(embed: embed);
     }
 
     [Command("standings")]
@@ -90,7 +92,8 @@ public class ShlModule(IShlOrchestrator shlOrchestrator) : ModuleBase<NixCommand
             .WithDescription(standings)
             .WithNixFooter(Context)
             .Build();
-        await ReplyAsync(embed: embed);
+
+        await Context.Channel.SendMessageAsync(embed: embed);
     }
 
     private ImmutableArray<Match> GetNextMatches(ImmutableArray<Match> matches)

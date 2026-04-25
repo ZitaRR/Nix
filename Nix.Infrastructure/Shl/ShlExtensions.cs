@@ -5,6 +5,7 @@ using Nix.Infrastructure.Shl.Standings.Internal.Private;
 using Nix.Infrastructure.Shl.Teams.Internal.Private;
 using System;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 
 namespace Nix.Infrastructure.Shl;
@@ -43,11 +44,12 @@ public static class ShlExtensions
             teams.First(t => dto.HomeTeam.Id.Equals(t.Id, StringComparison.OrdinalIgnoreCase)),
             teams.First(t => dto.AwayTeam.Id.Equals(t.Id, StringComparison.OrdinalIgnoreCase)));
 
-    internal static Team ToTeam(this TeamDto dto, ImmutableArray<(PlayerDto, Position)> players, ImmutableArray<StandingsTeamDto> standings) =>
+    internal static Team ToTeam(this TeamDto dto, byte[] iconBytes, ImmutableArray<(PlayerDto, Position)> players, ImmutableArray<StandingsTeamDto> standings) =>
         new(
             dto.Id,
             dto.Names.Long, 
             dto.Names.Code, 
+            iconBytes,
             standings.First(t => dto.Id.Equals(t.Info.TeamId, StringComparison.OrdinalIgnoreCase)).ToStanding(), 
             [.. players.Select(ToPlayer)]);
 

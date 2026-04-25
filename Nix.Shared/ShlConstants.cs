@@ -6,10 +6,8 @@ namespace Nix.Shared;
 public static class ShlConstants
 {
     public const string CLIENT = "SHL_CLIENT";
-    public const string LOGO_CLIENT = "LOGO_CLIENT";
     public const string BASE_URL = "https://www.shl.se/";
-    public const string LOGO_URL = "https://www.thesportsdb.com/api/v1/json/123/";
-    public const string LOGO_ENDPOINT = "search_all_teams.php?l=swedish_hockey_league";
+    public const string SETTINGS_ENDPOINT = "api/site/settings";
     public const string SEASONS_ENDPOINT = "api/sports-v2/season-series-game-types-filter";
     public const string GAME_INFO_ENDPOINT = "api/sports-v2/game-schedule?seasonUuid={0}&seriesUuid=qQ9-bb0bzEWUk&gameTypeUuid={1}&gamePlace=all&played=all";
     public const string UPCOMING_MATCHES_ENDPOINT = "api/sports-v2/upcoming-live-games";
